@@ -168,6 +168,7 @@ def ov_en_voorzieningen():
     run_script('locaties.py')
     run_script('netcongestie.py')
     run_script('erfgoed.py')
+    run_script('trend.py')
 
 
 def referentie():
