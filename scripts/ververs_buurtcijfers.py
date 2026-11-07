@@ -22,3 +22,5 @@ json.dump(b, open(pad, 'w'), ensure_ascii=False, separators=(',', ':'))
 print('buurten bijgewerkt:', len(b['features']), '| velden per buurt:', len(keep) + 2)
 subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ref.py'),
                 os.path.join(BRON, 'cbs-gemeenten-2024-nederland.geojson')], cwd=DATA, check=True)
+# trend 2019 -> 2024 hangt af van de buurtcijfers van 2024
+subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trend.py')], check=True)

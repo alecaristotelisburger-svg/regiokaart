@@ -69,6 +69,12 @@
   .pop .sub{color:var(--muted);font-size:12px;margin-bottom:8px}
   .pop table td{padding:3px 2px}
   .pop tr.hl td{font-weight:700;color:var(--accent)}
+  .pop .tr{display:block;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .pop .tr.op{color:#8a2486}.pop .tr.neer{color:#b2302a}
+  .pop .trnoot{color:var(--muted);font-size:11px;padding-top:8px}
+  .cmpchart .crow.neg .cb span{background:#b2302a}
+  .subkop{font-size:13px;margin:14px 0 6px;color:var(--accent);font-weight:700}
+  #cmpTrend td:not(:first-child),#cmpTrend th:not(:first-child){text-align:right}
   .pop h3{color:var(--accent);font-size:17px}
   .hover-tip{background:rgba(59,0,66,.94);color:#fff;border:none;border-radius:4px;box-shadow:none;font-size:12px;padding:4px 8px}
   .hover-tip:before{display:none}
@@ -250,6 +256,9 @@
       <div class="klap-in" id="klapCmpIn">
       <div class="tblwrap"><table id="cmp"><tbody><tr><td>Laden…</td></tr></tbody></table></div>
       <p class="note">Berekend uit de buurtcijfers van CBS (2024). Percentages zijn gewogen naar woningen of inwoners; geheime buurtwaarden tellen niet mee. Haltes: bushaltes uit OpenStreetMap (haltes aan twee kanten van de weg tellen als één).</p>
+      <h3 class="subkop">Verandering in vijf jaar (2019–2024)</h3>
+      <div class="tblwrap"><table id="cmpTrend"></table></div>
+      <p class="note" id="cmpTrendNote"></p>
       </div>
       <button class="btn klapmeer" aria-controls="klapCmpIn">Toon alles</button>
     </section>
@@ -378,6 +387,37 @@ const THEMES = [
 ];
 for(const t of THEMES){ Object.assign(t, DATA.spec[t.key]||{agg:{type:'w',w:'aantal_inwoners'}}); }
 
+/* ---------- Trend: verandering sinds 2019 (scripts/trend.py) ---------- */
+const TREND = DATA.trend, TJ = TREND.jaar;
+const TR_NAAM = {aantal_inwoners:'inwoners', aantal_huishoudens:'huishoudens', woningvoorraad:'woningen', gemiddelde_woningwaarde:'WOZ-waarde',
+  percentage_personen_0_tot_15_jaar:'kinderen (0–14 jaar)', percentage_personen_65_jaar_en_ouder:'65-plussers',
+  percentage_eenpersoonshuishoudens:'eenpersoonshuishoudens', percentage_koopwoningen:'koopwoningen', perc_huurwoningen_in_bezit_woningcorporaties:'corporatiewoningen'};
+const nl1v = new Intl.NumberFormat('nl-NL',{minimumFractionDigits:1, maximumFractionDigits:1});
+const teken = (v,f) => { const a=f.format(Math.abs(v)); return (/^0(,0)?$/.test(a)?'±':v>0?'+':'−')+a; };
+// procenten altijd met één decimaal; procentpunten per buurt in hele punten (CBS rondt af), per gemeente met één decimaal
+const trFmt = soort => soort==='pct' ? v=>teken(v,nl1v)+'%' : v=>teken(v,nl1)+' %-punt';
+const trFmtGm = soort => soort==='pct' ? trFmt('pct') : v=>teken(v,nl1v)+' %-punt';
+const N_VERGELIJKBAAR = Object.keys(TREND.buurt).length;
+for(const i of TREND.ind){
+  const naam = TR_NAAM[i.key];
+  const wat = i.soort==='pct' ? `Procentuele verandering van het aantal ${naam}` : `Verandering van het aandeel ${naam}, in procentpunten,`;
+  THEMES.push({g:`Verandering ${TJ}–2024`, key:'tr_'+i.key, label:'Verandering '+naam, trend:i, fmt:trFmt(i.soort), fmtKort:v=>teken(v, i.soort==='pct'?nl1v:nl1), agg:null, cmp:null,
+    note:(i.key==='gemiddelde_woningwaarde' ? 'Procentuele verandering van de gemiddelde WOZ-waarde' : wat)+` tussen ${TJ} en 2024 (CBS, peildatum 1 januari). Alleen buurten waarvan de grens niet veranderde (${N_VERGELIJKBAAR} van de 248); buurten met weinig inwoners of woningen vallen af. Grijs: geen vergelijking mogelijk.${i.soort==='pp'?' Het CBS rondt de aandelen per buurt af op hele procenten, dus een verschil van 1 procentpunt telt als vrijwel gelijk.':''}`});
+}
+for(const f of DATA.buurten.features){ const tr=TREND.buurt[f.properties.buurtcode]; if(!tr) continue; f.properties.tr_ok=true; for(const k in tr) f.properties['tr_'+k]=tr[k]; }
+const isTr = k => k.startsWith('tr_');
+// zoals clean(), maar veranderingen mogen negatief zijn
+const cleanK = (p,k) => isTr(k) ? (typeof p[k]==='number' ? p[k] : null) : clean(p[k]);
+const baseSpec = k => ({key:k, ...((DATA.spec[k]&&DATA.spec[k].agg)||{type:'sum'})});
+// verandering voor een gemeente (code 'GM0513') of de hele regio (null): 2024 uit de buurten, 2019 uit trend.json
+function trendWaarde(code, k){
+  const soort = TREND.ind.find(i=>i.key===k).soort;
+  const v24 = aggregateFeats(code ? gmFeats(code) : buurten.features, baseSpec(k));
+  const v19 = code ? TREND.gm[code.slice(2)][k] : TREND.regio[k];
+  if(v24==null || v19==null || !v19) return null;
+  return soort==='pct' ? (v24-v19)/v19*100 : v24-v19;
+}
+
 const SECTORS = [
   {key:'aantal_bedrijven_zakelijke_dienstverlening', label:'Zakelijke dienstverlening'},
   {key:'aantal_bedrijven_handel_en_horeca', label:'Handel en horeca'},
@@ -440,7 +480,7 @@ function gmOf(f){ const p=f.properties; return GM[p.gemeentecode || p.gm] || '';
 
 /* ---------- Thema & legenda ---------- */
 function computeBreaks(key){
-  const vals = buurten.features.map(f=>clean(f.properties[key])).filter(v=>v!==null).sort((a,b)=>a-b);
+  const vals = buurten.features.map(f=>cleanK(f.properties,key)).filter(v=>v!==null).sort((a,b)=>a-b);
   if(!vals.length) return [];
   const q = [0.2,0.4,0.6,0.8].map(p => vals[Math.min(vals.length-1, Math.floor(p*vals.length))]);
   const b = [vals[0], ...q, vals[vals.length-1]];
@@ -449,10 +489,34 @@ function computeBreaks(key){
   return u;
 }
 const rampIdx = i => breaks.length-1<=1 ? RAMP.length-1 : Math.round(i*(RAMP.length-1)/(breaks.length-2));
+// kleurklassen van laag naar hoog: [{lo, hi, c}]. Gewone thema's: kwintielen in paars.
+// Veranderingen: daling rood, vrijwel gelijk licht, stijging paars (tertielen).
+let klassen = [];
+const TR_NEG=['#b2302a','#e8907c'], TR_STAB='#f4ede3', TR_POS=['#d995ce','#a33d9a','#5b0065'];
+function maakKlassen(t){
+  breaks = computeBreaks(t.key);
+  if(!t.trend){ klassen = breaks.slice(0,-1).map((lo,i)=>({lo, hi:breaks[i+1], c:RAMP[rampIdx(i)]})); return; }
+  const vals = buurten.features.map(f=>cleanK(f.properties,t.key)).filter(v=>v!==null).sort((a,b)=>a-b);
+  const b = 1, q=(a,p)=>a[Math.min(a.length-1,Math.floor(p*a.length))];
+  const neg = vals.filter(v=>v<-b), pos = vals.filter(v=>v>b); const kl=[];
+  if(neg.length>=4){ const m=q(neg,0.5); kl.push({lo:neg[0],hi:m,c:TR_NEG[0]},{lo:m,hi:neg[neg.length-1],c:TR_NEG[1]}); }
+  else if(neg.length) kl.push({lo:neg[0],hi:neg[neg.length-1],c:TR_NEG[1]});
+  if(vals.some(v=>v>=-b && v<=b)) kl.push({lo:-b,hi:b,c:TR_STAB,stabiel:true});
+  if(pos.length>=6){ const a1=q(pos,1/3), a2=q(pos,2/3); kl.push({lo:b,hi:a1,c:TR_POS[0]},{lo:a1,hi:a2,c:TR_POS[1]},{lo:a2,hi:pos[pos.length-1],c:TR_POS[2]}); }
+  else if(pos.length) kl.push({lo:b,hi:pos[pos.length-1],c:TR_POS[1]});
+  klassen = kl.filter(k=>k.stabiel || k.hi>=k.lo);
+  // legenda toont het kleinste en grootste werkelijke getal per klasse; lege klassen vallen weg
+  for(const k of klassen){ k.toonLo=k.toonHi=null; }
+  for(const v of vals){ const k=klassen.find(k=>v<=k.hi)||klassen[klassen.length-1]; if(k.toonLo===null) k.toonLo=v; k.toonHi=v; }
+  klassen = klassen.filter(k=>k.toonLo!==null);
+}
+const klasLabel = (t,k) => { const kort=t.fmtKort||t.fmt, lo=k.toonLo??k.lo, hi=k.toonHi??k.hi;
+  return k.stabiel ? `${kort(k.lo)} tot ${t.fmt(k.hi)}: vrijwel gelijk` : lo===hi ? t.fmt(lo) : `${kort(lo)} – ${t.fmt(hi)}`; };
+const klassenHoogLaag = () => [...klassen].reverse();
 function colorFor(v){
-  if(v===null || !breaks.length) return NODATA;
-  for(let i=1;i<breaks.length;i++){ if(v <= breaks[i]) return RAMP[rampIdx(i-1)]; }
-  return RAMP[RAMP.length-1];
+  if(v===null || !klassen.length) return NODATA;
+  for(const k of klassen){ if(v <= k.hi) return k.c; }
+  return klassen[klassen.length-1].c;
 }
 function currentTheme(){ return THEMES.find(t=>t.key===$('theme').value) || THEMES[0]; }
 // is er een thema gekozen in het menu (en niet "Kies een thema…")?
@@ -465,10 +529,10 @@ function renderLegend(){
   if(!hasTheme()){ $('themeNote').textContent=''; L2.innerHTML='<div class="row">Kies een thema om de buurten te kleuren.</div>'; return; }
   $('themeNote').textContent = live ? t.note : '';
   if(!live){ L2.innerHTML=''; return; }
-  if(!breaks.length){ L2.innerHTML='<div class="row">Geen gegevens beschikbaar voor dit thema.</div>'; return; }
+  if(!klassen.length){ L2.innerHTML='<div class="row">Geen gegevens beschikbaar voor dit thema.</div>'; return; }
   let html='';
-  for(let i=breaks.length-2;i>=0;i--){
-    html += `<div class="row"><span class="sw" style="background:${RAMP[rampIdx(i)]}"></span>${t.fmt(breaks[i])} – ${t.fmt(breaks[i+1])}</div>`;
+  for(const k of klassenHoogLaag()){
+    html += `<div class="row"><span class="sw" style="background:${k.c}"></span>${klasLabel(t,k)}</div>`;
   }
   html += `<div class="row"><span class="sw" style="background:${NODATA};border:1px solid #d5d8dd"></span>geen gegevens / geheim</div>`;
   L2.innerHTML = html;
@@ -478,7 +542,7 @@ function styleBuurt(f){
   const fill = $('lyrFill').checked;
   // buurten aan zonder thema: alleen de buurten zelf, met grenzen en een lichte vulling
   if(fill && !hasTheme()) return {pane:'fills', color:'#8a2486', weight:0.8, opacity:0.8, fillColor:'#f1d4ec', fillOpacity: basemap==='sat' ? 0.15 : 0.35};
-  const v = live ? clean(f.properties[currentTheme().key]) : null;
+  const v = live ? cleanK(f.properties, currentTheme().key) : null;
   return {pane:'fills', color:'#ffffff', weight: basemap==='sat'?0.8:1, opacity:fill?0.9:(basemap==='sat'?0.7:0), fillColor: live ? colorFor(v) : '#9ec5f4',
           fillOpacity: fill ? (basemap==='sat' ? 0.5 : 0.78) : 0};
 }
@@ -489,10 +553,14 @@ function popupHtml(f){
   if(live){
     let g='';
     for(const t of THEMES){
+      if(t.trend) continue;
       if(t.g!==g){ g=t.g; rows += `<tr class="grp"><td colspan="2">${g}</td></tr>`; }
-      const v = clean(p[t.key]);
-      rows += `<tr class="${t.key===tk?'hl':''}"><td>${t.label}</td><td>${v===null?'–':t.fmt(v)}</td></tr>`;
+      const v = clean(p[t.key]), tr = p['tr_'+t.key], ts = TREND.ind.find(i=>i.key===t.key);
+      const trHtml = (typeof tr==='number' && ts) ? `<span class="tr ${tr>0?'op':tr<0?'neer':''}" title="verandering sinds ${TJ}">${tr>0?'▲':tr<0?'▼':'='} ${trFmt(ts.soort)(tr)} sinds ${TJ}</span>` : '';
+      const hl = t.key===tk || 'tr_'+t.key===tk;
+      rows += `<tr class="${hl?'hl':''}"><td>${t.label}</td><td>${v===null?'–':t.fmt(v)}${trHtml}</td></tr>`;
     }
+    rows += `<tr><td colspan="2" class="trnoot">${p.tr_ok ? `▲▼ = verandering sinds 1 januari ${TJ} (CBS).` : `Geen vergelijking met ${TJ}: de grens van deze buurt is veranderd.`}</td></tr>`;
     const sect = SECTORS.map(x=>({l:x.label,v:clean(p[x.key])})).filter(x=>x.v).sort((a,b)=>b.v-a.v).slice(0,3);
     if(sect.length) rows += `<tr><td colspan="2" style="padding-top:8px;color:#7a8291;font-size:11.5px">GROOTSTE BEDRIJFSSECTOREN</td></tr>` + sect.map(x=>`<tr><td>${x.l}</td><td>${nl0.format(x.v)}</td></tr>`).join('');
   }
@@ -505,7 +573,7 @@ function drawBuurten(){
     style: styleBuurt,
     onEachFeature:(f,lyr)=>{
       lyr.on('mouseover', e=>{
-        const t=currentTheme(); const v= live?clean(f.properties[t.key]):null;
+        const t=currentTheme(); const v= live?cleanK(f.properties,t.key):null;
         lyr.bindTooltip(`<b>${nameOf(f)}</b>${live?'<br>'+t.label+': '+(v===null?'–':t.fmt(v)):''}`,{sticky:true,className:'hover-tip',direction:'top',offset:[0,-6]}).openTooltip(e.latlng);
         lyr.setStyle({weight:3,color:'#fc7c00',opacity:1});
       });
@@ -520,7 +588,7 @@ function drawGemeenten(){
   gmLayer = L.geoJSON(gemeenten,{pane:'borders', style:gmStyle()}).addTo(map);
 }
 function restyle(){
-  breaks = live ? computeBreaks(currentTheme().key) : [];
+  if(live) maakKlassen(currentTheme()); else { breaks=[]; klassen=[]; }
   if(buurtLayer) buurtLayer.setStyle(styleBuurt);
   renderLegend();
   renderCmpChart();
@@ -551,6 +619,13 @@ function renderCompare(){
   }
   rows += `<tr class="total"><td>Regio</td><td>${nl0.format(T.inw)}</td><td>${pct(T.o65N,T.o65W)}</td><td>${pct(T.corpN,T.corpW)}</td><td>${nl0.format(T.bed)}</td>${ovData?`<td>${T.halt}</td>`:''}</tr>`;
   $('cmp').innerHTML = `<thead><tr><th>Gemeente</th><th>Inwoners</th><th>65+</th><th>Corp.</th><th>Bedr.</th>${ovData?'<th>Haltes</th>':''}</tr></thead><tbody>${rows}</tbody>`;
+  // verandering in vijf jaar
+  const TK=[['aantal_inwoners','Inwoners'],['woningvoorraad','Woningen'],['gemiddelde_woningwaarde','WOZ'],['percentage_personen_65_jaar_en_ouder','65+']];
+  const cel=(c,k)=>{ const v=trendWaarde(c,k), s=TREND.ind.find(i=>i.key===k).soort; return v==null?'–':trFmtGm(s)(v).replace(' %-punt',''); };
+  $('cmpTrend').innerHTML = `<thead><tr><th>Gemeente</th>${TK.map(x=>`<th>${x[1]}</th>`).join('')}</tr></thead><tbody>${
+    Object.keys(GM).map(c=>`<tr><td>${GM[c]}</td>${TK.map(x=>`<td>${cel(c,x[0])}</td>`).join('')}</tr>`).join('')
+  }<tr class="total"><td>Regio</td>${TK.map(x=>`<td>${cel(null,x[0])}</td>`).join('')}</tr></tbody>`;
+  $('cmpTrendNote').textContent = `Verandering tussen 1 januari ${TJ} en 1 januari 2024 (CBS). Inwoners, woningen en WOZ-waarde in procenten; 65+ in procentpunten (aandeel van de inwoners). Meer trends: kies onderaan het themamenu een ‘Verandering …’.`;
 }
 function renderSectors(){
   const g = aggregate(); const tot={}; let all=0;
@@ -845,9 +920,9 @@ kaartLegenda.addTo(map);
 let legendaDicht = false;
 function updateMapLegend(){
   const d=$('kaartLegenda'); let h='';
-  if(themed() && breaks.length){ const t=currentTheme();
-    h+=`<div class="kl-t">${t.label}</div>`;
-    for(let i=breaks.length-2;i>=0;i--) h+=`<div class="kl-r"><i style="background:${RAMP[rampIdx(i)]}"></i>${t.fmt(breaks[i])} – ${t.fmt(breaks[i+1])}</div>`;
+  if(themed() && klassen.length){ const t=currentTheme();
+    h+=`<div class="kl-t">${t.label}${t.trend?' ('+TJ+'–2024)':''}</div>`;
+    for(const k of klassenHoogLaag()) h+=`<div class="kl-r"><i style="background:${k.c}"></i>${klasLabel(t,k)}</div>`;
     h+=`<div class="kl-r"><i style="background:${NODATA}"></i>geen gegevens</div>`; }
   if($('lyrNet').checked){ h+=`<div class="kl-t">Netcongestie: ${netMode()==='af'?'verbruik':'teruglevering'}</div>`;
     for(const v of [0,1,2,3]) h+=`<div class="kl-r"><i style="background:${NET_C[v]}"></i>${NET_L[v]}</div>`; }
@@ -896,6 +971,15 @@ function refVal(level, t, forCompare){
 /* ---------- Vergelijkingsgrafiek ---------- */
 function renderCmpChart(){
   const t = currentTheme();
+  if(t.trend){ // verandering per gemeente en regio
+    const k=t.trend.key, rows = Object.entries(GM).map(([c,n])=>({l:n, v:trendWaarde(c,k), cls:''}));
+    rows.push({l:'Regio', v:trendWaarde(null,k), cls:'reg', sep:true});
+    $('cmpTitle').textContent = `Vergelijking: ${t.label.toLowerCase()} (${TJ}–2024)`;
+    const max = Math.max(...rows.map(r=>Math.abs(r.v||0))) || 1;
+    $('cmpChart').innerHTML = rows.map(r=>`${r.sep?'<div class="sep"></div>':''}<div class="crow ${r.cls} ${r.v<=-0.05?'neg':''}"><div class="cl" title="${r.l}">${r.l}</div><div class="cb"><span style="width:${r.v?(Math.abs(r.v)/max*100).toFixed(1):0}%"></span></div><div class="cv">${r.v==null?'–':trFmtGm(t.trend.soort)(r.v)}</div></div>`).join('');
+    $('cmpNote').textContent = `Per gemeente: alle buurten van ${TJ} en van 2024 opgeteld (de gemeentegrenzen zijn sinds 2015 niet veranderd), dus ook buurten die op de kaart grijs zijn.${t.trend.soort==='pp'?' In procentpunten.':''} Rode balk: daling.`;
+    return;
+  }
   const comparable = t.cmp!==null;
   $('cmpTitle').textContent = 'Vergelijking: ' + t.label.toLowerCase() + (t.cmp ? ' '+t.cmp.label : '');
   const rows = Object.entries(GM).map(([c,n])=>({l:n, v:themeValue(gmFeats(c), t, true), cls:''}));
@@ -937,7 +1021,7 @@ const stamp = () => new Date().toISOString().slice(0,10);
 const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
 const hex = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 const PURPLE='#5b0065', INK='#24112a', MUTED='#857a89';
-function pdfText(s){ return String(s).replace(/[–—]/g,'-').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/·/g,'·').replace(/≥/g,'>=').replace(/³/g,'3').replace(/²/g,'2'); }
+function pdfText(s){ return String(s).replace(/[–—−]/g,'-').replace(/±/g,'+/-').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/·/g,'·').replace(/≥/g,'>=').replace(/³/g,'3').replace(/²/g,'2'); }
 
 /* ---------- Kaart naar canvas ---------- */
 function mapToCanvas(scale, withTiles){
@@ -1012,10 +1096,10 @@ async function exportMapPdf(){
     // legenda
     let x=222, y=my+2;
     doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
-    if(themed() && breaks.length){
-      doc.text(pdfText(t.label), x, y); y+=5;
+    if(themed() && klassen.length){
+      doc.text(pdfText(t.label+(t.trend?' ('+TJ+'-2024)':'')), x, y); y+=5;
       doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
-      for(let i=breaks.length-2;i>=0;i--){ doc.setFillColor(...hex(RAMP[rampIdx(i)])); doc.rect(x,y-3,6,3.6,'F'); doc.text(pdfText(`${t.fmt(breaks[i])} - ${t.fmt(breaks[i+1])}`), x+8, y); y+=5; }
+      for(const k of klassenHoogLaag()){ doc.setFillColor(...hex(k.c)); doc.rect(x,y-3,6,3.6,'F'); doc.text(pdfText(klasLabel(t,k)), x+8, y); y+=5; }
       doc.setFillColor(...hex(NODATA)); doc.rect(x,y-3,6,3.6,'F'); doc.text('geen gegevens / geheim', x+8, y); y+=6;
       doc.setTextColor(...hex(MUTED)); doc.setFontSize(7.5);
       const nl = doc.splitTextToSize(pdfText(t.note), 65); doc.text(nl, x, y); y+= nl.length*3.4+5;
@@ -1057,7 +1141,7 @@ function drawGemeenteMap(code, t, wpx, hpx){
   const P=c=>[ox+(c[0]-minx)*k*s, hpx-oy-(c[1]-miny)*s];
   const path=(g)=>{ ctx.beginPath(); const polys=g.type==='Polygon'?[g.coordinates]:g.coordinates; for(const p of polys) for(const r of p){ r.forEach((c,i)=>{ const q=P(c); i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); }); ctx.closePath(); } };
   for(const f of gemeenten.features){ if(f.properties.gemeentecode===code) continue; path(f.geometry); ctx.fillStyle='#f1ecef'; ctx.fill('evenodd'); ctx.strokeStyle='#d9cfd6'; ctx.lineWidth=1; ctx.stroke(); }
-  for(const f of fs){ path(f.geometry); ctx.fillStyle=colorFor(clean(f.properties[t.key])); ctx.fill('evenodd'); ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.2; ctx.stroke(); }
+  for(const f of fs){ path(f.geometry); ctx.fillStyle=colorFor(cleanK(f.properties,t.key)); ctx.fill('evenodd'); ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.2; ctx.stroke(); }
   path(gmF.geometry); ctx.strokeStyle='#3b0042'; ctx.lineWidth=3; ctx.stroke();
   for(const st of DATA.stations.features){ if(st.properties.gm!==GM[code]) continue; const q=P(st.geometry.coordinates); ctx.beginPath(); ctx.arc(q[0],q[1],7,0,7); ctx.fillStyle='#fff'; ctx.fill(); ctx.lineWidth=3.5; ctx.strokeStyle='#fc7c00'; ctx.stroke(); }
   return cv.toDataURL('image/png');
@@ -1075,12 +1159,12 @@ async function exportProfilePdf(){
     tiles.forEach((tl,i)=>{ const x=10+i*47.5; doc.setFillColor(...hex('#f6eaf5')); doc.roundedRect(x,y,45,19,2,2,'F'); doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text(tl[1],x+4,y+9); doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...hex(MUTED)); doc.text(tl[0],x+4,y+15); });
     // kaartje + toelichting
     y=59;
-    if(!breaks.length) breaks=computeBreaks(t.key);
+    if(!klassen.length) maakKlassen(t);
     doc.addImage(drawGemeenteMap(code,t,900,640),'PNG',10,y,95,67.5); doc.setDrawColor(230,222,228); doc.rect(10,y,95,67.5);
     let x2=112, y2=y+4;
     doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text(pdfText('Kaart: '+t.label+' per buurt'), x2, y2); y2+=5;
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
-    for(let i=breaks.length-2;i>=0;i--){ doc.setFillColor(...hex(RAMP[rampIdx(i)])); doc.rect(x2,y2-3,6,3.6,'F'); doc.text(pdfText(`${t.fmt(breaks[i])} - ${t.fmt(breaks[i+1])}`), x2+8, y2); y2+=4.8; }
+    for(const k of klassenHoogLaag()){ doc.setFillColor(...hex(k.c)); doc.rect(x2,y2-3,6,3.6,'F'); doc.text(pdfText(klasLabel(t,k)), x2+8, y2); y2+=4.8; }
     doc.setFillColor(...hex(NODATA)); doc.rect(x2,y2-3,6,3.6,'F'); doc.text('geen gegevens / geheim', x2+8, y2); y2+=5;
     doc.setDrawColor(...hex('#fc7c00')); doc.setLineWidth(0.9); doc.circle(x2+3,y2-1.3,1.4); doc.setLineWidth(0.2); doc.text('treinstation', x2+8, y2); y2+=6;
     doc.setTextColor(...hex(MUTED)); doc.setFontSize(7.5);
@@ -1094,6 +1178,7 @@ async function exportProfilePdf(){
     tableHead();
     let g='';
     for(const th of THEMES){
+      if(th.trend) continue;
       if(y>278){ doc.addPage(); y=20; tableHead(); }
       if(th.g!==g){ g=th.g; doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.text(g.toUpperCase(), 12, y+1); y+=4.6; }
       const cmpLbl = th.cmp ? ' ('+th.cmp.label+')' : '';
@@ -1105,6 +1190,24 @@ async function exportProfilePdf(){
       doc.setDrawColor(236,228,234); doc.line(10,y+1.6,200,y+1.6); y+=5;
     }
     if(!DATA.ref){ doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED)); doc.text('Zuid-Holland en Nederland zijn nog niet toegevoegd.', 12, y+1); y+=5; }
+    // verandering in vijf jaar
+    y+=8; if(y+70>280){ doc.addPage(); y=20; }
+    doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text(pdfText(`Verandering in vijf jaar (${TJ}-2024)`), 10, y); y+=7;
+    { const tc=[10,110,140,170,201], th2=['Kerncijfer',String(TJ),'2024','Verandering','Regio'];
+      doc.setFillColor(...hex(PURPLE)); doc.rect(10,y-4.5,190,6.5,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+      th2.forEach((h,i)=> i? doc.text(h, tc[i]-2, y, {align:'right'}) : doc.text(h, tc[0]+2, y)); y+=6;
+      for(const ind of TREND.ind){
+        const k=ind.key, base=THEMES.find(x=>x.key===k), f = base ? base.fmt : (v=>nl0.format(v));
+        const fv = v => v==null ? '-' : (ind.soort==='pp' ? nl1v.format(v)+'%' : f(v));
+        const v19=TREND.gm[code.slice(2)][k], v24=aggregateFeats(fs, baseSpec(k)), d=trendWaarde(code,k), dr=trendWaarde(null,k);
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+        doc.text(pdfText(TR_NAAM[k].charAt(0).toUpperCase()+TR_NAAM[k].slice(1)), 12, y);
+        [fv(v19), fv(v24), d==null?'-':trFmtGm(ind.soort)(d), dr==null?'-':trFmtGm(ind.soort)(dr)].forEach((s,i)=>{ doc.setFont('helvetica', i===2?'bold':'normal'); doc.text(pdfText(s), tc[i+1]-2, y, {align:'right'}); });
+        doc.setDrawColor(236,228,234); doc.line(10,y+1.6,200,y+1.6); y+=5;
+      }
+      doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','normal');
+      doc.text(doc.splitTextToSize(pdfText(`CBS Kerncijfers wijken en buurten ${TJ} en 2024 (peildatum 1 januari), per gemeente opgeteld uit alle buurten. Aandelen veranderen in procentpunten (%-punt). Bedrijfsvestigingen ontbreken: hun stijging van ongeveer 50% wijst op een andere telwijze en is geen betrouwbare trend.`),186), 12, y+1); y+=9;
+    }
     // pagina 2: bedrijven, voorzieningen, OV, natuur
     y+=8; if(y>215){ doc.addPage(); y=20; }
     // h2: kop + ruimte voor de hele rubriek (need, mm); past het niet, dan eerst een nieuwe pagina
