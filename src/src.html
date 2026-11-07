@@ -79,6 +79,8 @@
   .vzcats{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:0 0 6px 26px;font-size:12.5px;color:var(--ink2)}
   .vzcats label{display:flex;align-items:center;gap:6px;cursor:pointer}
   .vzcats input{accent-color:var(--accent);margin:0}
+  .legend.sub{margin:0 0 8px 26px}
+  .layer .d.st{color:var(--accent);font-weight:600;margin-top:2px}
   .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
   .btn{font:600 14px "Barlow Semi Condensed","Barlow",system-ui,sans-serif;background:var(--accent);color:var(--cream);border:none;border-radius:8px;padding:9px 14px;cursor:pointer;letter-spacing:.02em}
   .btn:hover{background:#3b0042}
@@ -163,12 +165,20 @@
       <div class="layer"><input type="checkbox" id="lyrRoads"><label for="lyrRoads"><span class="t">Hoofdwegennet</span><span class="d">Snelwegen (A12, A20), autowegen en provinciale en lokale hoofdwegen, met wegnummer en beheerder (OpenStreetMap). Dikte = wegtype.</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrNnn"><label for="lyrNnn"><span class="t"><span class="sw2" style="background:#5fa36a"></span>Natuurnetwerk Nederland</span><span class="d">Ca. 7.500 ha beschermde natuur en ecologische verbindingen in de regio (Provincie Zuid-Holland).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrN2k"><label for="lyrN2k"><span class="t"><span class="sw2" style="background:#1f5c35"></span>Natura 2000</span><span class="d">Broekvelden, Vettenbroek &amp; Polder Stein (ca. 700 ha, Vogel- en Habitatrichtlijn).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrNet"><label for="lyrNet"><span class="t">Netcongestie</span><span class="d">Ruimte op het stroomnet per voedingsgebied, van Stedin en Liander. Kies hieronder verbruik of teruglevering. Bron: capaciteitskaart Netbeheer Nederland, stand <span id="netDate"></span>; indicatief.</span></label></div>
+      <div class="vzcats" id="netmode">
+        <label><input type="radio" name="netmode" value="af" checked>Verbruik (afname)</label>
+        <label><input type="radio" name="netmode" value="op">Teruglevering</label>
+      </div>
+      <div class="legend sub" id="netLegend" hidden></div>
+      <div class="layer"><input type="checkbox" id="lyrErf"><label for="lyrErf"><span class="t"><span class="sw2" style="background:#8a5a1f"></span>Erfgoed</span><span class="d" id="erfD">Rijksmonumenten en beschermde stads- en dorpsgezichten (Rijksdienst voor het Cultureel Erfgoed). Klik voor de link naar het monumentenregister.</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrBag"><label for="lyrBag"><span class="t">Bouwjaar van gebouwen</span><span class="d">Elk pand met zijn bouwjaar (BAG, Kadaster). Wordt live opgehaald voor het stuk kaart in beeld; zoom daarvoor in tot wijkniveau.</span><span class="d st" id="bagStatus"></span></label></div>
+      <div class="legend sub" id="bagLegend" hidden></div>
       <div class="layer"><input type="checkbox" id="lyrFill"><label for="lyrFill"><span class="t">Buurtkleuren tonen</span><span class="d">Toont de 248 buurten. Kies je hierboven een thema, dan krijgen ze de kleur van dat thema. Klik op een buurt voor de kerncijfers.</span></label></div>
     </section>
 
     <section>
       <h2>Volgende lagen</h2>
-      <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Netcongestie <span class="tag">bron bekend</span></span><span class="d">Beschikbare capaciteit voor afname en invoeding. Bron: <a href="https://capaciteitskaart.netbeheernederland.nl" target="_blank" rel="noopener">capaciteitskaart Netbeheer Nederland</a>; data via Stedin.</span></label></div>
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bodemkwaliteit <span class="tag">opvragen bij ODMH</span></span><span class="d">Regionale bodemkwaliteitskaart van de Omgevingsdienst Midden-Holland. Zie ook <a href="https://www.bodemloket.nl" target="_blank" rel="noopener">bodemloket.nl</a>.</span></label></div>
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bodemdaling <span class="tag">bron bekend</span></span><span class="d">Satellietmetingen van bodemdaling; zeer relevant voor de veenweide in het Groene Hart. Bron: <a href="https://bodemdalingskaart.nl" target="_blank" rel="noopener">bodemdalingskaart.nl</a>.</span></label></div>
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Sociale huur per complex <span class="tag">via corporaties</span></span><span class="d">Nu tonen we het CBS-aandeel corporatiewoningen per buurt. Complexdata kan alleen via de corporaties.</span></label></div>
@@ -201,8 +211,11 @@
         <li>Natuurnetwerk Nederland: Provincie Zuid-Holland (publiek domein)</li>
         <li>Natura 2000: RVO, via PDOK</li>
         <li>Wegen, trein- en buslijnen, haltes, voorzieningen: © OpenStreetMap-bijdragers (ODbL)</li>
+        <li>Netcongestie: capaciteitskaart elektriciteitsnet, Netbeheer Nederland (indicatief, momentopname)</li>
+        <li>Rijksmonumenten en beschermde gezichten: Rijksdienst voor het Cultureel Erfgoed, via PDOK</li>
+        <li>Bouwjaar van gebouwen: Basisregistratie Adressen en Gebouwen (BAG), Kadaster, via PDOK</li>
       </ul>
-      <p class="note">De buurtcijfers zitten in de pagina zelf. Achtergrondkaart, satelliet, NAP-hoogte en OV worden live opgehaald bij de bron.</p>
+      <p class="note">De buurtcijfers zitten in de pagina zelf. Achtergrondkaart, satelliet, NAP-hoogte, OV en bouwjaar worden live opgehaald bij de bron.</p>
     </section>
 
     <section>
@@ -661,6 +674,94 @@ function natureToggle(layer, on){
 }
 $('lyrNnn').addEventListener('change', e=>natureToggle(nnnLayer, e.target.checked));
 $('lyrN2k').addEventListener('change', e=>natureToggle(n2kLayer, e.target.checked));
+
+// ---- Netcongestie (data/net.json, scripts/netcongestie.py) ----
+const NET_C = {0:'#3f9c5a',1:'#f2c14e',2:'#ef8a3c',3:'#c7323c'};
+const NET_L = {0:'Capaciteit beschikbaar',1:'Beperkte capaciteit',2:'Geen capaciteit, onderzoek naar oplossing',3:'Geen capaciteit, wachtrij'};
+const dmy = s => s ? s.split('-').reverse().map(Number).join('-') : '';
+$('netDate').textContent = dmy(DATA.net.opgehaald);
+const netMode = ()=> document.querySelector('input[name=netmode]:checked').value;
+const netTxt = v => v==null ? 'Geen gegevens' : NET_L[v];
+const mw = v => v==null ? '–' : nl1.format(v)+' MW';
+const netStyle = f=>{ const v=f.properties[netMode()]; return {color:'#ffffff',weight:1,fillColor:v==null?NODATA:NET_C[v],fillOpacity:.62}; };
+const netLayer = L.geoJSON(DATA.net, {pane:'nature', style:netStyle,
+  onEachFeature:(f,l)=>{ const p=f.properties;
+    l.on('mouseover',e=>l.bindTooltip(`${p.naam}: ${netTxt(p[netMode()])}`,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng));
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup({maxWidth:330}).setLatLng(e.latlng).setContent(`<div class="pop"><h3>${p.naam}</h3><div class="sub">Voedingsgebied stroomnet${p.rnb?' · '+p.rnb:''}</div><table>
+      <tr><td>Verbruik (afname)</td><td>${netTxt(p.af)}</td></tr><tr><td>Teruglevering</td><td>${netTxt(p.op)}</td></tr>
+      <tr><td>Wachtrij afname</td><td>${mw(p.wa)}</td></tr><tr><td>Wachtrij teruglevering</td><td>${mw(p.wi)}</td></tr>
+      <tr><td>Aanvragen afname / teruglevering</td><td>${p.va??'–'} / ${p.vi??'–'}</td></tr></table>
+      <div class="sub" style="margin-top:6px">Capaciteitskaart Netbeheer Nederland, stand ${dmy(DATA.net.opgehaald)}. Indicatief.</div></div>`).openOn(map); }); }});
+function renderNetLegend(){ const on=$('lyrNet').checked; $('netLegend').hidden=!on; if(!on) return;
+  $('netLegend').innerHTML=[0,1,2,3].map(v=>`<div class="row"><span class="sw" style="background:${NET_C[v]}"></span>${NET_L[v]}</div>`).join(''); }
+$('lyrNet').addEventListener('change', e=>{ natureToggle(netLayer, e.target.checked); renderNetLegend(); });
+document.querySelectorAll('input[name=netmode]').forEach(i=>i.addEventListener('change', ()=>{
+  if(!$('lyrNet').checked){ $('lyrNet').checked=true; natureToggle(netLayer,true); }
+  netLayer.setStyle(netStyle); renderNetLegend(); }));
+
+// ---- Erfgoed (data/erfgoed.json, scripts/erfgoed.py) ----
+const ERF = '#8a5a1f';
+const erfLink = (u,t)=> u ? `<tr><td colspan="2"><a href="${u}" target="_blank" rel="noopener">${t}</a></td></tr>` : '';
+const erfVlak = L.geoJSON(DATA.erfgoed.vlak, {pane:'nature',
+  style:f=> f.properties.s.startsWith('Beschermd') ? {color:ERF,weight:2,dashArray:'5 4',fillColor:ERF,fillOpacity:.12} : {color:ERF,weight:1.5,fillColor:ERF,fillOpacity:.25},
+  onEachFeature:(f,l)=>{ const p=f.properties, titel=p.n||p.s;
+    l.on('mouseover',e=>l.bindTooltip(titel,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng));
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:${ERF}">${titel}</h3><div class="sub">${p.s}${p.j?' · aangewezen in '+p.j:''}</div><table>${erfLink(p.u,'Meer in het register van de RCE')}</table></div>`).openOn(map); }); }});
+const erfMon = L.layerGroup(DATA.erfgoed.mon.map(([x,y,nr,j])=>{
+  const m=L.circleMarker([y,x],{pane:'ov',radius:3.5,color:'#fff',weight:1,fillColor:ERF,fillOpacity:1});
+  m.bindTooltip('Rijksmonument '+nr,{className:'hover-tip'});
+  m.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:${ERF}">Rijksmonument ${nr}</h3><div class="sub">${j?'Aangewezen in '+j:'Rijksmonument'}</div><table>${erfLink('https://monumentenregister.cultureelerfgoed.nl/monumenten/'+nr,'Naam, adres en omschrijving in het monumentenregister')}</table></div>`).openOn(map); });
+  return m; }));
+const erfLayer = L.layerGroup([erfVlak, erfMon]);
+{ const g=DATA.erfgoed.vlak.features.filter(f=>f.properties.s.startsWith('Beschermd'));
+  $('erfD').textContent = `${nl0.format(DATA.erfgoed.mon.length)} rijksmonumenten en ${g.length} beschermde stads- en dorpsgezichten (${g.map(f=>f.properties.n).join(', ')}). Bron: Rijksdienst voor het Cultureel Erfgoed. Klik voor de link naar het monumentenregister.`; }
+$('lyrErf').addEventListener('change', e=>{ if(e.target.checked) erfLayer.addTo(map); else map.removeLayer(erfLayer); });
+
+// ---- Bouwjaar van gebouwen: live uit de BAG-WFS van PDOK (alleen in een gewone browser) ----
+const BAG_K = [[1700,'#67001f','vóór 1700'],[1850,'#b2182b','1700–1849'],[1900,'#d6604d','1850–1899'],[1945,'#f4a582','1900–1944'],
+               [1970,'#fddbc7','1945–1969'],[1990,'#d1e5f0','1970–1989'],[2010,'#92c5de','1990–2009'],[1e9,'#2166ac','2010 en later']];
+const BAG_MINZOOM = 16, BAG_MAX = 6000;
+const bagColor = j => (j && j<3000) ? BAG_K.find(k=>j<k[0])[1] : '#bdbdbd';
+const bagMsg = t => { $('bagStatus').textContent = t; };
+const bagLayer = L.geoJSON(null, {pane:'nature', style:f=>({color:'#555',weight:.4,fillColor:bagColor(f.properties.bouwjaar),fillOpacity:.88}),
+  onEachFeature:(f,l)=>{ const p=f.properties;
+    l.on('mouseover',e=>l.bindTooltip(`Bouwjaar ${p.bouwjaar||'onbekend'}`,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng));
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3>Pand uit ${p.bouwjaar||'onbekend jaar'}</h3><div class="sub">${p.status||''}</div><table>
+      ${p.gebruiksdoel?`<tr><td>Gebruik</td><td>${String(p.gebruiksdoel).replace(/,/g,', ')}</td></tr>`:''}
+      ${p.aantal_verblijfsobjecten?`<tr><td>Verblijfsobjecten</td><td>${p.aantal_verblijfsobjecten}</td></tr>`:''}
+      ${p.oppervlakte_max?`<tr><td>Oppervlakte</td><td>${p.oppervlakte_min===p.oppervlakte_max?'':nl0.format(p.oppervlakte_min)+'–'}${nl0.format(p.oppervlakte_max)} m²</td></tr>`:''}
+      <tr><td colspan="2"><a href="https://bagviewer.kadaster.nl/lvbag/bag-viewer/?objectId=${p.identificatie}" target="_blank" rel="noopener">Bekijk in de BAG-viewer</a></td></tr></table></div>`).openOn(map); }); }});
+const bagSeen = new Set(); let bagCtl = null, bagTimer = null;
+async function loadBag(){
+  if(!$('lyrBag').checked) return;
+  if(map.getZoom() < BAG_MINZOOM){ bagMsg(`Zoom verder in om de panden te laden (inzoomen tot wijkniveau).`); return; }
+  if(bagCtl) bagCtl.abort(); const ctl = bagCtl = new AbortController();
+  if(bagSeen.size > 30000){ bagLayer.clearLayers(); bagSeen.clear(); }
+  const b = map.getBounds(), bbox = [b.getSouth(),b.getWest(),b.getNorth(),b.getEast()].map(v=>v.toFixed(5)).join(',')+',urn:ogc:def:crs:EPSG::4326';
+  let start = 0, n = 0; bagMsg('Panden worden geladen…');
+  try{
+    while(true){
+      const url = `https://service.pdok.nl/lv/bag/wfs/v2_0?service=WFS&version=2.0.0&request=GetFeature&typeNames=bag:pand&outputFormat=application/json&srsName=EPSG:4326&count=1000&startIndex=${start}&bbox=${bbox}`;
+      const r = await fetch(url, {signal:ctl.signal}); if(!r.ok) throw new Error('HTTP '+r.status);
+      const d = await r.json();
+      bagLayer.addData(d.features.filter(f=>{ const id=f.properties.identificatie; if(bagSeen.has(id)) return false; bagSeen.add(id); return true; }));
+      n += d.features.length;
+      if(d.features.length < 900 || n >= BAG_MAX) break;
+      start += d.features.length;
+    }
+    bagMsg(`${nl0.format(bagSeen.size)} panden geladen. Schuif of zoom om meer te laden.${n>=BAG_MAX?' Niet alles in beeld is geladen: zoom verder in.':''}`);
+  }catch(e){
+    if(e.name==='AbortError') return;
+    bagMsg('De panden konden niet worden geladen. Dit werkt alleen in de online versie van de kaart (GitHub) of in een gewone browser, niet in de gedeelde Claude-link.');
+  }
+}
+map.on('moveend', ()=>{ clearTimeout(bagTimer); bagTimer = setTimeout(loadBag, 400); });
+$('lyrBag').addEventListener('change', e=>{
+  const on = e.target.checked; $('bagLegend').hidden = !on;
+  $('bagLegend').innerHTML = BAG_K.map(k=>`<div class="row"><span class="sw" style="background:${k[1]};border:1px solid #d5d8dd"></span>${k[2]}</div>`).join('');
+  natureToggle(bagLayer, on);
+  if(on) loadBag(); else { if(bagCtl) bagCtl.abort(); bagMsg(''); }
+});
 $('toggle').addEventListener('click', ()=>$('panel').classList.toggle('closed'));
 if(window.innerWidth<=760) $('panel').classList.add('closed');
 
@@ -767,6 +868,9 @@ function activeLayers(){
   const L2=[]; const on=id=>$(id)&&$(id).checked;
   if(on('lyrFill')) L2.push(hasTheme() ? {c:'#8a2486', l:'Buurtkleuren: '+currentTheme().label} : {c:'#f1d4ec', l:'Buurten'});
   if(on('lyrLoc') && currentLoc()) L2.push({c:LOC_C, l:currentLoc().mv[0].toUpperCase()+currentLoc().mv.slice(1)+' (ook tot 5 km buiten de regio)'});
+  if(on('lyrNet')) for(const v of [0,1,2,3]) L2.push({c:NET_C[v], l:`Netcongestie ${netMode()==='af'?'verbruik':'teruglevering'}: ${NET_L[v].toLowerCase()}`});
+  if(on('lyrErf')) L2.push({c:ERF, l:'Rijksmonumenten en beschermde gezichten (RCE)'});
+  if(on('lyrBag')) L2.push({c:'#b2182b', l:'Bouwjaar (BAG): rood = oud, blauw = nieuw'});
   if(on('lyrAhn')) L2.push({c:'#4b8fd6', l:'Hoogte t.o.v. NAP (AHN)'});
   if(on('lyrRail')) L2.push({c:'#fc7c00', l:'Treinverbindingen en stations'});
   if(on('lyrOv')) L2.push({c:'#d63fae', l:'Buslijnen en haltes'});
@@ -824,7 +928,10 @@ async function exportMapPdf(){
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK)); doc.text('Bodegraven-Reeuwijk, Gouda,', x+8, y); doc.text('Krimpenerwaard, Waddinxveen, Zuidplas', x+8, y+4);
     // bronnen
     doc.setFontSize(7); doc.setTextColor(...hex(MUTED));
-    const src = 'Bronnen: CBS Kerncijfers Wijken en Buurten 2024 (via PDOK); Kadaster/PDOK (achtergrond, luchtfoto); RWS (AHN); Provincie Zuid-Holland (NNN); RVO (Natura 2000); OpenStreetMap-bijdragers (wegen, OV, voorzieningen).'+tilesNote;
+    const src = 'Bronnen: CBS Kerncijfers Wijken en Buurten 2024 (via PDOK); Kadaster/PDOK (achtergrond, luchtfoto); RWS (AHN); Provincie Zuid-Holland (NNN); RVO (Natura 2000); OpenStreetMap-bijdragers (wegen, OV, voorzieningen).'
+      + ($('lyrNet').checked ? ` Netcongestie: capaciteitskaart Netbeheer Nederland, stand ${dmy(DATA.net.opgehaald)}, indicatief.` : '')
+      + ($('lyrErf').checked ? ' Erfgoed: Rijksdienst voor het Cultureel Erfgoed (via PDOK).' : '')
+      + ($('lyrBag').checked ? ' Bouwjaar: BAG, Kadaster (via PDOK).' : '') + tilesNote;
     doc.text(doc.splitTextToSize(pdfText(src), 277), 10, 201);
     await saveFile(`regiokaart-${slug(themed()?t.label:'lagen')}-${stamp()}.pdf`, doc.output('blob'));
   }catch(e){ console.error(e); dlStatus('Het maken van de PDF is mislukt: '+(e.message||e)); }
