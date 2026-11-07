@@ -1206,14 +1206,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   .btab td:last-child,.btab th:last-child{text-align:right;white-space:nowrap}
   .btab tbody tr{cursor:pointer}
   .btab tbody tr:hover,.btab tbody tr:focus{background:var(--accent-soft)}
-  /* in- en uitklapbare blokken: dicht toont de eerste twee regels met een fade */
+  /* in- en uitklapbare blokken: dicht even hoog als twee balken van Bedrijven per sector, met een fade */
   .klapkop{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;width:100%;cursor:pointer;font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit}
   .klapkop .pijl{font-size:12px;transition:transform .2s;letter-spacing:0}
   .klap.open .klapkop .pijl{transform:rotate(180deg)}
   .klap-in{position:relative;overflow:hidden;transition:max-height .3s ease}
-  .klap-in::after{content:'';position:absolute;left:0;right:0;bottom:0;height:70%;background:linear-gradient(rgba(255,255,255,0),var(--bg) 92%);pointer-events:none;transition:opacity .2s}
+  .klap-in::after{content:'';position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(rgba(255,255,255,0),var(--bg) 95%);pointer-events:none;transition:opacity .2s}
   .klap.open .klap-in::after{opacity:0}
-  .klapmeer{all:unset;cursor:pointer;color:var(--accent);font-size:12.5px;font-weight:600;margin-top:4px;display:inline-block}
+  .klapmeer{margin-top:8px;font-size:12.5px;padding:6px 11px;border-radius:7px}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   @media (max-width:760px){
     #app{display:block}
@@ -1237,7 +1237,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     <header>
       <img class="logo" id="logoImg" alt="Regio Midden-Holland">
       <div class="htxt">
-      <div class="kicker">Kennisbank · prototype</div>
+      <div class="kicker">Databank · prototype</div>
       <h1>Regiokaart: vijf gemeenten, één beeld</h1>
       <p>Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas. Kies een thema en klik op een buurt voor de kerncijfers.</p>
       <div id="status" class="status">Gegevens laden…</div>
@@ -1303,32 +1303,40 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       <div class="layer"><input type="checkbox" id="lyrFill"><label for="lyrFill"><span class="t">Buurtkleuren tonen</span><span class="d">Toont de 248 buurten. Kies je hierboven een thema, dan krijgen ze de kleur van dat thema. Klik op een buurt voor de kerncijfers.</span></label></div>
     </section>
 
-    <section>
-      <h2>Volgende lagen</h2>
+    <section class="klap" id="klapNext">
+      <h2><button class="klapkop" aria-expanded="false" aria-controls="klapNextIn">Volgende lagen <span class="pijl" aria-hidden="true">▾</span></button></h2>
+      <div class="klap-in" id="klapNextIn">
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bodemkwaliteit <span class="tag">opvragen bij ODMH</span></span><span class="d">Regionale bodemkwaliteitskaart van de Omgevingsdienst Midden-Holland. Zie ook <a href="https://www.bodemloket.nl" target="_blank" rel="noopener">bodemloket.nl</a>.</span></label></div>
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bodemdaling <span class="tag">bron bekend</span></span><span class="d">Satellietmetingen van bodemdaling; zeer relevant voor de veenweide in het Groene Hart. Bron: <a href="https://bodemdalingskaart.nl" target="_blank" rel="noopener">bodemdalingskaart.nl</a>.</span></label></div>
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Sociale huur per complex <span class="tag">via corporaties</span></span><span class="d">Nu tonen we het CBS-aandeel corporatiewoningen per buurt. Complexdata kan alleen via de corporaties.</span></label></div>
+      <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bedrijventerreinen <span class="tag">bron: BCI Vellum</span></span><span class="d">Ligging, oppervlakte en uitgeefbare ruimte van de bedrijventerreinen in de regio, uit de bedrijventerreinendata van BCI Vellum.</span></label></div>
+      <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Woningbouwlocaties <span class="tag">bron: Provincie Zuid-Holland</span></span><span class="d">Geplande woningbouwprojecten met aantallen en planfase, uit de woningbouwgegevens van de Provincie Zuid-Holland.</span></label></div>
+      </div>
+      <button class="btn klapmeer" aria-controls="klapNextIn">Toon alles</button>
     </section>
 
-    <section>
-      <h2>Gemeenten vergeleken</h2>
+    <section class="klap" id="klapCmp">
+      <h2><button class="klapkop" aria-expanded="false" aria-controls="klapCmpIn">Gemeenten vergeleken <span class="pijl" aria-hidden="true">▾</span></button></h2>
+      <div class="klap-in" id="klapCmpIn">
       <div class="tblwrap"><table id="cmp"><tbody><tr><td>Laden…</td></tr></tbody></table></div>
       <p class="note">Berekend uit de buurtcijfers van CBS (2024). Percentages zijn gewogen naar woningen of inwoners; geheime buurtwaarden tellen niet mee. Haltes: bushaltes uit OpenStreetMap (haltes aan twee kanten van de weg tellen als één).</p>
+      </div>
+      <button class="btn klapmeer" aria-controls="klapCmpIn">Toon alles</button>
     </section>
 
     <section class="klap" id="klapVz">
       <h2><button class="klapkop" aria-expanded="false" aria-controls="klapVzIn">Voorzieningen per gemeente <span class="pijl" aria-hidden="true">▾</span></button></h2>
-      <div class="klap-in" id="klapVzIn" data-rijen="#vztab tr">
+      <div class="klap-in" id="klapVzIn">
       <div class="tblwrap"><table id="vztab"></table></div>
       <p class="note">Aantal locaties in OpenStreetMap. Zorg = huisartsen, apotheken, klinieken en ziekenhuizen. Sport = sportaccommodaties. Maatschappelijk = buurthuizen, bibliotheken en gemeentehuizen. Dezelfde gegevens als de vinkjes ‘Toon … op de kaart’.</p>
       </div>
-      <button class="klapmeer" aria-controls="klapVzIn">Toon alles</button>
+      <button class="btn klapmeer" aria-controls="klapVzIn">Toon alles</button>
     </section>
 
     <section class="klap" id="klapSec">
       <h2><button class="klapkop" aria-expanded="false" aria-controls="klapSecIn">Bedrijven per sector <span class="pijl" aria-hidden="true">▾</span></button></h2>
-      <div class="klap-in" id="klapSecIn" data-rijen="#sectors .bar"><div id="sectors"></div></div>
-      <button class="klapmeer" aria-controls="klapSecIn">Toon alles</button>
+      <div class="klap-in" id="klapSecIn"><div id="sectors"></div></div>
+      <button class="btn klapmeer" aria-controls="klapSecIn">Toon alles</button>
     </section>
 
     <section>
@@ -2227,9 +2235,9 @@ $('btnProfPdf').addEventListener('click', exportProfilePdf);
   // in- en uitklapbare blokken (standaard dicht, eerste twee regels zichtbaar met fade)
   document.querySelectorAll('.klap').forEach(sec=>{
     const box=sec.querySelector('.klap-in');
-    const dichtHoogte=()=>{ // tabel: kop + 2 regels; balken: 2 regels
-      const n = box.querySelector('table') ? 3 : 2; const last=[...box.querySelectorAll(box.dataset.rijen)][n-1];
-      return last ? Math.ceil(last.getBoundingClientRect().bottom - box.getBoundingClientRect().top) : 60; };
+    const dichtHoogte=()=>{ // alle blokken even hoog: de eerste twee balken van 'Bedrijven per sector'
+      const ref=$('klapSecIn'), last=ref.querySelectorAll('#sectors .bar')[1];
+      return last ? Math.ceil(last.getBoundingClientRect().bottom - ref.getBoundingClientRect().top) : 50; };
     const zet=open=>{ sec.classList.toggle('open',open);
       sec.querySelectorAll('.klapkop').forEach(b=>b.setAttribute('aria-expanded',open));
       sec.querySelector('.klapmeer').textContent = open ? 'Inklappen' : 'Toon alles';
