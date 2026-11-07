@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regiokaart Midden-Holland – prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<!--LEAFLET_CSS-->
+<!--LEAFLET_JS-->
+<style>
+  :root{
+    --ink:#24112a; --ink2:#55475a; --muted:#857a89; --line:#ece4ea; --bg:#ffffff; --soft:#faf6f4;
+    --accent:#5b0065; --accent-soft:#f6eaf5; --warn:#9a4a00; --magenta:#ed56c2; --orange:#fc7c00; --cream:#fbf2ee;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font:14px/1.45 "Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--soft)}
+  #app{display:flex;height:100%}
+  #panel{width:360px;flex:none;background:var(--bg);border-right:1px solid var(--line);overflow-y:auto;z-index:1000}
+  #map{flex:1;height:100%;background:#f4eeeb}
+  header{padding:0 0 14px;border-bottom:1px solid var(--line)}
+  header .logo{display:block;width:100%;height:auto;aspect-ratio:1200/382}
+  header .htxt{padding:14px 20px 0}
+  h1,h2,.kicker,.seg button,.pop h3{font-family:"Barlow Semi Condensed","Barlow",system-ui,sans-serif}
+  header .kicker{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--magenta);font-weight:700}
+  header h1{font-size:23px;margin:2px 0 4px;line-height:1.15;font-weight:700;color:var(--accent)}
+  header p{margin:0;color:var(--ink2);font-size:13px}
+  section{padding:14px 20px;border-bottom:1px solid var(--line)}
+  section h2{font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;font-weight:700}
+  .status{font-size:12.5px;padding:8px 10px;border-radius:6px;background:var(--accent-soft);color:var(--accent);margin-top:10px}
+  .status.warn{background:#fff6e0;color:var(--warn)}
+  select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff;color:var(--ink)}
+  .note{font-size:12.5px;color:var(--ink2);margin:8px 0 0}
+  .layer{display:flex;gap:10px;align-items:flex-start;padding:7px 0}
+  .layer[hidden]{display:none}
+  .layer input{margin-top:3px;accent-color:var(--accent)}
+  .layer label{flex:1;cursor:pointer}
+  .layer .t{font-weight:600;display:block}
+  .layer .d{font-size:12.5px;color:var(--ink2);display:block}
+  .layer.soon{opacity:1}
+  .layer.soon .t{color:var(--ink2)}
+  .tag{display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.03em;padding:1px 6px;border-radius:10px;background:var(--soft);color:var(--muted);margin-left:6px;vertical-align:1px}
+  .legend{margin-top:10px}
+  .legend .row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);padding:2px 0}
+  .legend .sw{width:22px;height:12px;border-radius:2px;flex:none}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:right;padding:5px 3px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td:first-child{white-space:normal}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600;font-size:11.5px}
+  tr.total td{font-weight:600;border-bottom:none}
+  .tblwrap{overflow-x:auto}
+  .src{font-size:12px;color:var(--ink2)}
+  .src li{margin:3px 0}
+  a{color:var(--accent)}
+  .leaflet-popup-content{margin:12px 14px;font:13px/1.4 "Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-width:230px}
+  .pop h3{margin:0 0 2px;font-size:15px}
+  .pop .sub{color:var(--muted);font-size:12px;margin-bottom:8px}
+  .pop table td{padding:3px 2px}
+  .pop tr.hl td{font-weight:700;color:var(--accent)}
+  .pop h3{color:var(--accent);font-size:17px}
+  .hover-tip{background:rgba(59,0,66,.94);color:#fff;border:none;border-radius:4px;box-shadow:none;font-size:12px;padding:4px 8px}
+  .hover-tip:before{display:none}
+  .maplegend{background:#fff;padding:8px 10px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.18);font-size:12px;max-width:220px}
+  .maplegend img{display:block;max-width:180px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{flex:1;border:none;background:#fff;padding:8px 0;font:inherit;color:var(--ink2);cursor:pointer;border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:none}
+  .seg button.on{background:var(--accent);color:var(--cream);font-weight:700}
+  .seg button{font-size:15px}
+  .bar{display:grid;grid-template-columns:1fr 70px 46px;gap:8px;align-items:center;font-size:12.5px;padding:3px 0}
+  .bl{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bt{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+  .bt span{display:block;height:100%;background:linear-gradient(90deg,#5b0065,#c940ad);border-radius:0 4px 4px 0}
+  .bv{text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+  .sw2{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+  .stlabel{background:rgba(255,255,255,.92);border:none;box-shadow:0 1px 3px rgba(0,0,0,.2);font:600 11.5px "Barlow",system-ui,sans-serif;color:#24112a;padding:1px 6px}
+  .stlabel:before{display:none}
+  .vzcats{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:0 0 6px 26px;font-size:12.5px;color:var(--ink2)}
+  .vzcats label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .vzcats input{accent-color:var(--accent);margin:0}
+  .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+  .btn{font:600 14px "Barlow Semi Condensed","Barlow",system-ui,sans-serif;background:var(--accent);color:var(--cream);border:none;border-radius:8px;padding:9px 14px;cursor:pointer;letter-spacing:.02em}
+  .btn:hover{background:#3b0042}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .dlrow{display:flex;gap:8px;margin-top:12px}
+  .dlrow select{flex:1}
+  .cmpchart .crow{display:grid;grid-template-columns:118px 1fr 74px;gap:8px;align-items:center;font-size:12.5px;padding:2.5px 0}
+  .cmpchart .cl{color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cmpchart .cb{height:10px;background:var(--soft);border-radius:0 4px 4px 0;position:relative}
+  .cmpchart .cb span{display:block;height:100%;border-radius:0 4px 4px 0;background:#8a2486}
+  .cmpchart .cv{text-align:right;font-variant-numeric:tabular-nums}
+  .cmpchart .crow.ref .cl{font-weight:600;color:var(--ink)}
+  .cmpchart .crow.ref .cb span{background:#857a89}
+  .cmpchart .crow.reg .cb span{background:#5b0065}
+  .cmpchart .crow.reg .cl{font-weight:700;color:var(--accent)}
+  .cmpchart .sep{border-top:1px dashed var(--line);margin:4px 0}
+  .pop .grp td{padding-top:8px;color:#857a89;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-bottom:none}
+  .dlst{color:var(--accent);font-weight:600;margin-top:6px}
+  #toggle{display:none}
+  @media (max-width:760px){
+    #app{display:block}
+    #panel{position:absolute;left:0;right:0;bottom:0;max-height:62%;width:auto;border-right:none;border-top:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:0 -4px 16px rgba(0,0,0,.12);transition:transform .25s}
+    #panel.closed{transform:translateY(calc(100% - 58px))}
+    #map{position:absolute;inset:0}
+    #toggle{display:block;width:100%;border:none;background:none;padding:10px 0 0;cursor:pointer}
+    #toggle span{display:block;width:40px;height:4px;border-radius:2px;background:#fff;opacity:.9;margin:0 auto}
+    #toggle{position:absolute;top:0;left:0;right:0;z-index:2}
+    header{padding-top:8px}
+    .leaflet-bottom{bottom:62px}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="panel">
+    <button id="toggle" aria-label="Paneel openen of sluiten"><span></span></button>
+    <header>
+      <img class="logo" id="logoImg" alt="Regio Midden-Holland">
+      <div class="htxt">
+      <div class="kicker">Kennisbank · prototype</div>
+      <h1>Regiokaart: vijf gemeenten, één beeld</h1>
+      <p>Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas. Kies een thema en klik op een buurt voor de kerncijfers.</p>
+      <div id="status" class="status">Gegevens laden…</div>
+      </div>
+    </header>
+
+    <section>
+      <h2>Thema per buurt</h2>
+      <select id="theme"><option value="" selected>Kies een thema…</option></select>
+      <div class="layer" id="locRow" hidden><input type="checkbox" id="lyrLoc"><label for="lyrLoc"><span class="t" id="locT"></span><span class="d" id="locD"></span></label></div>
+      <div id="legend" class="legend"></div>
+      <p id="themeNote" class="note"></p>
+    </section>
+
+    <section>
+      <h2 id="cmpTitle">Vergelijking</h2>
+      <div id="cmpChart" class="cmpchart"></div>
+      <p id="cmpNote" class="note"></p>
+    </section>
+
+
+    <section>
+      <h2>Achtergrond</h2>
+      <div class="seg" role="radiogroup">
+        <button data-bm="kaart" class="on">Kaart</button><button data-bm="sat">Satelliet</button><button data-bm="geen">Geen</button>
+      </div>
+      <p id="bmNote" class="note">Satelliet: actuele luchtfoto van heel Nederland (PDOK, 8 cm per pixel), scherper dan Google Maps.</p>
+    </section>
+
+    <section>
+      <h2>Kaartlagen</h2>
+      <div class="layer"><input type="checkbox" id="lyrAhn"><label for="lyrAhn"><span class="t">Hoogte t.o.v. NAP</span><span class="d">Actueel Hoogtebestand Nederland (AHN), maaiveld. Klik op de kaart voor de hoogte op dat punt.</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrRail"><label for="lyrRail"><span class="t"><span class="sw2" style="background:#fc7c00"></span>Treinverbindingen</span><span class="d">7 stations, 5 intercity- en 9 sprinterseries die in de regio stoppen, plus het Nachtnet. Dikte = aantal series op dat stuk spoor. Klik op een station of spoorlijn voor de treinen (OpenStreetMap).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrOv"><label for="lyrOv"><span class="t"><span class="sw2" style="background:#d63fae"></span>Buslijnen en haltes</span><span class="d">23 buslijnen van Qbuzz en U-OV die in de regio stoppen, en ruim 300 haltes. Klik op een lijn of halte om te zien welke lijnen er rijden (OpenStreetMap).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrVz"><label for="lyrVz"><span class="t">Voorzieningen</span><span class="d">Bijna 400 scholen, zorgpunten, sportaccommodaties en maatschappelijke voorzieningen (OpenStreetMap). Kies hieronder welke.</span></label></div>
+      <div class="vzcats" id="vzcats">
+        <label><input type="checkbox" data-c="onderwijs" checked><span class="dot" style="background:#2a78d6"></span>Onderwijs</label>
+        <label><input type="checkbox" data-c="zorg" checked><span class="dot" style="background:#d6392f"></span>Zorg</label>
+        <label><input type="checkbox" data-c="sport" checked><span class="dot" style="background:#00968a"></span>Sport</label>
+        <label><input type="checkbox" data-c="maatsch" checked><span class="dot" style="background:#b07d00"></span>Maatschappelijk</label>
+      </div>
+      <div class="layer"><input type="checkbox" id="lyrRoads"><label for="lyrRoads"><span class="t">Hoofdwegennet</span><span class="d">Snelwegen (A12, A20), autowegen en provinciale en lokale hoofdwegen, met wegnummer en beheerder (OpenStreetMap). Dikte = wegtype.</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrNnn"><label for="lyrNnn"><span class="t"><span class="sw2" style="background:#5fa36a"></span>Natuurnetwerk Nederland</span><span class="d">Ca. 7.500 ha beschermde natuur en ecologische verbindingen in de regio (Provincie Zuid-Holland).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrN2k"><label for="lyrN2k"><span class="t"><span class="sw2" style="background:#1f5c35"></span>Natura 2000</span><span class="d">Broekvelden, Vettenbroek &amp; Polder Stein (ca. 700 ha, Vogel- en Habitatrichtlijn).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrFill"><label for="lyrFill"><span class="t">Buurtkleuren tonen</span><span class="d">Toont de 248 buurten. Kies je hierboven een thema, dan krijgen ze de kleur van dat thema. Klik op een buurt voor de kerncijfers.</span></label></div>
+    </section>
+
+    <section>
+      <h2>Volgende lagen</h2>
+      <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Netcongestie <span class="tag">bron bekend</span></span><span class="d">Beschikbare capaciteit voor afname en invoeding. Bron: <a href="https://capaciteitskaart.netbeheernederland.nl" target="_blank" rel="noopener">capaciteitskaart Netbeheer Nederland</a>; data via Stedin.</span></label></div>
+      <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bodemkwaliteit <span class="tag">opvragen bij ODMH</span></span><span class="d">Regionale bodemkwaliteitskaart van de Omgevingsdienst Midden-Holland. Zie ook <a href="https://www.bodemloket.nl" target="_blank" rel="noopener">bodemloket.nl</a>.</span></label></div>
+      <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bodemdaling <span class="tag">bron bekend</span></span><span class="d">Satellietmetingen van bodemdaling; zeer relevant voor de veenweide in het Groene Hart. Bron: <a href="https://bodemdalingskaart.nl" target="_blank" rel="noopener">bodemdalingskaart.nl</a>.</span></label></div>
+      <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Sociale huur per complex <span class="tag">via corporaties</span></span><span class="d">Nu tonen we het CBS-aandeel corporatiewoningen per buurt. Complexdata kan alleen via de corporaties.</span></label></div>
+    </section>
+
+    <section>
+      <h2>Gemeenten vergeleken</h2>
+      <div class="tblwrap"><table id="cmp"><tbody><tr><td>Laden…</td></tr></tbody></table></div>
+      <p class="note">Berekend uit de buurtcijfers van CBS (2024). Percentages zijn gewogen naar woningen of inwoners; geheime buurtwaarden tellen niet mee. Haltes: bushaltes uit OpenStreetMap (haltes aan twee kanten van de weg tellen als één).</p>
+    </section>
+
+    <section>
+      <h2>Voorzieningen per gemeente</h2>
+      <div class="tblwrap"><table id="vztab"></table></div>
+      <p class="note">Aantal locaties in OpenStreetMap. Zorg = huisartsen en artsen, apotheken, klinieken en ziekenhuizen. Maatschappelijk = buurthuizen, bibliotheken en gemeentehuizen.</p>
+    </section>
+
+    <section>
+      <h2>Bedrijven per sector</h2>
+      <div id="sectors"></div>
+    </section>
+
+    <section>
+      <h2>Bronnen</h2>
+      <ul class="src">
+        <li>Buurtcijfers en grenzen: CBS Wijk- en Buurtkaart 2024, via PDOK (CC BY 4.0)</li>
+        <li>Hoogte: AHN, Rijkswaterstaat, via PDOK (CC0)</li>
+        <li>Grenzen gemeenten: samengevoegd uit de CBS-buurtgrenzen</li>
+        <li>Achtergrondkaart: Kadaster / PDOK · Luchtfoto: Beeldmateriaal Nederland / PDOK</li>
+        <li>Natuurnetwerk Nederland: Provincie Zuid-Holland (publiek domein)</li>
+        <li>Natura 2000: RVO, via PDOK</li>
+        <li>Wegen, trein- en buslijnen, haltes, voorzieningen: © OpenStreetMap-bijdragers (ODbL)</li>
+      </ul>
+      <p class="note">De buurtcijfers zitten in de pagina zelf. Achtergrondkaart, satelliet, NAP-hoogte en OV worden live opgehaald bij de bron.</p>
+    </section>
+
+    <section>
+      <h2>Kaart downloaden</h2>
+      <button class="btn" id="btnMapPdf">Huidige kaart als PDF</button>
+      <p class="note" style="margin-top:6px">Wat je nu ziet, met legenda, actieve lagen en bronnen, op een A4 liggend.</p>
+      <p id="dlStatusMap" class="note dlst"></p>
+    </section>
+
+    <section>
+      <h2>Genereer een gemeenteprofiel</h2>
+      <p class="note" style="margin:0 0 10px">Een PDF van twee pagina's met alle kerncijfers van één gemeente naast de regio, Zuid-Holland en Nederland, plus kaart, bedrijven, voorzieningen, OV en natuur.</p>
+      <label class="note" for="profGm" style="display:block;margin-bottom:4px;font-weight:600;color:var(--ink)">Kies een gemeente</label>
+      <select id="profGm"></select>
+      <button class="btn" id="btnProfPdf" style="width:100%;margin-top:10px">Download gemeenteprofiel (PDF)</button>
+      <p class="note" style="margin-top:8px">Het kaartje in het profiel toont het thema dat je bovenaan hebt gekozen.</p>
+      <p id="dlStatusProf" class="note dlst"></p>
+    </section>
+  </aside>
+  <div id="map"></div>
+</div>
+
+<script>
+window.addEventListener('error',e=>{const s=document.getElementById('status');if(s){s.className='status warn';s.textContent='Er ging iets mis bij het starten van de kaart: '+(e.message||'onbekende fout');}});
+const DATA = /*DATA*/null;
+document.getElementById('logoImg').src = DATA.logo;
+
+const GM = {GM1901:'Bodegraven-Reeuwijk',GM0513:'Gouda',GM1931:'Krimpenerwaard',GM0627:'Waddinxveen',GM1892:'Zuidplas'};
+const BBOX = [4.50,51.86,4.93,52.15];
+const API = 'https://api.pdok.nl/cbs/wijken-en-buurten-2024/ogc/v1/collections/';
+const RAMP = ['#f1d4ec','#d995ce','#bb55ae','#8a2486','#5b0065'];
+const NODATA = '#e9eaec';
+
+const nl0 = new Intl.NumberFormat('nl-NL',{maximumFractionDigits:0});
+const nl1 = new Intl.NumberFormat('nl-NL',{maximumFractionDigits:1});
+const pct = v=>nl0.format(v)+'%', km = v=>nl1.format(v)+' km';
+const THEMES = [
+  {g:'Bevolking', key:'aantal_inwoners', label:'Inwoners', fmt:v=>nl0.format(v), note:'Aantal inwoners per buurt.'},
+  {g:'Bevolking', key:'bevolkingsdichtheid_inwoners_per_km2', label:'Bevolkingsdichtheid', fmt:v=>nl0.format(v)+' /km²', note:'Inwoners per km² land.'},
+  {g:'Bevolking', key:'percentage_personen_65_jaar_en_ouder', label:'65-plussers', fmt:pct, note:'Aandeel inwoners van 65 jaar en ouder.'},
+  {g:'Bevolking', key:'percentage_personen_0_tot_15_jaar', label:'Kinderen (0–14 jaar)', fmt:pct, note:'Aandeel inwoners jonger dan 15.'},
+  {g:'Bevolking', key:'percentage_personen_15_tot_25_jaar', label:'Jongeren (15–24 jaar)', fmt:pct, note:'Aandeel inwoners van 15 tot 25 jaar.'},
+  {g:'Bevolking', key:'percentage_personen_25_tot_45_jaar', label:'Inwoners 25–44 jaar', fmt:pct, note:'Aandeel inwoners van 25 tot 45 jaar.'},
+  {g:'Bevolking', key:'percentage_personen_45_tot_65_jaar', label:'Inwoners 45–64 jaar', fmt:pct, note:'Aandeel inwoners van 45 tot 65 jaar.'},
+  {g:'Bevolking', key:'percentage_eenpersoonshuishoudens', label:'Eenpersoonshuishoudens', fmt:pct, note:'Aandeel huishoudens van één persoon.'},
+  {g:'Bevolking', key:'percentage_huishoudens_met_kinderen', label:'Huishoudens met kinderen', fmt:pct, note:'Aandeel huishoudens met thuiswonende kinderen.'},
+  {g:'Bevolking', key:'gemiddelde_huishoudsgrootte', label:'Gemiddelde huishoudensgrootte', fmt:v=>nl1.format(v)+' personen', note:'Gemiddeld aantal personen per huishouden.'},
+  {g:'Bevolking', key:'percentage_met_herkomstland_nederland', label:'Herkomst Nederland', fmt:pct, note:'Aandeel inwoners met Nederland als herkomstland (CBS-indeling sinds 2022).'},
+  {g:'Bevolking', key:'percentage_met_herkomstland_uit_europa_excl_nl', label:'Herkomst Europa (buiten NL)', fmt:pct, note:'Aandeel inwoners met een ander Europees land als herkomstland.'},
+  {g:'Bevolking', key:'percentage_met_herkomstland_buiten_europa', label:'Herkomst buiten Europa', fmt:pct, note:'Aandeel inwoners met een herkomstland buiten Europa.'},
+  {g:'Bevolking', key:'geboortes_per_1000_inwoners', label:'Geboortes', fmt:v=>nl1.format(v)+' per 1.000', note:'Aantal levendgeborenen in 2024 per 1.000 inwoners. In kleine buurten schommelt dit sterk.'},
+  {g:'Bevolking', key:'omgevingsadressendichtheid', label:'Stedelijkheid (adressen per km²)', fmt:v=>nl0.format(v), note:'Omgevingsadressendichtheid: gemiddeld aantal adressen per km² binnen een cirkel van 1 km. Vanaf 2.500 noemt het CBS dit zeer sterk stedelijk, onder 500 niet stedelijk.'},
+  {g:'Wonen', key:'perc_huurwoningen_in_bezit_woningcorporaties', label:'Corporatiewoningen (sociale huur)', fmt:pct, note:'Aandeel woningen in bezit van een woningcorporatie. Benadering van sociale huur: CBS kijkt naar de eigenaar, niet naar de huurprijs.'},
+  {g:'Wonen', key:'percentage_koopwoningen', label:'Koopwoningen', fmt:pct, note:'Aandeel koopwoningen.'},
+  {g:'Wonen', key:'percentage_huurwoningen', label:'Huurwoningen (totaal)', fmt:pct, note:'Aandeel huurwoningen, van corporaties en andere verhuurders samen.'},
+  {g:'Wonen', key:'perc_huurwoningen_in_bezit_overige_verhuurders', label:'Particuliere huur', fmt:pct, note:'Aandeel huurwoningen van andere verhuurders dan corporaties (beleggers, particulieren).'},
+  {g:'Wonen', key:'gemiddelde_woningwaarde', label:'Gemiddelde WOZ-waarde', fmt:v=>'€ '+nl0.format(Math.round(v)*1000), note:'Gemiddelde WOZ-waarde van woningen.'},
+  {g:'Wonen', key:'perc_bouwjaar_afgelopen_10_jaar', label:'Woningen jonger dan 10 jaar', fmt:pct, note:'Aandeel woningen gebouwd in de afgelopen tien jaar.'},
+  {g:'Wonen', key:'aantal_nieuwbouw_woningen', label:'Nieuwbouwwoningen (2024)', fmt:v=>nl0.format(v), cmpFmt:v=>nl1.format(v), note:'Aantal woningen dat in het afgelopen jaar is opgeleverd.'},
+  {g:'Wonen', key:'percentage_eengezinswoning', label:'Eengezinswoningen', fmt:pct, note:'Aandeel eengezinswoningen (rijtjes-, hoek-, twee-onder-een-kap- en vrijstaande woningen).'},
+  {g:'Wonen', key:'percentage_meergezinswoning', label:'Appartementen', fmt:pct, note:'Aandeel meergezinswoningen: appartementen, flats, boven- en benedenwoningen.'},
+  {g:'Wonen', key:'percentage_onbewoond', label:'Onbewoonde woningen', fmt:pct, note:'Aandeel woningen waar op 1 januari niemand stond ingeschreven. Dit is meer dan echte leegstand: ook verbouwing, verkoop en tweede woningen tellen mee.'},
+  {g:'Economie en werk', key:'aantal_bedrijfsvestigingen', label:'Bedrijfsvestigingen', fmt:v=>nl0.format(v), cmpFmt:v=>nl0.format(v), note:'Aantal bedrijfsvestigingen per buurt (CBS, op basis van het KvK-register).'},
+  {g:'Economie en werk', key:'ww_per_1000', label:'WW-uitkeringen', fmt:v=>nl1.format(v)+' per 1.000', note:'Personen met een WW-uitkering per 1.000 inwoners (buurten vanaf 200 inwoners).'},
+  {g:'Sociaal', key:'bijstand_per_1000', label:'Bijstandsuitkeringen', fmt:v=>nl1.format(v)+' per 1.000', note:'Personen met een algemene bijstandsuitkering per 1.000 inwoners (buurten vanaf 200 inwoners).'},
+  {g:'Voorzieningen en bereikbaarheid', key:'huisartsenpraktijk_gemiddelde_afstand_in_km', label:'Afstand tot huisarts', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde huisartsenpraktijk.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'huisartsenpost_gemiddelde_afstand_in_km', label:'Afstand tot huisartsenpost', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde huisartsenpost (avond, nacht en weekend).'},
+  {g:'Voorzieningen en bereikbaarheid', key:'apotheek_gemiddelde_afstand_in_km', label:'Afstand tot apotheek', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde apotheek.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'basisonderwijs_gemiddelde_afstand_in_km', label:'Afstand tot basisschool', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde basisschool.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'voortgezet_onderwijs_gem_afstand_in_km', label:'Afstand tot middelbare school', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde school voor voortgezet onderwijs.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'vmbo_gemiddelde_afstand_in_km', label:'Afstand tot vmbo', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde school met vmbo.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'havo_vwo_gemiddelde_afstand_in_km', label:'Afstand tot havo/vwo', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde school met havo of vwo.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'kinderdagverblijf_gemiddelde_afstand_in_km', label:'Afstand tot kinderdagverblijf', fmt:km, note:'Gemiddelde afstand over de weg tot het dichtstbijzijnde kinderdagverblijf.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'buitenschoolse_opvang_gem_afstand_in_km', label:'Afstand tot buitenschoolse opvang', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde buitenschoolse opvang.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'grote_supermarkt_gemiddelde_afstand_in_km', label:'Afstand tot grote supermarkt', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde grote supermarkt.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'ziekenhuis_incl_buitenpolikliniek_gem_afst_in_km', label:'Afstand tot ziekenhuis', fmt:km, note:'Gemiddelde afstand over de weg tot het dichtstbijzijnde ziekenhuis of buitenpolikliniek.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'treinstation_gemiddelde_afstand_in_km', label:'Afstand tot treinstation', fmt:km, note:'Gemiddelde afstand over de weg tot het dichtstbijzijnde treinstation.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'overstapstation_gemiddelde_afstand_in_km', label:'Afstand tot overstapstation', fmt:km, note:'Gemiddelde afstand over de weg tot het dichtstbijzijnde station waar intercity’s stoppen.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'oprit_hoofdverkeersweg_gemiddelde_afstand_in_km', label:'Afstand tot oprit hoofdweg', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde oprit van een hoofdverkeersweg.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'brandweerkazerne_gemiddelde_afstand_in_km', label:'Afstand tot brandweerkazerne', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde brandweerkazerne.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'bibliotheek_gemiddelde_afstand_in_km', label:'Afstand tot bibliotheek', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde bibliotheek.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'zwembad_gemiddelde_afstand_in_km', label:'Afstand tot zwembad', fmt:km, note:'Gemiddelde afstand over de weg tot het dichtstbijzijnde zwembad.'},
+  {g:'Voorzieningen en bereikbaarheid', key:'personenautos_per_huishouden', label:'Auto’s per huishouden', fmt:v=>nl1.format(v), note:'Gemiddeld aantal personenauto’s per huishouden.'},
+  {g:'Energie', key:'percentage_woningen_met_zonnestroom', label:'Woningen met zonnepanelen', fmt:pct, note:'Aandeel woningen met zonnestroom. Relevant naast netcongestie.'},
+  {g:'Energie', key:'percentage_aardgasvrije_woningen', label:'Aardgasvrije woningen', fmt:pct, note:'Aandeel woningen zonder aardgasaansluiting.'},
+  {g:'Energie', key:'percentage_aardgaswoningen', label:'Woningen op aardgas', fmt:pct, note:'Aandeel woningen met aardgas als belangrijkste energiebron. Voor een deel van de buurten geheim.'},
+  {g:'Energie', key:'gemiddeld_aardgasverbruik', label:'Gemiddeld aardgasverbruik', fmt:v=>nl0.format(v)+' m³', note:'Gemiddeld aardgasverbruik per woning per jaar.'},
+  {g:'Energie', key:'gemiddelde_elektriciteitsteruglevering', label:'Teruglevering van stroom', fmt:v=>nl0.format(v)+' kWh', note:'Gemiddelde teruglevering van stroom aan het net per woning per jaar, vooral door zonnepanelen. Relevant naast netcongestie.'}
+];
+for(const t of THEMES){ Object.assign(t, DATA.spec[t.key]||{agg:{type:'w',w:'aantal_inwoners'}}); }
+
+const SECTORS = [
+  {key:'aantal_bedrijven_zakelijke_dienstverlening', label:'Zakelijke dienstverlening'},
+  {key:'aantal_bedrijven_handel_en_horeca', label:'Handel en horeca'},
+  {key:'aantal_bedrijven_nijverheid_energie', label:'Nijverheid en energie'},
+  {key:'aantal_bedrijven_cultuur_recreatie_overige', label:'Cultuur, recreatie, overig'},
+  {key:'aantal_bedrijven_overheid_onderwijs_en_zorg', label:'Overheid, onderwijs en zorg'},
+  {key:'aantal_bedrijven_vervoer_informatie_communicatie', label:'Vervoer, ICT en communicatie'},
+  {key:'aantal_bedrijven_financieel_onroerend_goed', label:'Financieel en vastgoed'},
+  {key:'aantal_bedrijven_landbouw_bosbouw_visserij', label:'Landbouw, bosbouw, visserij'}
+];
+const clean = v => (v===null || v===undefined || typeof v!=='number' || v < 0) ? null : v;
+const $ = id => document.getElementById(id);
+function setStatus(msg, warn){ const s=$('status'); s.textContent=msg; s.className='status'+(warn?' warn':''); }
+
+/* ---------- Kaart ---------- */
+const map = L.map('map',{zoomControl:true, attributionControl:true, preferCanvas:true}).fitBounds([[51.88,4.52],[52.13,4.90]]);
+const brt = L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png',
+  {maxZoom:19, crossOrigin:'anonymous', attribution:'Kaart: <a href="https://www.pdok.nl">Kadaster / PDOK</a> · Data: CBS, RWS (AHN), © OpenStreetMap'}).addTo(map);
+const photo = L.tileLayer('https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
+  {maxZoom:21, maxNativeZoom:19, crossOrigin:'anonymous', attribution:'Luchtfoto: Beeldmateriaal Nederland / PDOK'});
+const photoLabels = L.tileLayer('https://service.pdok.nl/bzk/luchtfotolabels/wmts/v1_0/lufolabels/EPSG:3857/{z}/{x}/{y}.png',
+  {maxZoom:21, maxNativeZoom:19, pane:'labels', crossOrigin:'anonymous'});
+let basemap = 'kaart', tileFails = 0, tileOk = 0;
+for(const t of [brt, photo]){
+  t.on('tileerror', ()=>{ tileFails++; if(tileFails===6 && tileOk===0){ $('bmNote').textContent='De achtergrondkaart kan in deze weergave niet laden (deze omgeving blokkeert externe kaartbeelden). Download het bestand en open het in Chrome of Edge om de kaart en satelliet te zien.'; $('bmNote').style.color='var(--warn)'; } });
+  t.on('tileload', ()=>{ tileOk++; });
+}
+function setBasemap(bm){
+  basemap = bm;
+  for(const t of [brt, photo, photoLabels]) map.removeLayer(t);
+  if(bm==='kaart') brt.addTo(map).bringToBack();
+  if(bm==='sat'){ photo.addTo(map).bringToBack(); photoLabels.addTo(map); }
+  document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on', b.dataset.bm===bm));
+  if(buurtLayer) buurtLayer.setStyle(styleBuurt);
+  if(gmLayer) gmLayer.setStyle(gmStyle());
+}
+const ahn = L.tileLayer.wms('https://service.pdok.nl/rws/ahn/wms/v1_0',
+  {layers:'dtm_05m', format:'image/png', transparent:true, opacity:0.75, crossOrigin:'anonymous', attribution:'AHN · RWS'});
+
+map.createPane('fills'); map.getPane('fills').style.zIndex=410;
+map.createPane('borders'); map.getPane('borders').style.zIndex=420; map.getPane('borders').style.pointerEvents='none';
+map.createPane('labels'); map.getPane('labels').style.zIndex=425; map.getPane('labels').style.pointerEvents='none';
+map.createPane('roads'); map.getPane('roads').style.zIndex=418;
+map.createPane('rail'); map.getPane('rail').style.zIndex=419;
+map.createPane('nature'); map.getPane('nature').style.zIndex=415;
+map.createPane('ov'); map.getPane('ov').style.zIndex=430;
+
+let buurten = null;   // FeatureCollection
+let gemeenten = null; // FeatureCollection
+let live = false;
+let buurtLayer = null, gmLayer = null, ovLayer = null, ovData = null;
+let breaks = [];
+
+function nameOf(f){ const p=f.properties; return p.buurtnaam || p.naam || p.statnaam || ''; }
+function gmOf(f){ const p=f.properties; return GM[p.gemeentecode || p.gm] || ''; }
+
+/* ---------- Thema & legenda ---------- */
+function computeBreaks(key){
+  const vals = buurten.features.map(f=>clean(f.properties[key])).filter(v=>v!==null).sort((a,b)=>a-b);
+  if(!vals.length) return [];
+  const q = [0.2,0.4,0.6,0.8].map(p => vals[Math.min(vals.length-1, Math.floor(p*vals.length))]);
+  const b = [vals[0], ...q, vals[vals.length-1]];
+  const u = [b[0]]; for(let i=1;i<b.length;i++) if(b[i]>u[u.length-1]) u.push(b[i]);
+  if(u.length===1) u.push(u[0]);
+  return u;
+}
+const rampIdx = i => breaks.length-1<=1 ? RAMP.length-1 : Math.round(i*(RAMP.length-1)/(breaks.length-2));
+function colorFor(v){
+  if(v===null || !breaks.length) return NODATA;
+  for(let i=1;i<breaks.length;i++){ if(v <= breaks[i]) return RAMP[rampIdx(i-1)]; }
+  return RAMP[RAMP.length-1];
+}
+function currentTheme(){ return THEMES.find(t=>t.key===$('theme').value) || THEMES[0]; }
+// is er een thema gekozen in het menu (en niet "Kies een thema…")?
+function hasTheme(){ return $('theme').value !== ''; }
+// worden de buurten nu gekleurd naar een thema?
+function themed(){ return $('lyrFill').checked && hasTheme(); }
+
+function renderLegend(){
+  const t = currentTheme(); const L2 = $('legend');
+  if(!hasTheme()){ $('themeNote').textContent=''; L2.innerHTML='<div class="row">Kies een thema om de buurten te kleuren.</div>'; return; }
+  $('themeNote').textContent = live ? t.note : '';
+  if(!live){ L2.innerHTML=''; return; }
+  if(!breaks.length){ L2.innerHTML='<div class="row">Geen gegevens beschikbaar voor dit thema.</div>'; return; }
+  let html='';
+  for(let i=breaks.length-2;i>=0;i--){
+    html += `<div class="row"><span class="sw" style="background:${RAMP[rampIdx(i)]}"></span>${t.fmt(breaks[i])} – ${t.fmt(breaks[i+1])}</div>`;
+  }
+  html += `<div class="row"><span class="sw" style="background:${NODATA};border:1px solid #d5d8dd"></span>geen gegevens / geheim</div>`;
+  L2.innerHTML = html;
+}
+
+function styleBuurt(f){
+  const fill = $('lyrFill').checked;
+  // buurten aan zonder thema: alleen de buurten zelf, met grenzen en een lichte vulling
+  if(fill && !hasTheme()) return {pane:'fills', color:'#8a2486', weight:0.8, opacity:0.8, fillColor:'#f1d4ec', fillOpacity: basemap==='sat' ? 0.15 : 0.35};
+  const v = live ? clean(f.properties[currentTheme().key]) : null;
+  return {pane:'fills', color:'#ffffff', weight: basemap==='sat'?0.8:1, opacity:fill?0.9:(basemap==='sat'?0.7:0), fillColor: live ? colorFor(v) : '#9ec5f4',
+          fillOpacity: fill ? (basemap==='sat' ? 0.5 : 0.78) : 0};
+}
+
+function popupHtml(f){
+  const p = f.properties; const tk = currentTheme().key;
+  let rows = '';
+  if(live){
+    let g='';
+    for(const t of THEMES){
+      if(t.g!==g){ g=t.g; rows += `<tr class="grp"><td colspan="2">${g}</td></tr>`; }
+      const v = clean(p[t.key]);
+      rows += `<tr class="${t.key===tk?'hl':''}"><td>${t.label}</td><td>${v===null?'–':t.fmt(v)}</td></tr>`;
+    }
+    const sect = SECTORS.map(x=>({l:x.label,v:clean(p[x.key])})).filter(x=>x.v).sort((a,b)=>b.v-a.v).slice(0,3);
+    if(sect.length) rows += `<tr><td colspan="2" style="padding-top:8px;color:#7a8291;font-size:11.5px">GROOTSTE BEDRIJFSSECTOREN</td></tr>` + sect.map(x=>`<tr><td>${x.l}</td><td>${nl0.format(x.v)}</td></tr>`).join('');
+  }
+  return `<div class="pop"><h3>${nameOf(f)}</h3><div class="sub">${gmOf(f)}${p.wijknaam?' · wijk '+p.wijknaam:''}</div><table>${rows}</table></div>`;
+}
+
+function drawBuurten(){
+  if(buurtLayer) map.removeLayer(buurtLayer);
+  buurtLayer = L.geoJSON(buurten, {
+    style: styleBuurt,
+    onEachFeature:(f,lyr)=>{
+      lyr.on('mouseover', e=>{
+        const t=currentTheme(); const v= live?clean(f.properties[t.key]):null;
+        lyr.bindTooltip(`<b>${nameOf(f)}</b>${live?'<br>'+t.label+': '+(v===null?'–':t.fmt(v)):''}`,{sticky:true,className:'hover-tip',direction:'top',offset:[0,-6]}).openTooltip(e.latlng);
+        lyr.setStyle({weight:3,color:'#fc7c00',opacity:1});
+      });
+      lyr.on('mouseout', ()=>{ lyr.closeTooltip(); buurtLayer.resetStyle(lyr); });
+      lyr.on('click', e=>{ e.originalEvent._buurt = true; if(typeof busLayer!=='undefined' && map.hasLayer(busLayer) && busPopup(e.latlng,true)) return; const html = popupHtml(f); const pop = L.popup({maxWidth:320, maxHeight:380}).setLatLng(e.latlng).setContent(html).openOn(map); if($('lyrAhn').checked) queryAhn(e.latlng, pop, html); });
+    }
+  }).addTo(map);
+}
+function gmStyle(){ return basemap==='sat' ? {color:'#fc7c00',weight:2.8,fill:false,opacity:1} : {color:'#3b0042',weight:2.2,fill:false,opacity:.85}; }
+function drawGemeenten(){
+  if(gmLayer) map.removeLayer(gmLayer);
+  gmLayer = L.geoJSON(gemeenten,{pane:'borders', style:gmStyle()}).addTo(map);
+}
+function restyle(){
+  breaks = live ? computeBreaks(currentTheme().key) : [];
+  if(buurtLayer) buurtLayer.setStyle(styleBuurt);
+  renderLegend();
+  renderCmpChart();
+}
+
+/* ---------- Vergelijkingstabel ---------- */
+function aggregate(){
+  const g = {};
+  for(const c of Object.keys(GM)) g[c]={inw:0,bed:0,won:0,corpW:0,corpN:0,o65W:0,o65N:0,sect:{}};
+  for(const f of buurten.features){
+    const p=f.properties, a=g[p.gemeentecode]; if(!a) continue;
+    const inw=clean(p.aantal_inwoners), won=clean(p.woningvoorraad), corp=clean(p.perc_huurwoningen_in_bezit_woningcorporaties), o65=clean(p.percentage_personen_65_jaar_en_ouder);
+    if(inw) a.inw+=inw; const bed=clean(p.aantal_bedrijfsvestigingen); if(bed) a.bed+=bed; if(won) a.won+=won;
+    if(won && corp!==null){ a.corpW+=won; a.corpN+=won*corp/100; }
+    if(inw && o65!==null){ a.o65W+=inw; a.o65N+=inw*o65/100; }
+    for(const s of SECTORS){ const v=clean(p[s.key]); if(v) a.sect[s.key]=(a.sect[s.key]||0)+v; }
+  }
+  return g;
+}
+function renderCompare(){
+  const g = aggregate(), haltes = {};
+  if(ovData){ for(const s of ovData){ if(s.gm) haltes[s.gm]=(haltes[s.gm]||0)+1; } }
+  const T={inw:0,bed:0,corpW:0,corpN:0,o65W:0,o65N:0,halt:0}; let rows='';
+  const pct=(n,w)=> w? Math.round(n/w*100)+'%' : '–';
+  for(const c of Object.keys(GM)){
+    const a=g[c]; for(const k of ['inw','bed','corpW','corpN','o65W','o65N']) T[k]+=a[k]; T.halt+=haltes[c]||0;
+    rows += `<tr><td>${GM[c]}</td><td>${nl0.format(a.inw)}</td><td>${pct(a.o65N,a.o65W)}</td><td>${pct(a.corpN,a.corpW)}</td><td>${nl0.format(a.bed)}</td>${ovData?`<td>${haltes[c]||0}</td>`:''}</tr>`;
+  }
+  rows += `<tr class="total"><td>Regio</td><td>${nl0.format(T.inw)}</td><td>${pct(T.o65N,T.o65W)}</td><td>${pct(T.corpN,T.corpW)}</td><td>${nl0.format(T.bed)}</td>${ovData?`<td>${T.halt}</td>`:''}</tr>`;
+  $('cmp').innerHTML = `<thead><tr><th>Gemeente</th><th>Inwoners</th><th>65+</th><th>Corp.</th><th>Bedr.</th>${ovData?'<th>Haltes</th>':''}</tr></thead><tbody>${rows}</tbody>`;
+}
+function renderSectors(){
+  const g = aggregate(); const tot={}; let all=0;
+  for(const c in g) for(const k in g[c].sect){ tot[k]=(tot[k]||0)+g[c].sect[k]; }
+  for(const k in tot) all+=tot[k];
+  const max = Math.max(...Object.values(tot));
+  const rows = SECTORS.map(s=>({...s,v:tot[s.key]||0})).sort((a,b)=>b.v-a.v).map(s=>
+    `<div class="bar"><div class="bl">${s.label}</div><div class="bt"><span style="width:${(s.v/max*100).toFixed(1)}%"></span></div><div class="bv">${nl0.format(s.v)}</div></div>`).join('');
+  $('sectors').innerHTML = rows + `<p class="note">Totaal ${nl0.format(all)} vestigingen in de regio. Klik op een buurt voor de verdeling daar.</p>`;
+}
+
+/* ---------- Punt-in-polygoon (voor OV per gemeente) ---------- */
+function inRing(pt, ring){ let x=pt[0],y=pt[1],ins=false; for(let i=0,j=ring.length-1;i<ring.length;j=i++){ const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1]; if(((yi>y)!==(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) ins=!ins; } return ins; }
+function inGeom(pt, g){ const polys = g.type==='Polygon'?[g.coordinates]:g.coordinates; for(const poly of polys){ if(inRing(pt,poly[0]) && !poly.slice(1).some(h=>inRing(pt,h))) return true; } return false; }
+function gmForPoint(lon,lat){ for(const f of gemeenten.features){ if(inGeom([lon,lat], f.geometry)) return f.properties.gemeentecode || f.properties.gm; } return null; }
+
+/* ---------- OV via Overpass ---------- */
+async function loadOv(){
+  if(ovLayer){ ovLayer.addTo(map); return; }
+  setStatus('OV-haltes laden…');
+  const b = `${BBOX[1]},${BBOX[0]},${BBOX[3]},${BBOX[2]}`;
+  const q = `[out:json][timeout:30];(node["highway"="bus_stop"](${b});node["railway"~"^(station|halt)$"](${b}););out body;`;
+  try{
+    const r = await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j = await r.json();
+    ovData = j.elements.map(e=>({lat:e.lat,lon:e.lon,name:(e.tags&&e.tags.name)||'',train:!!(e.tags&&e.tags.railway),gm:gmForPoint(e.lon,e.lat)})).filter(s=>s.gm);
+    const bus = ovData.filter(s=>!s.train), train = ovData.filter(s=>s.train);
+    ovLayer = L.layerGroup([
+      ...bus.map(s=>L.circleMarker([s.lat,s.lon],{pane:'ov',radius:4,color:'#fff',weight:1.5,fillColor:'#5b0065',fillOpacity:.9}).bindTooltip('Bushalte '+s.name,{className:'hover-tip'})),
+      ...train.map(s=>L.circleMarker([s.lat,s.lon],{pane:'ov',radius:8,color:'#fff',weight:2.5,fillColor:'#fc7c00',fillOpacity:1}).bindTooltip('Station '+s.name,{className:'hover-tip',permanent:false}))
+    ]).addTo(map);
+    setStatus(`${train.length} ${train.length===1?'station':'stations'} en ${nl0.format(bus.length)} bushaltes in de regio geladen.`);
+    renderCompare();
+  }catch(err){
+    setStatus('OV-haltes konden niet worden geladen (Overpass-server druk of niet bereikbaar). Probeer het later opnieuw.', true);
+    $('lyrOv').checked=false;
+  }
+}
+
+/* ---------- AHN-hoogte op klikpunt ---------- */
+let ahnLegend = null;
+async function queryAhn(latlng, pop, baseHtml){
+  try{
+    const p = map.latLngToContainerPoint(latlng), s = map.getSize(), b = map.getBounds();
+    const sw = L.CRS.EPSG3857.project(b.getSouthWest()), ne = L.CRS.EPSG3857.project(b.getNorthEast());
+    const url = 'https://service.pdok.nl/rws/ahn/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=dtm_05m&QUERY_LAYERS=dtm_05m&STYLES=&CRS=EPSG:3857'
+      + `&BBOX=${sw.x},${sw.y},${ne.x},${ne.y}&WIDTH=${s.x}&HEIGHT=${s.y}&I=${Math.round(p.x)}&J=${Math.round(p.y)}&INFO_FORMAT=application/json`;
+    const r = await fetch(url); if(!r.ok) return;
+    const j = await r.json();
+    const props = (j.features && j.features[0] && j.features[0].properties) || {};
+    const num = Object.values(props).map(Number).find(v=>isFinite(v) && Math.abs(v)<400);
+    if(num===undefined) return;
+    const h = `${nl1.format(num).replace('-','−')} m NAP`;
+    if(pop && baseHtml){ pop.setContent(baseHtml.replace('</h3>', `</h3><div class="sub" style="color:#1c5cab;font-weight:600">Maaiveld hier: ${h}</div>`)); return; }
+    {
+      L.popup({offset:[0,-4]}).setLatLng(latlng).setContent(`<div class="pop"><h3>${h}</h3><div class="sub">Maaiveldhoogte (AHN)</div></div>`).openOn(map);
+    }
+  }catch(e){ /* stil falen */ }
+}
+map.on('click', e=>{ if($('lyrAhn').checked && !e.originalEvent._buurt) queryAhn(e.latlng); });
+
+/* ---------- Bediening ---------- */
+{ const groups={}; for(const t of THEMES){ if(!groups[t.g]){ groups[t.g]=document.createElement('optgroup'); groups[t.g].label=t.g; $('theme').appendChild(groups[t.g]); } const o=document.createElement('option'); o.value=t.key; o.textContent=t.label; groups[t.g].appendChild(o); } }
+// wie een thema kiest, wil het zien: zet de buurtkleuren weer aan (ook als een natuurlaag of AHN ze uitzette)
+$('theme').addEventListener('change', ()=>{ if(hasTheme()) $('lyrFill').checked = true; restyle(); });
+$('lyrFill').addEventListener('change', ()=>buurtLayer && buurtLayer.setStyle(styleBuurt));
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>setBasemap(b.dataset.bm)));
+$('lyrAhn').addEventListener('change', e=>{
+  if(e.target.checked){
+    ahn.addTo(map);
+    ahnLegend = L.control({position:'bottomright'});
+    ahnLegend.onAdd = ()=>{ const d=L.DomUtil.create('div','maplegend'); d.innerHTML='<b>Hoogte t.o.v. NAP</b><img alt="" src="https://service.pdok.nl/rws/ahn/wms/v1_0?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetLegendGraphic&FORMAT=image/png&LAYER=dtm_05m">'; return d; };
+    ahnLegend.addTo(map);
+    if($('lyrFill').checked){ $('lyrFill').checked=false; buurtLayer && buurtLayer.setStyle(styleBuurt); }
+  } else { map.removeLayer(ahn); if(ahnLegend) ahnLegend.remove(); }
+});
+const BUS='#d63fae';
+const busLines = L.geoJSON(DATA.buslines, {pane:'rail', style:{color:BUS,weight:3,opacity:.55,lineCap:'round',lineJoin:'round'},
+  onEachFeature:(f,l)=>{ const p=f.properties;
+    l.on('mouseover',e=>{ l.setStyle({weight:6,opacity:1}); l.bringToFront(); l.bindTooltip(`Lijn ${p.ref} · ${p.route}`,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng); });
+    l.on('mouseout',()=>{ l.setStyle({weight:3,opacity:.55}); l.closeTooltip(); });
+    l.on('click',e=>{ e.originalEvent._buurt=true; busPopup(e.latlng); }); }});
+function distSeg(p,a,b){ const dx=b.x-a.x, dy=b.y-a.y; const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/((dx*dx+dy*dy)||1))); return Math.hypot(p.x-(a.x+t*dx), p.y-(a.y+t*dy)); }
+function busPopup(latlng, onlyIfHits){
+  const P = map.latLngToLayerPoint(latlng), hits=[];
+  busLines.eachLayer(l=>{ const p=l.feature.properties; let near=false;
+    const parts = l.getLatLngs(); const flat = Array.isArray(parts[0]) ? parts : [parts];
+    for(const part of flat){ for(let i=1;i<part.length && !near;i++){ if(distSeg(P, map.latLngToLayerPoint(part[i-1]), map.latLngToLayerPoint(part[i])) < 14) near=true; } if(near) break; }
+    if(near) hits.push(p); });
+  if(onlyIfHits && !hits.length) return false;
+  hits.sort((a,b)=>a.ref.length-b.ref.length || a.ref.localeCompare(b.ref));
+  L.popup({maxWidth:340}).setLatLng(latlng).setContent(`<div class="pop"><h3>${hits.length} ${hits.length===1?'buslijn':'buslijnen'} hier</h3><table>${hits.map(p=>`<tr><td><b>Lijn ${p.ref}</b> ${p.route}<br><span style="color:#857a89;font-size:11.5px">${p.op.replace(';',' / ')}${p.brand?' · '+p.brand:''} · stopt in ${p.gms}</span></td></tr>`).join('')}</table></div>`).openOn(map);
+  return true;
+}
+const busStops = L.geoJSON(DATA.busstops, {pane:'ov', pointToLayer:(f,ll)=>L.circleMarker(ll,{radius:3.5,color:BUS,weight:1.5,fillColor:'#fff',fillOpacity:1}),
+  onEachFeature:(f,l)=>{ const p=f.properties;
+    l.bindTooltip('Bushalte · lijn '+p.lijnen.join(', '),{className:'hover-tip'});
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3>Bushalte</h3><div class="sub">${p.gm}</div><table><tr><td>Lijnen</td><td>${p.lijnen.join(', ')}</td></tr></table></div>`).openOn(map); }); }});
+const busLayer = L.layerGroup([busLines, busStops]);
+$('lyrOv').addEventListener('change', e=>{ if(e.target.checked) busLayer.addTo(map); else map.removeLayer(busLayer); });
+const NNN_COL = {'bestaande en nieuwe natuur':'#5fa36a','ecologische verbinding':'#9bcf6a','prioritaire nieuwe natuur':'#3d8b5a','waternatuurgebied':'#4fa3a0','blijvend agrarisch gebied binnen Natura2000-gebied':'#b9c77a'};
+const nnnType = p => (p.type||'').replace('NatuurNetwerk Nederland: ','');
+const nnnLayer = L.geoJSON(DATA.nnn, {pane:'nature', style:f=>({color:'#2f6b3b',weight:0.8,fillColor:NNN_COL[nnnType(f.properties)]||'#5fa36a',fillOpacity:.6}),
+  onEachFeature:(f,l)=>{ l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:#1f5c35">Natuurnetwerk Nederland</h3><div class="sub">${nnnType(f.properties)} · ${nl1.format(f.properties.ha)} ha</div></div>`).openOn(map); });
+    l.on('mouseover',e=>l.bindTooltip('NNN: '+nnnType(f.properties),{sticky:true,className:'hover-tip'}).openTooltip(e.latlng)); }});
+const n2kLayer = L.geoJSON(DATA.n2k, {pane:'nature', style:{color:'#123d22',weight:2,dashArray:'6 4',fillColor:'#1f5c35',fillOpacity:.35},
+  onEachFeature:(f,l)=>{ const p=f.properties; const b={VR:'Vogelrichtlijn','VR+HR':'Vogel- en Habitatrichtlijn',HR:'Habitatrichtlijn'}[p.bescherming]||p.bescherming;
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:#1f5c35">${p.naam}</h3><div class="sub">Natura 2000 · ${b} · ${nl0.format(p.ha)} ha in de regio</div></div>`).openOn(map); });
+    l.on('mouseover',e=>l.bindTooltip('Natura 2000: '+p.naam,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng)); }});
+const ROAD = {motorway:{w:5,c:'#1f1f1f',l:'Snelweg'},trunk:{w:4,c:'#3a3a3a',l:'Autoweg'},primary:{w:2.8,c:'#5e5e5e',l:'Hoofdweg'},secondary:{w:1.6,c:'#8f8f8f',l:'Overige hoofdweg'}};
+const roadLayer = L.geoJSON(DATA.roads, {pane:'roads', style:f=>{const r=ROAD[f.properties.h]||ROAD.secondary; return {color:r.c,weight:r.w,opacity:.9,lineCap:'round'};},
+  onEachFeature:(f,l)=>{ const p=f.properties, r=ROAD[p.h]||ROAD.secondary; const title=[p.ref,p.naam].filter(Boolean).join(' · ')||r.l;
+    l.on('mouseover',e=>l.bindTooltip(title,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng));
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3>${title}</h3><div class="sub">${r.l}</div><table>${p.beheer?`<tr><td>Beheerder</td><td>${p.beheer}</td></tr>`:''}${p.max?`<tr><td>Maximumsnelheid</td><td>${p.max} km/u</td></tr>`:''}</table></div>`).openOn(map); }); }});
+$('lyrRoads').addEventListener('change', e=>{ if(e.target.checked) roadLayer.addTo(map); else map.removeLayer(roadLayer); });
+const svcList = s => s ? s.split(' | ') : [];
+const railLines = L.geoJSON(DATA.rail, {pane:'rail', style:f=>({color:'#fc7c00',weight:2+Math.min(f.properties.n,9)*0.8,opacity:.95,lineCap:'round'}),
+  onEachFeature:(f,l)=>{ const st=svcList(f.properties.stop);
+    l.on('mouseover',e=>l.bindTooltip(`${st.length} treinseries op dit spoor`,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng));
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pop"><h3>Spoorlijn</h3><div class="sub">${st.length} treinseries rijden hier en stoppen in de regio</div><table>${st.map(x=>`<tr><td>${x}</td></tr>`).join('')}</table></div>`).openOn(map); }); }});
+const railStations = L.geoJSON(DATA.stations, {pane:'rail', pointToLayer:(f,ll)=>L.circleMarker(ll,{radius:7,color:'#fc7c00',weight:3,fillColor:'#fff',fillOpacity:1}),
+  onEachFeature:(f,l)=>{ const p=f.properties, ic=p.diensten.filter(x=>x.startsWith('Intercity')).length, sp=p.diensten.filter(x=>x.startsWith('Sprinter')).length;
+    l.bindTooltip(p.naam||'Station',{permanent:true,direction:'right',offset:[8,0],className:'stlabel'});
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pop"><h3>Station ${p.naam||''}</h3><div class="sub">${p.gm} · ${ic} intercity- en ${sp} sprinterseries</div><table>${p.diensten.map(x=>`<tr><td>${x}</td></tr>`).join('')}</table></div>`).openOn(map); }); }});
+const railLayer = L.layerGroup([railLines, railStations]);
+$('lyrRail').addEventListener('change', e=>{ if(e.target.checked) railLayer.addTo(map); else map.removeLayer(railLayer); });
+const VZC={onderwijs:'#2a78d6',zorg:'#d6392f',sport:'#00968a',maatsch:'#b07d00'};
+const vzGroups={}; for(const c in VZC) vzGroups[c]=L.layerGroup();
+for(const f of DATA.voorz.features){
+  const p=f.properties, [x,y]=f.geometry.coordinates;
+  const m=L.circleMarker([y,x],{pane:'ov',radius:5.5,color:'#fff',weight:1.5,fillColor:VZC[p.c],fillOpacity:1});
+  m.bindTooltip(`${p.n||p.t}`,{className:'hover-tip'});
+  m.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3>${p.n||p.t}</h3><div class="sub">${p.t} · ${p.gm}</div><table>${p.a?`<tr><td>Adres</td><td>${p.a}</td></tr>`:''}${p.o?`<tr><td>Organisatie</td><td>${p.o}</td></tr>`:''}</table></div>`).openOn(map); });
+  vzGroups[p.c].addLayer(m);
+}
+// buurtvenster: scroll naar de regel van het gekozen thema (de lijst is lang)
+map.on('popupopen', e=>{ const c=e.popup.getElement().querySelector('.leaflet-popup-content'), h=c && c.querySelector('tr.hl');
+  if(h && hasTheme()) c.scrollTop += h.getBoundingClientRect().top - c.getBoundingClientRect().top - c.clientHeight/2 + h.offsetHeight/2; });
+
+// Locaties bij de afstandsthema's: "Toon ziekenhuizen op de kaart" enz. Data: scripts/locaties.py (OSM, regio + 5 km).
+const LOCS = {
+  huisartsenpraktijk_gemiddelde_afstand_in_km: {k:'huisarts', mv:'huisartsen', een:'Huisarts'},
+  basisonderwijs_gemiddelde_afstand_in_km: {k:'basisschool', mv:'basisscholen', een:'Basisschool'},
+  grote_supermarkt_gemiddelde_afstand_in_km: {k:'supermarkt', mv:'supermarkten', een:'Supermarkt', extra:' Dit zijn alle supermarkten; het CBS rekent alleen met grote.'},
+  ziekenhuis_incl_buitenpolikliniek_gem_afst_in_km: {k:'ziekenhuis', mv:'ziekenhuizen', een:'Ziekenhuis of polikliniek'},
+  treinstation_gemiddelde_afstand_in_km: {k:'station', mv:'treinstations', een:'Treinstation'},
+  oprit_hoofdverkeersweg_gemiddelde_afstand_in_km: {k:'oprit', mv:'opritten van snelwegen', een:'Aansluiting op de snelweg'},
+  voortgezet_onderwijs_gem_afstand_in_km: {k:'middelbaar', mv:'middelbare scholen', een:'Middelbare school'},
+  vmbo_gemiddelde_afstand_in_km: {k:'middelbaar', mv:'middelbare scholen', een:'Middelbare school', extra:' OpenStreetMap zegt niet welke scholen vmbo hebben; je ziet alle middelbare scholen.'},
+  havo_vwo_gemiddelde_afstand_in_km: {k:'middelbaar', mv:'middelbare scholen', een:'Middelbare school', extra:' OpenStreetMap zegt niet welke scholen havo/vwo hebben; je ziet alle middelbare scholen.'},
+  apotheek_gemiddelde_afstand_in_km: {k:'apotheek', mv:'apotheken', een:'Apotheek'},
+  brandweerkazerne_gemiddelde_afstand_in_km: {k:'brandweer', mv:'brandweerkazernes', een:'Brandweerkazerne'},
+  bibliotheek_gemiddelde_afstand_in_km: {k:'bibliotheek', mv:'bibliotheken', een:'Bibliotheek'},
+  zwembad_gemiddelde_afstand_in_km: {k:'zwembad', mv:'zwembaden', een:'Zwembad'},
+  // geen locaties: huisartsenpost en kinderopvang (OSM te onvolledig), overstapstation (OSM zegt niet waar intercity's stoppen)
+};
+const LOC_C = '#1d1d1b';
+const locGroups = {}, locCount = {};
+for(const f of (DATA.locaties ? DATA.locaties.features : [])){
+  const p=f.properties, [x,y]=f.geometry.coordinates, def=Object.values(LOCS).find(d=>d.k===p.k);
+  if(!def) continue;
+  const g = locGroups[p.k] || (locGroups[p.k]=L.layerGroup()); locCount[p.k]=(locCount[p.k]||0)+1;
+  const m=L.circleMarker([y,x],{pane:'ov',radius:p.r?5.5:4.5,color:LOC_C,weight:2,fillColor:'#fff',fillOpacity:p.r?1:.75,opacity:p.r?1:.75});
+  const naam = p.n || def.een, waar = p.r ? 'in de regio' : 'buiten de regio';
+  m.bindTooltip(`${naam}${p.r?'':' (buiten de regio)'}`,{className:'hover-tip'});
+  m.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3>${naam}</h3><div class="sub">${def.een} · ${waar}</div><table>${p.a?`<tr><td>Adres</td><td>${p.a}</td></tr>`:''}<tr><td>Bron</td><td>OpenStreetMap</td></tr></table></div>`).openOn(map); });
+  g.addLayer(m);
+}
+function currentLoc(){ return hasTheme() ? LOCS[$('theme').value] : null; }
+function syncLoc(){
+  const d = currentLoc();
+  $('locRow').hidden = !d;
+  if(d){ $('locT').textContent = `Toon ${d.mv} op de kaart`;
+         $('locD').textContent = `${locCount[d.k]||0} locaties, ook tot 5 km buiten de regio: het CBS rekent die afstand ook mee (OpenStreetMap).${d.extra||''}`; }
+  for(const k in locGroups){ if(d && d.k===k && $('lyrLoc').checked) locGroups[k].addTo(map); else map.removeLayer(locGroups[k]); }
+}
+$('lyrLoc').addEventListener('change', syncLoc);
+$('theme').addEventListener('change', syncLoc);
+
+function syncVz(){ const on=$('lyrVz').checked; document.querySelectorAll('#vzcats input').forEach(i=>{ const g=vzGroups[i.dataset.c]; if(on && i.checked) g.addTo(map); else map.removeLayer(g); }); }
+$('lyrVz').addEventListener('change', syncVz);
+document.querySelectorAll('#vzcats input').forEach(i=>i.addEventListener('change', ()=>{ if(!$('lyrVz').checked) $('lyrVz').checked=true; syncVz(); }));
+function renderVzTable(){
+  const t={}; for(const c of Object.values(GM)) t[c]={onderwijs:0,zorg:0,sport:0,maatsch:0};
+  for(const f of DATA.voorz.features){ const p=f.properties; if(t[p.gm]) t[p.gm][p.c]++; }
+  const T={onderwijs:0,zorg:0,sport:0,maatsch:0}; let rows='';
+  for(const g of Object.values(GM)){ for(const k in T) T[k]+=t[g][k]; rows+=`<tr><td>${g}</td><td>${t[g].onderwijs}</td><td>${t[g].zorg}</td><td>${t[g].sport}</td><td>${t[g].maatsch}</td></tr>`; }
+  rows+=`<tr class="total"><td>Regio</td><td>${T.onderwijs}</td><td>${T.zorg}</td><td>${T.sport}</td><td>${T.maatsch}</td></tr>`;
+  $('vztab').innerHTML=`<thead><tr><th>Gemeente</th><th>Onderw.</th><th>Zorg</th><th>Sport</th><th>Maatsch.</th></tr></thead><tbody>${rows}</tbody>`;
+}
+renderVzTable();
+function natureToggle(layer, on){
+  if(on){ layer.addTo(map); if($('lyrFill').checked){ $('lyrFill').checked=false; buurtLayer && buurtLayer.setStyle(styleBuurt); } }
+  else map.removeLayer(layer);
+}
+$('lyrNnn').addEventListener('change', e=>natureToggle(nnnLayer, e.target.checked));
+$('lyrN2k').addEventListener('change', e=>natureToggle(n2kLayer, e.target.checked));
+$('toggle').addEventListener('click', ()=>$('panel').classList.toggle('closed'));
+if(window.innerWidth<=760) $('panel').classList.add('closed');
+
+
+/* ---------- Aggregatie (zelfde regels als bij Zuid-Holland/Nederland) ---------- */
+function aggregateFeats(feats, spec){
+  if(!spec) return null;
+  const P = f => f.properties || f;
+  if(spec.type==='sum'){ let s=0,n=0; for(const f of feats){ const v=clean(P(f)[spec.key]); if(v!==null){ s+=v; n++; } } return n? s : null; }
+  if(spec.type==='w'){ let s=0,w=0; for(const f of feats){ const p=P(f), v=clean(p[spec.key]), ww=clean(p[spec.w]); if(v!==null && ww){ s+=v*ww; w+=ww; } } return w? s/w : null; }
+  if(spec.type==='ratio'){ let a=0,b=0; for(const f of feats){ const p=P(f), x=clean(p[spec.num]), y=clean(p[spec.den]); if(x!==null && y){ a+=x; b+=y; } } return b? a/b*spec.mult : null; }
+  return null;
+}
+function themeValue(feats, t, forCompare){
+  const spec = (forCompare && t.cmp) ? t.cmp : {...t.agg, key:t.key};
+  if(!spec) return null;
+  return aggregateFeats(feats, {key:t.key, ...spec});
+}
+function fmtCmp(t, v){ if(v===null||v===undefined) return '–'; return (t.cmp && t.cmpFmt) ? t.cmpFmt(v) : t.fmt(v); }
+const gmFeats = c => buurten.features.filter(f=>f.properties.gemeentecode===c);
+function refVal(level, t, forCompare){
+  if(!DATA.ref || !DATA.ref[level]) return null;
+  if(forCompare && t.cmp===null) return null;
+  const k = (forCompare && t.cmp) ? t.key+'__cmp' : t.key;
+  const v = DATA.ref[level][k]; return (v===undefined) ? null : v;
+}
+
+/* ---------- Vergelijkingsgrafiek ---------- */
+function renderCmpChart(){
+  const t = currentTheme();
+  const comparable = t.cmp!==null;
+  $('cmpTitle').textContent = 'Vergelijking: ' + t.label.toLowerCase() + (t.cmp ? ' '+t.cmp.label : '');
+  const rows = Object.entries(GM).map(([c,n])=>({l:n, v:themeValue(gmFeats(c), t, true), cls:''}));
+  rows.push({l:'Regio', v:themeValue(buurten.features, t, true), cls:'reg', sep:true});
+  if(comparable && DATA.ref){
+    rows.push({l:'Zuid-Holland', v:refVal('zh',t,true), cls:'ref'});
+    rows.push({l:'Nederland', v:refVal('nl',t,true), cls:'ref'});
+  }
+  const max = Math.max(...rows.map(r=>r.v||0)) || 1;
+  $('cmpChart').innerHTML = rows.map(r=>`${r.sep?'<div class="sep"></div>':''}<div class="crow ${r.cls}"><div class="cl" title="${r.l}">${r.l}</div><div class="cb"><span style="width:${r.v?(r.v/max*100).toFixed(1):0}%"></span></div><div class="cv">${fmtCmp(t,r.v)}</div></div>`).join('');
+  let note = 'Per gemeente berekend uit de CBS-buurtcijfers 2024';
+  if(t.agg.type==='w') note += ', gewogen naar ' + ({aantal_inwoners:'inwoners',woningvoorraad:'woningen',aantal_huishoudens:'huishoudens'}[t.agg.w]||'') ;
+  note += '.';
+  if(!comparable) note += ' Totalen zijn niet zinvol te vergelijken met Zuid-Holland en Nederland.';
+  else if(!DATA.ref) note += ' Zuid-Holland en Nederland volgen zodra het landelijke CBS-bestand is toegevoegd.';
+  else note += ' Zuid-Holland en Nederland zijn op dezelfde manier berekend uit de CBS-cijfers van alle gemeenten.';
+  $('cmpNote').textContent = note;
+}
+
+/* ---------- Bestanden aanbieden ---------- */
+let dlTarget='dlStatusMap';
+function dlStatus(msg){ $(dlTarget).textContent = msg||''; }
+async function saveFile(filename, blob){
+  try{
+    if(window.claude && typeof window.claude.use==='function'){
+      const d = await window.claude.use('downloads');
+      if(d){ await d.save({filename, data:blob}); dlStatus('Bestand aangeboden: '+filename); return; }
+    }
+  }catch(e){
+    if(e && e.code==='declined'){ dlStatus('Download geannuleerd.'); return; }
+    if(e && e.code==='rate_limited'){ dlStatus('Er staat al een download klaar. Probeer het zo opnieuw.'); return; }
+  }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  dlStatus('Bestand gedownload: '+filename);
+}
+const today = () => new Date().toLocaleDateString('nl-NL',{day:'numeric',month:'long',year:'numeric'});
+const stamp = () => new Date().toISOString().slice(0,10);
+const slug = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+const hex = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const PURPLE='#5b0065', INK='#24112a', MUTED='#857a89';
+function pdfText(s){ return String(s).replace(/[–—]/g,'-').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/·/g,'·').replace(/≥/g,'>=').replace(/³/g,'3').replace(/²/g,'2'); }
+
+/* ---------- Kaart naar canvas ---------- */
+function mapToCanvas(scale, withTiles){
+  const cont = map.getContainer(), R = cont.getBoundingClientRect();
+  const W = Math.round(R.width*scale), H = Math.round(R.height*scale);
+  const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx = cv.getContext('2d'); ctx.fillStyle='#f4eeeb'; ctx.fillRect(0,0,W,H);
+  const zOf = el => { let p=el.closest('.leaflet-pane'); let z=0; while(p && p!==cont){ const zz=parseInt(getComputedStyle(p).zIndex); if(!isNaN(zz)) { z=zz; break; } p=p.parentElement.closest('.leaflet-pane'); } return z; };
+  const els = [...cont.querySelectorAll('.leaflet-pane img.leaflet-tile-loaded, .leaflet-pane canvas')]
+     .filter(el=> withTiles || el.tagName==='CANVAS')
+     .map((el,i)=>({el,i,z:zOf(el)})).sort((a,b)=>a.z-b.z || a.i-b.i);
+  for(const {el} of els){
+    const r = el.getBoundingClientRect(); if(!r.width||!r.height) continue;
+    let op=1, n=el; while(n && n!==cont){ const o=parseFloat(getComputedStyle(n).opacity); if(!isNaN(o)) op*=o; n=n.parentElement; }
+    ctx.globalAlpha = op;
+    ctx.drawImage(el, (r.left-R.left)*scale, (r.top-R.top)*scale, r.width*scale, r.height*scale);
+  }
+  ctx.globalAlpha=1;
+  // stationsnamen
+  for(const t of cont.querySelectorAll('.leaflet-tooltip.stlabel')){
+    const r=t.getBoundingClientRect(); if(r.right<R.left||r.left>R.right||r.bottom<R.top||r.top>R.bottom) continue;
+    const x=(r.left-R.left)*scale, y=(r.top-R.top)*scale;
+    ctx.fillStyle='rgba(255,255,255,.92)'; ctx.fillRect(x,y,r.width*scale,r.height*scale);
+    ctx.fillStyle=INK; ctx.font=`600 ${11.5*scale}px Barlow, Helvetica, Arial, sans-serif`; ctx.textBaseline='middle';
+    ctx.fillText(t.textContent, x+6*scale, y+r.height*scale/2);
+  }
+  return cv;
+}
+function canvasToJpeg(cv){ try{ return cv.toDataURL('image/jpeg',0.92); }catch(e){ return null; } }
+
+function activeLayers(){
+  const L2=[]; const on=id=>$(id)&&$(id).checked;
+  if(on('lyrFill')) L2.push(hasTheme() ? {c:'#8a2486', l:'Buurtkleuren: '+currentTheme().label} : {c:'#f1d4ec', l:'Buurten'});
+  if(on('lyrLoc') && currentLoc()) L2.push({c:LOC_C, l:currentLoc().mv[0].toUpperCase()+currentLoc().mv.slice(1)+' (ook tot 5 km buiten de regio)'});
+  if(on('lyrAhn')) L2.push({c:'#4b8fd6', l:'Hoogte t.o.v. NAP (AHN)'});
+  if(on('lyrRail')) L2.push({c:'#fc7c00', l:'Treinverbindingen en stations'});
+  if(on('lyrOv')) L2.push({c:'#d63fae', l:'Buslijnen en haltes'});
+  if(on('lyrVz')) document.querySelectorAll('#vzcats input').forEach(i=>{ if(i.checked) L2.push({c:VZC[i.dataset.c], l:'Voorzieningen: '+i.parentElement.textContent.trim()}); });
+  if(on('lyrRoads')) L2.push({c:'#3a3a3a', l:'Hoofdwegennet'});
+  if(on('lyrNnn')) L2.push({c:'#5fa36a', l:'Natuurnetwerk Nederland'});
+  if(on('lyrN2k')) L2.push({c:'#1f5c35', l:'Natura 2000'});
+  return L2;
+}
+function pdfHeader(doc, W, title, sub){
+  const lh=15, lw=lh*1200/382;
+  doc.addImage(DATA.logo,'JPEG',10,8,lw,lh);
+  doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(17);
+  doc.text(pdfText(title), 10+lw+6, 15);
+  doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text(pdfText(sub), 10+lw+6, 21);
+}
+async function exportMapPdf(){
+  dlTarget='dlStatusMap'; const btn=$('btnMapPdf'); btn.disabled=true; dlStatus('Kaart wordt omgezet naar PDF…');
+  try{
+    map.closePopup();
+    await new Promise(r=>setTimeout(r,250));
+    let tilesNote='';
+    let img = canvasToJpeg(mapToCanvas(2,true));
+    if(!img){ img = canvasToJpeg(mapToCanvas(2,false)); tilesNote=' De achtergrondkaart kon niet worden meegenomen.'; }
+    else if(tileOk===0 && basemap!=='geen') tilesNote=' Achtergrondkaart niet beschikbaar in deze weergave.';
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+    const W=297, H=210, t=currentTheme();
+    pdfHeader(doc, W, 'Regiokaart Midden-Holland', `${themed() ? t.label+' per buurt · ' : ''}gemaakt op ${today()}`);
+    // kaart
+    const sz=map.getSize(), mx=10, my=30, maxW=205, maxH=165;
+    let w=maxW, h=w*sz.y/sz.x; if(h>maxH){ h=maxH; w=h*sz.x/sz.y; }
+    doc.addImage(img,'JPEG',mx,my,w,h); doc.setDrawColor(220,210,218); doc.rect(mx,my,w,h);
+    // legenda
+    let x=222, y=my+2;
+    doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
+    if(themed() && breaks.length){
+      doc.text(pdfText(t.label), x, y); y+=5;
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+      for(let i=breaks.length-2;i>=0;i--){ doc.setFillColor(...hex(RAMP[rampIdx(i)])); doc.rect(x,y-3,6,3.6,'F'); doc.text(pdfText(`${t.fmt(breaks[i])} - ${t.fmt(breaks[i+1])}`), x+8, y); y+=5; }
+      doc.setFillColor(...hex(NODATA)); doc.rect(x,y-3,6,3.6,'F'); doc.text('geen gegevens / geheim', x+8, y); y+=6;
+      doc.setTextColor(...hex(MUTED)); doc.setFontSize(7.5);
+      const nl = doc.splitTextToSize(pdfText(t.note), 65); doc.text(nl, x, y); y+= nl.length*3.4+5;
+    }
+    const lay = activeLayers().filter(l=>!l.l.startsWith('Buurtkleuren'));
+    if(lay.length){
+      doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text('Kaartlagen', x, y); y+=5;
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+      for(const l of lay){ doc.setFillColor(...hex(l.c)); doc.rect(x,y-3,6,3.6,'F'); const tl=doc.splitTextToSize(pdfText(l.l),56); doc.text(tl,x+8,y); y+=4.4*tl.length+1; }
+      y+=3;
+    }
+    doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text('Gemeentegrenzen', x, y); y+=5;
+    doc.setDrawColor(...hex('#3b0042')); doc.setLineWidth(0.6); doc.line(x,y-1.5,x+6,y-1.5); doc.setLineWidth(0.2);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK)); doc.text('Bodegraven-Reeuwijk, Gouda,', x+8, y); doc.text('Krimpenerwaard, Waddinxveen, Zuidplas', x+8, y+4);
+    // bronnen
+    doc.setFontSize(7); doc.setTextColor(...hex(MUTED));
+    const src = 'Bronnen: CBS Kerncijfers Wijken en Buurten 2024 (via PDOK); Kadaster/PDOK (achtergrond, luchtfoto); RWS (AHN); Provincie Zuid-Holland (NNN); RVO (Natura 2000); OpenStreetMap-bijdragers (wegen, OV, voorzieningen).'+tilesNote;
+    doc.text(doc.splitTextToSize(pdfText(src), 277), 10, 201);
+    await saveFile(`regiokaart-${slug(themed()?t.label:'lagen')}-${stamp()}.pdf`, doc.output('blob'));
+  }catch(e){ console.error(e); dlStatus('Het maken van de PDF is mislukt: '+(e.message||e)); }
+  btn.disabled=false;
+}
+
+/* ---------- Gemeenteprofiel ---------- */
+function drawGemeenteMap(code, t, wpx, hpx){
+  const cv=document.createElement('canvas'); cv.width=wpx; cv.height=hpx; const ctx=cv.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,wpx,hpx);
+  const fs = gmFeats(code);
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  const eachCoord=(g,fn)=>{ const polys=g.type==='Polygon'?[g.coordinates]:g.coordinates; for(const p of polys) for(const r of p) for(const c of r) fn(c); };
+  const gmF = gemeenten.features.find(f=>f.properties.gemeentecode===code);
+  eachCoord(gmF.geometry, c=>{ minx=Math.min(minx,c[0]); maxx=Math.max(maxx,c[0]); miny=Math.min(miny,c[1]); maxy=Math.max(maxy,c[1]); });
+  const k=Math.cos((miny+maxy)/2*Math.PI/180), pad=14;
+  const sx=(wpx-2*pad)/((maxx-minx)*k), sy=(hpx-2*pad)/(maxy-miny), s=Math.min(sx,sy);
+  const ox=(wpx-(maxx-minx)*k*s)/2, oy=(hpx-(maxy-miny)*s)/2;
+  const P=c=>[ox+(c[0]-minx)*k*s, hpx-oy-(c[1]-miny)*s];
+  const path=(g)=>{ ctx.beginPath(); const polys=g.type==='Polygon'?[g.coordinates]:g.coordinates; for(const p of polys) for(const r of p){ r.forEach((c,i)=>{ const q=P(c); i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); }); ctx.closePath(); } };
+  for(const f of gemeenten.features){ if(f.properties.gemeentecode===code) continue; path(f.geometry); ctx.fillStyle='#f1ecef'; ctx.fill('evenodd'); ctx.strokeStyle='#d9cfd6'; ctx.lineWidth=1; ctx.stroke(); }
+  for(const f of fs){ path(f.geometry); ctx.fillStyle=colorFor(clean(f.properties[t.key])); ctx.fill('evenodd'); ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.2; ctx.stroke(); }
+  path(gmF.geometry); ctx.strokeStyle='#3b0042'; ctx.lineWidth=3; ctx.stroke();
+  for(const st of DATA.stations.features){ if(st.properties.gm!==GM[code]) continue; const q=P(st.geometry.coordinates); ctx.beginPath(); ctx.arc(q[0],q[1],7,0,7); ctx.fillStyle='#fff'; ctx.fill(); ctx.lineWidth=3.5; ctx.strokeStyle='#fc7c00'; ctx.stroke(); }
+  return cv.toDataURL('image/png');
+}
+async function exportProfilePdf(){
+  dlTarget='dlStatusProf'; const code=$('profGm').value, naam=GM[code], btn=$('btnProfPdf'); btn.disabled=true; dlStatus('Gemeenteprofiel '+naam+' wordt gemaakt…');
+  try{
+    const { jsPDF } = window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'}); const W=210; let y;
+    const fs=gmFeats(code), all=buurten.features, t=currentTheme();
+    const val=(feats,k)=>aggregateFeats(feats,{type:'sum',key:k});
+    pdfHeader(doc, W, 'Gemeenteprofiel '+naam, `Regio Midden-Holland · CBS Kerncijfers Wijken en Buurten 2024 · ${today()}`);
+    // kerncijfertegels
+    y=34; const tiles=[['Inwoners',nl0.format(val(fs,'aantal_inwoners'))],['Huishoudens',nl0.format(val(fs,'aantal_huishoudens'))],['Woningen',nl0.format(val(fs,'woningvoorraad'))],['Bedrijfsvestigingen',nl0.format(val(fs,'aantal_bedrijfsvestigingen'))]];
+    tiles.forEach((tl,i)=>{ const x=10+i*47.5; doc.setFillColor(...hex('#f6eaf5')); doc.roundedRect(x,y,45,19,2,2,'F'); doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text(tl[1],x+4,y+9); doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...hex(MUTED)); doc.text(tl[0],x+4,y+15); });
+    // kaartje + toelichting
+    y=59;
+    if(!breaks.length) breaks=computeBreaks(t.key);
+    doc.addImage(drawGemeenteMap(code,t,900,640),'PNG',10,y,95,67.5); doc.setDrawColor(230,222,228); doc.rect(10,y,95,67.5);
+    let x2=112, y2=y+4;
+    doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text(pdfText('Kaart: '+t.label+' per buurt'), x2, y2); y2+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+    for(let i=breaks.length-2;i>=0;i--){ doc.setFillColor(...hex(RAMP[rampIdx(i)])); doc.rect(x2,y2-3,6,3.6,'F'); doc.text(pdfText(`${t.fmt(breaks[i])} - ${t.fmt(breaks[i+1])}`), x2+8, y2); y2+=4.8; }
+    doc.setFillColor(...hex(NODATA)); doc.rect(x2,y2-3,6,3.6,'F'); doc.text('geen gegevens / geheim', x2+8, y2); y2+=5;
+    doc.setDrawColor(...hex('#fc7c00')); doc.setLineWidth(0.9); doc.circle(x2+3,y2-1.3,1.4); doc.setLineWidth(0.2); doc.text('treinstation', x2+8, y2); y2+=6;
+    doc.setTextColor(...hex(MUTED)); doc.setFontSize(7.5);
+    doc.text(doc.splitTextToSize(pdfText('Kleurklassen gelden voor de hele regio, zodat profielen van verschillende gemeenten vergelijkbaar zijn. Kies een ander thema op de kaart om het kaartje te veranderen.'),88), x2, y2);
+    // tabel
+    y=y+75;
+    const cols=[10,124,150,176,201], head=['Kerncijfer',naam.replace('Bodegraven-Reeuwijk','Bodegr.-Reeuwijk'),'Regio','Zuid-Holland','Nederland'];
+    const tableHead=()=>{ doc.setFillColor(...hex(PURPLE)); doc.rect(10,y-4.5,190,6.5,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+      head.forEach((h,i)=> i? doc.text(pdfText(h), cols[i]-2, y, {align:'right'}) : doc.text(h, cols[0]+2, y)); y+=6; };
+    doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Kerncijfers vergeleken', 10, y); y+=7;
+    tableHead();
+    let g='';
+    for(const th of THEMES){
+      if(y>278){ doc.addPage(); y=20; tableHead(); }
+      if(th.g!==g){ g=th.g; doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.text(g.toUpperCase(), 12, y+1); y+=4.6; }
+      const cmpLbl = th.cmp ? ' ('+th.cmp.label+')' : '';
+      const vals=[themeValue(fs,th,true), themeValue(all,th,true), th.cmp===null?null:refVal('zh',th,true), th.cmp===null?null:refVal('nl',th,true)];
+      if(th.cmp===null){ vals[2]=DATA.ref&&DATA.ref.zh?DATA.ref.zh[th.key]:null; vals[3]=DATA.ref&&DATA.ref.nl?DATA.ref.nl[th.key]:null; }
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+      doc.text(pdfText(th.label+cmpLbl), 12, y);
+      vals.forEach((v,i)=>{ doc.setFont('helvetica', i===0?'bold':'normal'); doc.text(pdfText(fmtCmp(th,v)), cols[i+1]-2, y, {align:'right'}); });
+      doc.setDrawColor(236,228,234); doc.line(10,y+1.6,200,y+1.6); y+=5;
+    }
+    if(!DATA.ref){ doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED)); doc.text('Zuid-Holland en Nederland zijn nog niet toegevoegd.', 12, y+1); y+=5; }
+    // pagina 2: bedrijven, voorzieningen, OV, natuur
+    y+=8; if(y>215){ doc.addPage(); y=20; }
+    const h2=(s)=>{ if(y>262){ doc.addPage(); y=20; } doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text(pdfText(s),10,y); y+=7; };
+    h2('Bedrijven per sector');
+    const sectG={}, sectR={}; let totG=0, totR=0;
+    for(const f of all){ for(const sc of SECTORS){ const v=clean(f.properties[sc.key])||0; sectR[sc.key]=(sectR[sc.key]||0)+v; totR+=v; if(f.properties.gemeentecode===code){ sectG[sc.key]=(sectG[sc.key]||0)+v; totG+=v; } } }
+    const srt=[...SECTORS].sort((a,b)=>(sectG[b.key]||0)-(sectG[a.key]||0));
+    doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','normal'); doc.text(pdfText(naam+' (paars) en regio (grijs), als aandeel van alle vestigingen'),10,y-2); y+=3;
+    for(const sc of srt){
+      const pg=totG?(sectG[sc.key]||0)/totG:0, pr=totR?(sectR[sc.key]||0)/totR:0;
+      doc.setFontSize(8.5); doc.setTextColor(...hex(INK)); doc.text(pdfText(sc.label),10,y);
+      doc.setFillColor(...hex('#8a2486')); doc.rect(70,y-3,pg*250,2.6,'F'); doc.setFillColor(...hex('#c9bfc8')); doc.rect(70,y,pr*250,1.6,'F');
+      doc.text(`${nl0.format(sectG[sc.key]||0)}  (${Math.round(pg*100)}%)`, 200, y, {align:'right'}); y+=6.5; if(y>278){ doc.addPage(); y=20; }
+    }
+    y+=4; h2('Voorzieningen');
+    const vz={onderwijs:0,zorg:0,sport:0,maatsch:0}; for(const f of DATA.voorz.features) if(f.properties.gm===naam) vz[f.properties.c]++;
+    const vzl=[['Onderwijs (scholen)',vz.onderwijs],['Zorg (huisartsen, apotheken, klinieken, ziekenhuizen)',vz.zorg],['Sportaccommodaties',vz.sport],['Maatschappelijk (buurthuizen, bibliotheken, gemeentehuis)',vz.maatsch]];
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+    for(const [l,v] of vzl){ if(y>278){ doc.addPage(); y=20; } doc.text(pdfText(l),12,y); doc.text(String(v),200,y,{align:'right'}); doc.setDrawColor(236,228,234); doc.line(10,y+1.8,200,y+1.8); y+=5.6; }
+    const afst=['huisartsenpraktijk_gemiddelde_afstand_in_km','basisonderwijs_gemiddelde_afstand_in_km','grote_supermarkt_gemiddelde_afstand_in_km','ziekenhuis_incl_buitenpolikliniek_gem_afst_in_km'].map(k=>THEMES.find(x=>x.key===k));
+    doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED));
+    doc.text(pdfText('Gemiddelde afstand: '+afst.map(a=>a.label.replace('Afstand tot ','')+' '+fmtCmp(a,themeValue(fs,a,true))).join(' · ')),12,y+1); y+=9;
+    h2('Openbaar vervoer en wegen');
+    const sts=DATA.stations.features.filter(f=>f.properties.gm===naam);
+    const lines=DATA.buslines.features.filter(f=>(f.properties.gms||'').split(', ').includes(naam));
+    const haltes=DATA.busstops.features.filter(f=>f.properties.gm===naam).length;
+    const ovl=[['Treinstations', sts.length? sts.map(s=>s.properties.naam||'station').join(', ') : 'geen'],
+               ['Treinseries die hier stoppen', String(new Set(sts.flatMap(s=>s.properties.diensten.filter(d=>!d.startsWith('Nachtnet')))).size)],
+               ['Buslijnen die hier stoppen', lines.length ? lines.length+' (lijn '+lines.map(l=>l.properties.ref).sort((a,b)=>a.length-b.length||a.localeCompare(b)).join(', ')+')' : 'geen'],
+               ['Bushaltes', String(haltes)]];
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+    for(const [l,v] of ovl){ doc.text(pdfText(l),12,y); const vv=doc.splitTextToSize(pdfText(v),110); doc.text(vv,200,y,{align:'right'}); y+=4.6*vv.length+1; doc.setDrawColor(236,228,234); doc.line(10,y-2.8,200,y-2.8); y+=1; }
+    y+=5; h2('Natuur en ruimte');
+    const n=DATA.natuur;
+    const nat=[['Oppervlakte gemeente (incl. water)', nl0.format(n.land[naam])+' ha'],['Natuurnetwerk Nederland', nl0.format(n.nnn[naam])+' ha ('+nl1.format(n.nnn[naam]/n.land[naam]*100)+'%)'],['Natura 2000', n.n2k[naam]? nl0.format(n.n2k[naam])+' ha (Broekvelden, Vettenbroek & Polder Stein)':'geen']];
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+    for(const [l,v] of nat){ doc.text(pdfText(l),12,y); doc.text(pdfText(v),200,y,{align:'right'}); doc.setDrawColor(236,228,234); doc.line(10,y+1.8,200,y+1.8); y+=5.6; }
+    // voetnoot op alle pagina's
+    const pages=doc.getNumberOfPages();
+    for(let i=1;i<=pages;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(6.8); doc.setTextColor(...hex(MUTED));
+      doc.text(doc.splitTextToSize(pdfText('Bronnen: CBS Kerncijfers Wijken en Buurten 2024 (via PDOK), per gemeente berekend uit buurtcijfers; percentages gewogen naar inwoners, woningen of huishoudens; geheime buurtwaarden tellen niet mee. Voorzieningen, OV en wegen: OpenStreetMap-bijdragers. Natuur: Provincie Zuid-Holland, RVO. Regio Midden-Holland - prototype.'),170), 10, 287);
+      doc.text(`${i}/${pages}`, 200, 291, {align:'right'}); }
+    await saveFile(`gemeenteprofiel-${slug(naam)}-${stamp()}.pdf`, doc.output('blob'));
+  }catch(e){ console.error(e); dlStatus('Het maken van het profiel is mislukt: '+(e.message||e)); }
+  btn.disabled=false;
+}
+for(const [c,n] of Object.entries(GM)){ const o=document.createElement('option'); o.value=c; o.textContent=n; $('profGm').appendChild(o); }
+$('btnMapPdf').addEventListener('click', exportMapPdf);
+$('btnProfPdf').addEventListener('click', exportProfilePdf);
+
+/* ---------- Start ---------- */
+(function init(){
+  buurten = DATA.buurten; gemeenten = DATA.gemeenten; live = true;
+  const code = Object.fromEntries(Object.entries(GM).map(([c,n])=>[n,c]));
+  ovData = DATA.busstops.features.map(f=>({gm:code[f.properties.gm]}));
+  drawBuurten(); drawGemeenten(); restyle(); renderCompare(); renderSectors();
+  setStatus(`${buurten.features.length} buurten · CBS Kerncijfers Wijken en Buurten 2024`);
+})();
+</script>
+</body>
+</html>

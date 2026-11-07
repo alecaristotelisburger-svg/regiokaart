@@ -1,0 +1,328 @@
+{
+"aantal_inwoners": {
+"agg": {
+"type": "sum"
+},
+"cmp": null
+},
+"bevolkingsdichtheid_inwoners_per_km2": {
+"agg": {
+"type": "ratio",
+"num": "aantal_inwoners",
+"den": "oppervlakte_land_in_ha",
+"mult": 100
+}
+},
+"percentage_personen_65_jaar_en_ouder": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"percentage_personen_0_tot_15_jaar": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"percentage_eenpersoonshuishoudens": {
+"agg": {
+"type": "w",
+"w": "aantal_huishoudens"
+}
+},
+"percentage_huishoudens_met_kinderen": {
+"agg": {
+"type": "w",
+"w": "aantal_huishoudens"
+}
+},
+"perc_huurwoningen_in_bezit_woningcorporaties": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"percentage_koopwoningen": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"gemiddelde_woningwaarde": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"perc_bouwjaar_afgelopen_10_jaar": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"aantal_nieuwbouw_woningen": {
+"agg": {
+"type": "sum"
+},
+"cmp": {
+"type": "ratio",
+"num": "aantal_nieuwbouw_woningen",
+"den": "woningvoorraad",
+"mult": 1000,
+"label": "per 1.000 woningen"
+}
+},
+"aantal_bedrijfsvestigingen": {
+"agg": {
+"type": "sum"
+},
+"cmp": {
+"type": "ratio",
+"num": "aantal_bedrijfsvestigingen",
+"den": "aantal_inwoners",
+"mult": 1000,
+"label": "per 1.000 inwoners"
+}
+},
+"bijstand_per_1000": {
+"agg": {
+"type": "ratio",
+"num": "aantal_personen_met_een_alg_bijstandsuitkering_tot",
+"den": "aantal_inwoners",
+"mult": 1000
+}
+},
+"ww_per_1000": {
+"agg": {
+"type": "ratio",
+"num": "aantal_personen_met_een_ww_uitkering_totaal",
+"den": "aantal_inwoners",
+"mult": 1000
+}
+},
+"huisartsenpraktijk_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"basisonderwijs_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"grote_supermarkt_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"ziekenhuis_incl_buitenpolikliniek_gem_afst_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"treinstation_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"oprit_hoofdverkeersweg_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"personenautos_per_huishouden": {
+"agg": {
+"type": "w",
+"w": "aantal_huishoudens"
+}
+},
+"percentage_woningen_met_zonnestroom": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"percentage_aardgasvrije_woningen": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"gemiddeld_aardgasverbruik": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"percentage_personen_15_tot_25_jaar": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"percentage_personen_25_tot_45_jaar": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"percentage_personen_45_tot_65_jaar": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"percentage_met_herkomstland_nederland": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"percentage_met_herkomstland_uit_europa_excl_nl": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"percentage_met_herkomstland_buiten_europa": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"geboortes_per_1000_inwoners": {
+"agg": {
+"type": "ratio",
+"num": "geboorte_totaal",
+"den": "aantal_inwoners",
+"mult": 1000
+}
+},
+"gemiddelde_huishoudsgrootte": {
+"agg": {
+"type": "w",
+"w": "aantal_huishoudens"
+}
+},
+"omgevingsadressendichtheid": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"percentage_huurwoningen": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"perc_huurwoningen_in_bezit_overige_verhuurders": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"percentage_eengezinswoning": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"percentage_meergezinswoning": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"percentage_onbewoond": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"percentage_aardgaswoningen": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"gemiddelde_elektriciteitsteruglevering": {
+"agg": {
+"type": "w",
+"w": "woningvoorraad"
+}
+},
+"voortgezet_onderwijs_gem_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"vmbo_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"havo_vwo_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"kinderdagverblijf_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"buitenschoolse_opvang_gem_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"apotheek_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"huisartsenpost_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"brandweerkazerne_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"overstapstation_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"bibliotheek_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+},
+"zwembad_gemiddelde_afstand_in_km": {
+"agg": {
+"type": "w",
+"w": "aantal_inwoners"
+}
+}
+}

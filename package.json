@@ -1,0 +1,10 @@
+{
+  "name": "regiokaart-midden-holland",
+  "private": true,
+  "description": "Interactieve regiokaart en kennisbank voor Regio Midden-Holland",
+  "dependencies": {
+    "leaflet": "1.9.4",
+    "jspdf": "2.5.1",
+    "mapshaper": "0.7.101"
+  }
+}
