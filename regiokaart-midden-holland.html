@@ -1265,13 +1265,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       <div class="seg" role="radiogroup">
         <button data-bm="kaart" class="on">Kaart</button><button data-bm="sat">Satelliet</button><button data-bm="geen">Geen</button>
       </div>
-      <p id="bmNote" class="note">Satelliet: actuele luchtfoto van heel Nederland (PDOK, 8 cm per pixel).</p>
+      <p id="bmNote" class="note" hidden></p>
     </section>
 
     <section>
       <h2>Kaartlagen</h2>
       <div class="layer"><input type="checkbox" id="lyrAhn"><label for="lyrAhn"><span class="t">Hoogte t.o.v. NAP</span><span class="d">Actueel Hoogtebestand Nederland (AHN), maaiveld. Klik op de kaart voor de hoogte op dat punt.</span></label></div>
-      <div class="layer"><input type="checkbox" id="lyrRail"><label for="lyrRail"><span class="t"><span class="sw2" style="background:#fc7c00"></span>Treinverbindingen</span><span class="d">7 stations, 5 intercity- en 9 sprinterseries die in de regio stoppen, plus het Nachtnet. Dikte = aantal series op dat stuk spoor. Klik op een station of spoorlijn voor de treinen (OpenStreetMap).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrRail"><label for="lyrRail"><span class="t"><span class="sw2" style="background:#fc7c00"></span>Treinverbindingen</span><span class="d">7 stations, 5 intercity- en 9 sprinterseries die in de regio stoppen, plus het Nachtnet. Dikte = aantal series op dat stuk spoor (OpenStreetMap).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrOv"><label for="lyrOv"><span class="t"><span class="sw2" style="background:#d63fae"></span>Buslijnen en haltes</span><span class="d">23 buslijnen van Qbuzz en U-OV die in de regio stoppen, en ruim 300 haltes. Klik op een lijn of halte om te zien welke lijnen er rijden (OpenStreetMap).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrVz"><label for="lyrVz"><span class="t">Voorzieningen</span><span class="d" id="vzD">Scholen, zorgpunten, sportaccommodaties en maatschappelijke voorzieningen (OpenStreetMap). Kies hieronder welke.</span></label></div>
       <div class="vzcats" id="vzcats">
@@ -1320,6 +1320,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     </section>
 
     <section>
+      <h2>Kaart downloaden</h2>
+      <button class="btn" id="btnMapPdf">Huidige kaart als PDF</button>
+      <p class="note" style="margin-top:6px">Wat je nu ziet, met legenda, actieve lagen en bronnen, op een A4 liggend.</p>
+      <p id="dlStatusMap" class="note dlst"></p>
+    </section>
+
+    <section>
+      <h2>Genereer een gemeenteprofiel</h2>
+      <p class="note" style="margin:0 0 10px">Een PDF met alle kerncijfers van één gemeente naast de regio, Zuid-Holland en Nederland, plus kaart, bedrijven, voorzieningen, OV en natuur.</p>
+      <label class="note" for="profGm" style="display:block;margin-bottom:4px;font-weight:600;color:var(--ink)">Kies een gemeente</label>
+      <select id="profGm"></select>
+      <button class="btn" id="btnProfPdf" style="width:100%;margin-top:10px">Download gemeenteprofiel (PDF)</button>
+      <p class="note" style="margin-top:8px">Het kaartje in het profiel toont het thema dat je bovenaan hebt gekozen.</p>
+      <p id="dlStatusProf" class="note dlst"></p>
+    </section>
+
+    <section>
       <h2>Bronnen</h2>
       <ul class="src">
         <li>Buurtcijfers en grenzen: CBS Wijk- en Buurtkaart 2024, via PDOK (CC BY 4.0)</li>
@@ -1335,23 +1352,6 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         <li>Zoeken op adres: PDOK Locatieserver · Lettertype: Barlow (SIL Open Font License)</li>
       </ul>
       <p class="note">De buurtcijfers zitten in de pagina zelf. Achtergrondkaart, satelliet, NAP-hoogte, OV en bouwjaar worden live opgehaald bij de bron.</p>
-    </section>
-
-    <section>
-      <h2>Kaart downloaden</h2>
-      <button class="btn" id="btnMapPdf">Huidige kaart als PDF</button>
-      <p class="note" style="margin-top:6px">Wat je nu ziet, met legenda, actieve lagen en bronnen, op een A4 liggend.</p>
-      <p id="dlStatusMap" class="note dlst"></p>
-    </section>
-
-    <section>
-      <h2>Genereer een gemeenteprofiel</h2>
-      <p class="note" style="margin:0 0 10px">Een PDF met alle kerncijfers van één gemeente naast de regio, Zuid-Holland en Nederland, plus kaart, bedrijven, voorzieningen, OV en natuur.</p>
-      <label class="note" for="profGm" style="display:block;margin-bottom:4px;font-weight:600;color:var(--ink)">Kies een gemeente</label>
-      <select id="profGm"></select>
-      <button class="btn" id="btnProfPdf" style="width:100%;margin-top:10px">Download gemeenteprofiel (PDF)</button>
-      <p class="note" style="margin-top:8px">Het kaartje in het profiel toont het thema dat je bovenaan hebt gekozen.</p>
-      <p id="dlStatusProf" class="note dlst"></p>
     </section>
   </aside>
   <div id="map"></div>
@@ -1456,7 +1456,7 @@ const photoLabels = L.tileLayer('https://service.pdok.nl/bzk/luchtfotolabels/wmt
   {maxZoom:21, maxNativeZoom:19, pane:'labels', crossOrigin:'anonymous'});
 let basemap = 'kaart', tileFails = 0, tileOk = 0;
 for(const t of [brt, photo]){
-  t.on('tileerror', ()=>{ tileFails++; if(tileFails===6 && tileOk===0){ $('bmNote').textContent='De achtergrondkaart kan in deze weergave niet laden (deze omgeving blokkeert externe kaartbeelden). Download het bestand en open het in Chrome of Edge om de kaart en satelliet te zien.'; $('bmNote').style.color='var(--warn)'; } });
+  t.on('tileerror', ()=>{ tileFails++; if(tileFails===6 && tileOk===0){ $('bmNote').textContent='De achtergrondkaart kan in deze weergave niet laden (deze omgeving blokkeert externe kaartbeelden). Download het bestand en open het in Chrome of Edge om de kaart en satelliet te zien.'; $('bmNote').style.color='var(--warn)'; $('bmNote').hidden=false; } });
   t.on('tileload', ()=>{ tileOk++; });
 }
 function setBasemap(bm){
