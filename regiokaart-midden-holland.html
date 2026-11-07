@@ -1211,7 +1211,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   .klapkop .pijl{font-size:12px;transition:transform .2s;letter-spacing:0}
   .klap.open .klapkop .pijl{transform:rotate(180deg)}
   .klap-in{position:relative;overflow:hidden;transition:max-height .3s ease}
-  .klap-in::after{content:'';position:absolute;left:0;right:0;bottom:0;height:70%;background:linear-gradient(rgba(255,255,255,0),var(--bg) 92%);pointer-events:none;transition:opacity .2s}
+  .klap-in::after{content:'';position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(rgba(255,255,255,0),var(--bg) 95%);pointer-events:none;transition:opacity .2s}
   .klap.open .klap-in::after{opacity:0}
   .klapmeer{all:unset;cursor:pointer;color:var(--accent);font-size:12.5px;font-weight:600;margin-top:4px;display:inline-block}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -1303,17 +1303,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       <div class="layer"><input type="checkbox" id="lyrFill"><label for="lyrFill"><span class="t">Buurtkleuren tonen</span><span class="d">Toont de 248 buurten. Kies je hierboven een thema, dan krijgen ze de kleur van dat thema. Klik op een buurt voor de kerncijfers.</span></label></div>
     </section>
 
-    <section>
-      <h2>Volgende lagen</h2>
+    <section class="klap" id="klapNext">
+      <h2><button class="klapkop" aria-expanded="false" aria-controls="klapNextIn">Volgende lagen <span class="pijl" aria-hidden="true">▾</span></button></h2>
+      <div class="klap-in" id="klapNextIn" data-rijen=".layer">
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bodemkwaliteit <span class="tag">opvragen bij ODMH</span></span><span class="d">Regionale bodemkwaliteitskaart van de Omgevingsdienst Midden-Holland. Zie ook <a href="https://www.bodemloket.nl" target="_blank" rel="noopener">bodemloket.nl</a>.</span></label></div>
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Bodemdaling <span class="tag">bron bekend</span></span><span class="d">Satellietmetingen van bodemdaling; zeer relevant voor de veenweide in het Groene Hart. Bron: <a href="https://bodemdalingskaart.nl" target="_blank" rel="noopener">bodemdalingskaart.nl</a>.</span></label></div>
       <div class="layer soon"><input type="checkbox" disabled><label><span class="t">Sociale huur per complex <span class="tag">via corporaties</span></span><span class="d">Nu tonen we het CBS-aandeel corporatiewoningen per buurt. Complexdata kan alleen via de corporaties.</span></label></div>
+      </div>
+      <button class="klapmeer" aria-controls="klapNextIn">Toon alles</button>
     </section>
 
-    <section>
-      <h2>Gemeenten vergeleken</h2>
+    <section class="klap" id="klapCmp">
+      <h2><button class="klapkop" aria-expanded="false" aria-controls="klapCmpIn">Gemeenten vergeleken <span class="pijl" aria-hidden="true">▾</span></button></h2>
+      <div class="klap-in" id="klapCmpIn" data-rijen="#cmp tr">
       <div class="tblwrap"><table id="cmp"><tbody><tr><td>Laden…</td></tr></tbody></table></div>
       <p class="note">Berekend uit de buurtcijfers van CBS (2024). Percentages zijn gewogen naar woningen of inwoners; geheime buurtwaarden tellen niet mee. Haltes: bushaltes uit OpenStreetMap (haltes aan twee kanten van de weg tellen als één).</p>
+      </div>
+      <button class="klapmeer" aria-controls="klapCmpIn">Toon alles</button>
     </section>
 
     <section class="klap" id="klapVz">
