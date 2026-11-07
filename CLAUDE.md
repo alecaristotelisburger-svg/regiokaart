@@ -14,6 +14,9 @@ De gebruiker werkt bij de regio. Hij is geen ontwikkelaar: hij communiceert in h
 - **Waarom zelfstandig:** het bestand wordt ook gepubliceerd als artifact (gedeelde link op claude.ai). Die omgeving blokkeert `fetch` en externe afbeeldingen. Daarom werkt de link zonder achtergrondkaart. Achtergrondkaart (BRT), satelliet (PDOK-luchtfoto) en NAP-hoogte (AHN-WMS) laden alleen als je het bestand in een gewone browser opent. Een melding in het paneel legt dat uit.
 - **Bron versus resultaat:** bewerk altijd `src/src.html`, nooit het gebouwde bestand. `src.html` bevat placeholders (`<!--LEAFLET_CSS-->`, `<!--LEAFLET_JS-->`, `/*DATA*/null`) die `scripts/bouw_kaart.py` vult.
 - **Rendering:** Leaflet met `preferCanvas: true`. Dat is nodig voor de PDF-export: die tekent de canvassen en tegels van de kaart in één canvas.
+- **Functies naast de kaart (7-11-2026):** zoekveld (thema's, gemeenten en buurten uit de pagina; adressen, straten en woonplaatsen in de vijf gemeenten via de PDOK Locatieserver, alleen online), deelbare link (thema, lagen, netcongestie-modus, achtergrond en uitsnede staan in `#thema=…&lagen=…&kaart=zoom/lat/lon`; `index.html` geeft de hash door), legenda op de kaart zelf (rechtsboven, inklapbaar), tabel "Alle buurten als tabel" bij elk thema, en op de telefoon een witte menubalk boven het logo.
+- **Lettertypen** zitten in de pagina zelf (`src/fonts/*.woff2`, latin-subset, SIL OFL; `bouw_kaart.py` vult `<!--FONTS-->`). Geen verbinding met Google Fonts.
+- **Voorbeeld bij delen:** Open Graph-tags in `src.html` en `index.html`, afbeelding `og-afbeelding.png` (1200×630, schermafbeelding van de kaart; opnieuw maken als de kaart er anders uitziet).
 - **Downloads in de artifact** lopen via de `downloads`-capability (`window.claude.use('downloads')`). In een gewone browser valt de code terug op een normale `<a download>`. Zie `saveFile()` in `src.html`.
 
 ## Mappen
@@ -55,8 +58,8 @@ Controleer na elke wijziging de PDF's en de schermafbeelding visueel (bijvoorbee
 | Hoofdwegen | OpenStreetMap (Overpass) | `osm-hoofdwegen.json` |
 | Treinroutes | OpenStreetMap (Overpass, `route=train`) | `osm-treinroutes.json` |
 | Buslijnen en haltes | OpenStreetMap (Overpass Turbo-export, 3 stroken) | `osm-busroutes/*.geojson` |
-| Voorzieningen | OpenStreetMap (Overpass Turbo-export) | `osm-voorzieningen.geojson` |
-| Locaties bij afstandsthema's ("Toon … op de kaart") | OpenStreetMap (Overpass, door Claude Code opgehaald op 7-11-2026, bbox `51.81,4.44,52.20,4.98`, in 2 delen wegens 504) → `scripts/locaties.py` houdt regio + 5 km | `osm-locaties-1.json` (supermarkt, ziekenhuis, motorway_junction, railway=station), `osm-locaties-2.json` (doctors/general_practitioner, school), `osm-locaties-3.json` (pharmacy, childcare/kindergarten, fire_station, library, zwembaden). Geen vinkje bij huisartsenpost en kinderopvang (OSM te onvolledig) en overstapstation (OSM kent geen intercitystops) |
+| Voorzieningen (laag, tabel en profiel) | Sinds 7-11-2026 afgeleid uit `data/locaties.json` door `scripts/voorz.py`, zodat laag, tabel, profiel en de vinkjes 'Toon … op de kaart' dezelfde OSM-gegevens gebruiken (364 locaties in de regio). De oude Overpass Turbo-export wordt niet meer gebruikt | `osm-locaties-1..4.json` (oud: `osm-voorzieningen.geojson`) |
+| Locaties bij afstandsthema's ("Toon … op de kaart") | OpenStreetMap (Overpass, door Claude Code opgehaald op 7-11-2026, bbox `51.81,4.44,52.20,4.98`, in 2 delen wegens 504) → `scripts/locaties.py` houdt regio + 5 km | `osm-locaties-1.json` (supermarkt, ziekenhuis, motorway_junction, railway=station), `osm-locaties-2.json` (doctors/general_practitioner, school), `osm-locaties-3.json` (pharmacy, childcare/kindergarten, fire_station, library, zwembaden), `osm-locaties-4.json` (sports_centre, community_centre, townhall, clinic). Geen vinkje bij huisartsenpost en kinderopvang (OSM te onvolledig) en overstapstation (OSM kent geen intercitystops) |
 | Netcongestie | Capaciteitskaart Netbeheer Nederland, ArcGIS FeatureServer `Capaciteitskaart_elektriciteitsnet_v2_afname` (bevat afname- én opwekcode 0–3). `scripts/netcongestie.py` haalt de ~109 gebieden rond de regio op (per 20 id's, WGS84), vereenvoudigt 15 m en knipt op de regio → `data/net.json` (34 gebieden). Ca. elk kwartaal verversen met `--opnieuw`. Eén gebied zonder naam en netbeheerder staat als "Onbekend voedingsgebied" (geen gegevens) | `netcongestie-regio.json.gz` |
 | Erfgoed | RCE via PDOK-WFS `beschermde-gebieden-cultuurhistorie` (punten + vlakken, gepagineerd per 1000). `scripts/erfgoed.py` houdt rijksmonumenten binnen de regio (804, nummer uit `ciCitation`) en vlakken geknipt op de regio (6 gezichten, 3 complexen) → `data/erfgoed.json`. Namen van monumenten staan niet in de WFS: de popup linkt naar het monumentenregister | `rce-erfgoed-regio.json.gz` |
 | Bouwjaar panden | BAG-WFS PDOK `bag:pand`, **live** vanuit de browser (CORS: ja) vanaf zoom 16, max. 6.000 per beweging, gepagineerd per 1000. Werkt niet in de claude.ai-artifact (fetch geblokkeerd); de laag meldt dat | – |
@@ -68,6 +71,8 @@ Belangrijk:
 - **CBS-geheimhouding:** de waarden -99997 en -99995 betekenen geheim of onbekend. `clean()` maakt er `null` van.
 - **Aggregatie:** gemeente-, regio-, ZH- en NL-waarden worden op dezelfde manier berekend volgens `data/spec.json`: `sum`, `w` (gewogen naar inwoners, woningen of huishoudens) of `ratio` (bijvoorbeeld per 1.000 inwoners). De JS (`aggregateFeats`) en Python (`ref.py`) moeten dezelfde regels volgen. Voeg je een thema toe, zet het dan in `THEMES` (src.html) én in `spec.json`.
 - **Zorg en inkomen** (Wmo, jeugdzorg, laag inkomen) zijn voor 2024 nog niet per buurt gepubliceerd. Gebruik daarvoor eventueel 2023.
+- **CBS 2025** staat op PDOK (`api.pdok.nl/cbs/wijken-en-buurten-2025/ogc/v1`), maar op 7-11-2026 nog met maar 42 velden per buurt (geen WOZ, bedrijven, voorzieningen). Overstappen pas als die zijn aangevuld.
+- **Absolute aantallen** (inwoners, nieuwbouw, bedrijfsvestigingen) hebben een waarschuwing in de toelichting en een relatieve tegenhanger (`bedrijven_per_1000_inwoners`, `nieuwbouw_per_1000_woningen`, berekend in `buurt_props`).
 - **Stationsnamen** staan niet in de OSM-export. Ze worden in `trains.py` gekoppeld via de vaste coördinaten in `KNOWN`.
 - **OpenStreetMap** is niet volledig (bijvoorbeeld 7 "gemeentehuizen" voor 5 gemeenten, mogelijk ontbrekende buslijnen). De kaart zegt dat ook. Voor officieel gebruik: DUO (scholen), LRZa (huisartsen), Qbuzz/NDOV (OV).
 
@@ -86,7 +91,7 @@ Afgeleid van het aangeleverde logo. De website zelf kon niet worden uitgelezen.
 - Paars `#5b0065` (hoofdkleur, koppen, knoppen), magenta `#ed56c2` (kicker, accenten), oranje `#fc7c00` (hover, trein, accent), crème `#fbf2ee` (tekst op paars).
 - Sequentiële buurtkleuren: `#f1d4ec → #d995ce → #bb55ae → #8a2486 → #5b0065` (kwintielen, dubbele klassegrenzen worden samengevoegd).
 - Lagen: wegen grijs, trein oranje, bus `#d63fae`, NNN groen, Natura 2000 donkergroen. Voorzieningen: onderwijs `#2a78d6`, zorg `#d6392f`, sport `#00968a`, maatschappelijk `#b07d00` (gevalideerd op kleurenblindheid).
-- Letter: Barlow / Barlow Semi Condensed (Google Fonts). Dit is een benadering, het echte huisstijllettertype is niet bekend.
+- Letter: Barlow / Barlow Semi Condensed (meegeleverd in `src/fonts`, oorspronkelijk van Google Fonts). Dit is een benadering, het echte huisstijllettertype is niet bekend.
 
 ## Wensen en open punten
 

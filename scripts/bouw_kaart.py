@@ -11,6 +11,15 @@ css = open(P('node_modules', 'leaflet', 'dist', 'leaflet.css')).read()
 js = open(P('node_modules', 'leaflet', 'dist', 'leaflet.js')).read().replace('</script>', '<\\/script>')
 pdf = open(P('node_modules', 'jspdf', 'dist', 'jspdf.umd.min.js')).read().replace('</script>', '<\\/script>')
 s = s.replace('<!--LEAFLET_CSS-->', '<style>' + css + '</style>')
+# lettertypen in de pagina zelf (geen verbinding met Google nodig); licentie: src/fonts/OFL.txt
+ff = ''
+for fn in sorted(os.listdir(P('src', 'fonts'))):
+    if fn.endswith('.woff2'):
+        fam, w = fn[:-6].rsplit('-', 1)
+        fam = {'BarlowSemiCondensed': 'Barlow Semi Condensed'}.get(fam, fam)
+        b64 = base64.b64encode(open(P('src', 'fonts', fn), 'rb').read()).decode()
+        ff += f"@font-face{{font-family:'{fam}';font-style:normal;font-weight:{w};font-display:swap;src:url(data:font/woff2;base64,{b64}) format('woff2')}}\n"
+s = s.replace('<!--FONTS-->', '<style>' + ff + '</style>')
 s = s.replace('<!--LEAFLET_JS-->', '<script>' + js + '</script>\n<script>' + pdf + '</script>')
 names = ['buurten', 'gemeenten', 'nnn', 'n2k', 'roads', 'rail', 'stations', 'buslines', 'busstops', 'voorz', 'locaties', 'net', 'erfgoed']
 data = {k: json.load(open(P('data', k + '.json'))) for k in names}

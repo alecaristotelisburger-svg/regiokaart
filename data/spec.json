@@ -324,5 +324,21 @@
 "type": "w",
 "w": "aantal_inwoners"
 }
+},
+"bedrijven_per_1000_inwoners": {
+"agg": {
+"type": "ratio",
+"num": "aantal_bedrijfsvestigingen",
+"den": "aantal_inwoners",
+"mult": 1000
+}
+},
+"nieuwbouw_per_1000_woningen": {
+"agg": {
+"type": "ratio",
+"num": "aantal_nieuwbouw_woningen",
+"den": "woningvoorraad",
+"mult": 1000
+}
 }
 }
