@@ -37,6 +37,12 @@ def buurt_props(p, keep):
         v = p.get(src)
         # per 1.000 inwoners, alleen voor buurten vanaf 200 inwoners
         q[dst] = round(v / inw * 1000, 1) if isinstance(v, (int, float)) and v >= 0 and inw >= 200 else None
+    # relatieve varianten van absolute aantallen (toegevoegd 7-11-2026)
+    v = p.get('aantal_bedrijfsvestigingen')
+    q['bedrijven_per_1000_inwoners'] = round(v / inw * 1000, 1) if isinstance(v, (int, float)) and v >= 0 and inw >= 200 else None
+    won = p.get('woningvoorraad') or 0
+    v = p.get('aantal_nieuwbouw_woningen')
+    q['nieuwbouw_per_1000_woningen'] = round(v / won * 1000, 1) if isinstance(v, (int, float)) and v >= 0 and won >= 50 else None
     return q
 
 

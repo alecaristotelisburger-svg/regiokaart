@@ -4,6 +4,7 @@ Bron: OpenStreetMap via Overpass, in delen gedownload (de server gaf bij één g
   bron-downloads/osm-locaties-1.json  supermarkten, ziekenhuizen, snelwegaansluitingen, stations
   bron-downloads/osm-locaties-2.json  huisartsen/artsen, scholen
   bron-downloads/osm-locaties-3.json  apotheken, kinderopvang, brandweer, bibliotheken, zwembaden
+  bron-downloads/osm-locaties-4.json  sportaccommodaties, buurthuizen, gemeentehuizen, klinieken
 Bbox van alle vragen: (51.81,4.44,52.20,4.98). Zie CLAUDE.md voor de queries.
 
 Gehouden: alles binnen de regio + BUFFER meter, want de CBS-afstand rekent ook met
@@ -78,13 +79,23 @@ def soort(t):
         return ['brandweer']
     if a == 'library':
         return ['bibliotheek']
-    if t.get('leisure') in ('sports_centre', 'water_park', 'swimming_pool'):
-        return [] if GEEN_ZWEMBAD.search(n) else ['zwembad']
-    return []
+    k = []
+    if t.get('leisure') == 'sports_centre':
+        k.append('sport')
+    zwem = t.get('leisure') in ('water_park', 'swimming_pool') or 'swimming' in t.get('sport', '')
+    if zwem and t.get('leisure') in ('sports_centre', 'water_park', 'swimming_pool') and not GEEN_ZWEMBAD.search(n):
+        k.append('zwembad')
+    if a == 'community_centre':
+        k.append('buurthuis')
+    if a == 'townhall':
+        k.append('gemeentehuis')
+    if a == 'clinic':
+        k.append('kliniek')
+    return k
 
 
 out, seen = [], set()
-for fn in ['osm-locaties-1.json', 'osm-locaties-2.json', 'osm-locaties-3.json']:
+for fn in ['osm-locaties-1.json', 'osm-locaties-2.json', 'osm-locaties-3.json', 'osm-locaties-4.json']:
     for e in json.load(open(P('bron-downloads', fn)))['elements']:
         t = e.get('tags', {})
         lon, lat = (e['lon'], e['lat']) if 'lon' in e else (e['center']['lon'], e['center']['lat'])
@@ -112,5 +123,6 @@ json.dump({'type': 'FeatureCollection', 'features': out}, open(P('data', 'locati
           ensure_ascii=False, separators=(',', ':'))
 c = collections.Counter((f['properties']['k'], f['properties']['r']) for f in out)
 for k in ['huisarts', 'huisartsenpost', 'apotheek', 'basisschool', 'middelbaar', 'kinderopvang', 'supermarkt',
-          'ziekenhuis', 'station', 'oprit', 'brandweer', 'bibliotheek', 'zwembad']:
+          'ziekenhuis', 'kliniek', 'station', 'oprit', 'brandweer', 'bibliotheek', 'zwembad', 'sport', 'buurthuis',
+          'gemeentehuis']:
     print(f'{k:14s} in regio {c[(k, 1)]:4d}   tot {BUFFER // 1000} km erbuiten {c[(k, 0)]:4d}')

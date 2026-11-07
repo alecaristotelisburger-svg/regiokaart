@@ -52,7 +52,9 @@
   "brandweerkazerne_gemiddelde_afstand_in_km": 2.1971091641493348,
   "overstapstation_gemiddelde_afstand_in_km": 10.821040590779369,
   "bibliotheek_gemiddelde_afstand_in_km": 2.0400841289014937,
-  "zwembad_gemiddelde_afstand_in_km": 3.380440810654128
+  "zwembad_gemiddelde_afstand_in_km": 3.380440810654128,
+  "bedrijven_per_1000_inwoners": 139.76331194739413,
+  "nieuwbouw_per_1000_woningen": 8.426205157965292
  },
  "zh": {
   "aantal_inwoners": 3840460,
@@ -107,7 +109,9 @@
   "brandweerkazerne_gemiddelde_afstand_in_km": 1.9737969930685386,
   "overstapstation_gemiddelde_afstand_in_km": 9.602771334683867,
   "bibliotheek_gemiddelde_afstand_in_km": 1.6262221973409432,
-  "zwembad_gemiddelde_afstand_in_km": 2.4766625352171356
+  "zwembad_gemiddelde_afstand_in_km": 2.4766625352171356,
+  "bedrijven_per_1000_inwoners": 141.37759539221864,
+  "nieuwbouw_per_1000_woningen": 8.404771711995048
  },
  "n": {
   "nl": 342,
