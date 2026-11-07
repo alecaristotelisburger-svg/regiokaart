@@ -160,6 +160,8 @@ def ov_en_voorzieningen():
        'precision=0.00001', 'format=geojson')
     run_script('voorz.py')
     run_script('locaties.py')
+    run_script('netcongestie.py')
+    run_script('erfgoed.py')
 
 
 def referentie():

@@ -57,7 +57,12 @@ Controleer na elke wijziging de PDF's en de schermafbeelding visueel (bijvoorbee
 | Buslijnen en haltes | OpenStreetMap (Overpass Turbo-export, 3 stroken) | `osm-busroutes/*.geojson` |
 | Voorzieningen | OpenStreetMap (Overpass Turbo-export) | `osm-voorzieningen.geojson` |
 | Locaties bij afstandsthema's ("Toon … op de kaart") | OpenStreetMap (Overpass, door Claude Code opgehaald op 7-11-2026, bbox `51.81,4.44,52.20,4.98`, in 2 delen wegens 504) → `scripts/locaties.py` houdt regio + 5 km | `osm-locaties-1.json` (supermarkt, ziekenhuis, motorway_junction, railway=station), `osm-locaties-2.json` (doctors/general_practitioner, school), `osm-locaties-3.json` (pharmacy, childcare/kindergarten, fire_station, library, zwembaden). Geen vinkje bij huisartsenpost en kinderopvang (OSM te onvolledig) en overstapstation (OSM kent geen intercitystops) |
+| Netcongestie | Capaciteitskaart Netbeheer Nederland, ArcGIS FeatureServer `Capaciteitskaart_elektriciteitsnet_v2_afname` (bevat afname- én opwekcode 0–3). `scripts/netcongestie.py` haalt de ~109 gebieden rond de regio op (per 20 id's, WGS84), vereenvoudigt 15 m en knipt op de regio → `data/net.json` (34 gebieden). Ca. elk kwartaal verversen met `--opnieuw`. Eén gebied zonder naam en netbeheerder staat als "Onbekend voedingsgebied" (geen gegevens) | `netcongestie-regio.json.gz` |
+| Erfgoed | RCE via PDOK-WFS `beschermde-gebieden-cultuurhistorie` (punten + vlakken, gepagineerd per 1000). `scripts/erfgoed.py` houdt rijksmonumenten binnen de regio (804, nummer uit `ciCitation`) en vlakken geknipt op de regio (6 gezichten, 3 complexen) → `data/erfgoed.json`. Namen van monumenten staan niet in de WFS: de popup linkt naar het monumentenregister | `rce-erfgoed-regio.json.gz` |
+| Bouwjaar panden | BAG-WFS PDOK `bag:pand`, **live** vanuit de browser (CORS: ja) vanaf zoom 16, max. 6.000 per beweging, gepagineerd per 1000. Werkt niet in de claude.ai-artifact (fetch geblokkeerd); de laag meldt dat | – |
 | Achtergrond, luchtfoto, AHN | PDOK, live | – |
+
+Niet ingebouwd: Energy-Charts (landelijke opwek en stroomprijs). Die API staat alleen aanvragen van hun eigen domein toe (CORS), dus vanaf GitHub Pages kan het niet zonder eigen server, en het zijn geen regionale cijfers.
 
 Belangrijk:
 - **CBS-geheimhouding:** de waarden -99997 en -99995 betekenen geheim of onbekend. `clean()` maakt er `null` van.
@@ -86,7 +91,7 @@ Afgeleid van het aangeleverde logo. De website zelf kon niet worden uitgelezen.
 ## Wensen en open punten
 
 1. **Woningbouwlocaties:** de projectenlijst van het regionale woningbouwprogramma (bij de regio of gemeenten). Daarna de **opgavenkaart**: woningbouw naast netcongestie en bodemdaling, het idee met de meeste meerwaarde voor bestuurders.
-2. **Netcongestie:** capaciteitskaart Netbeheer Nederland / Stedin open data.
+2. ~~**Netcongestie**~~: ingebouwd op 7-11-2026 (zie Data en bronnen). Mogelijke uitbreiding: TenneT-lagen (hoogspanning) en de opgavenkaart (punt 1).
 3. **Bodemkwaliteit:** opvragen bij de Omgevingsdienst Midden-Holland. **Bodemdaling:** bodemdalingskaart.nl.
 4. **Klimaat:** Klimaateffectatlas (wateroverlast, overstromingsdiepte, hitte).
 5. **Bevolkingsprognose** 2030/2040 (provincie). **Trends** over meerdere CBS-jaren.
