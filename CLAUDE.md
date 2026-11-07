@@ -93,8 +93,14 @@ Afgeleid van het aangeleverde logo. De website zelf kon niet worden uitgelezen.
 6. **Sociaal domein 2023**, GGD Hollands Midden-gezondheidsmonitor, Leefbaarometer.
 7. **Reistijdkaarten** (isochronen) voor de bereikbaarheidslobby, verkeersongevallen.
 8. **Regionale afspraken en projecten op de kaart**, met contactpersonen (de kennisbankfunctie).
-9. **Hosting op een eigen domein** van de regio, zodat de achtergrondkaart ook in de gedeelde versie werkt.
+9. **Hosting op een eigen domein** van de regio. Sinds 7-11-2026 staat de kaart op GitHub Pages (zie onder), waar de achtergrondkaart werkt. Een eigen domein kan later aan GitHub Pages worden gekoppeld (CNAME).
 
 ## Gepubliceerde versie
 
-Artifact op claude.ai, eigendom van de gebruiker: https://claude.ai/artifact/DRHUJLsJ6em15MuwMzyrEE (slug `6491aa31-26c0-46a2-96dc-77d86591b833`, capability `downloads`). Bijwerken kan alleen vanuit een Claude-sessie met de artifact-tools. Anders levert Claude Code het gebouwde HTML-bestand aan.
+**Website (hoofdlink om te delen):** https://alecaristotelisburger-svg.github.io/regiokaart/ via GitHub Pages, branch `main`, map `/`. `index.html` stuurt door naar `regiokaart-midden-holland.html`. Hier laden achtergrondkaart, luchtfoto en AHN wel. Openbaar: iedereen met het adres kan de kaart openen.
+
+**Repository:** https://github.com/alecaristotelisburger-svg/regiokaart (openbaar). De projectmap staat lokaal in `~/MEGA/regiokaart` (MEGA-cloudmap; `.venv` en `node_modules` staan niet in git en moeten na een nieuwe checkout opnieuw worden gemaakt, zie Werkwijze).
+
+**Git-werkwijze met de gebruiker:** Claude maakt commits; de gebruiker pusht zelf met **GitHub Desktop** ("Push origin"), want Claude kan niet bij GitHub inloggen en `gh` is niet geïnstalleerd. Alleen wat op `main` staat komt op de website. Werk je op een andere branch, zeg dan dat die nog in GitHub Desktop moet worden samengevoegd (of via een pull request op github.com) voordat het online staat. Bouw `regiokaart-midden-holland.html` altijd opnieuw vóór een commit, want de website toont het gebouwde bestand.
+
+**Artifact op claude.ai** (tweede link, privé tenzij de gebruiker hem deelt), eigendom van de gebruiker: https://claude.ai/artifact/DRHUJLsJ6em15MuwMzyrEE (slug `6491aa31-26c0-46a2-96dc-77d86591b833`, capability `downloads`). Bijwerken kan alleen vanuit een Claude-sessie met de artifact-tools. Anders levert Claude Code het gebouwde HTML-bestand aan.

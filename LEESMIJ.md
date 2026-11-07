@@ -5,7 +5,9 @@ Interactieve kaart en kennisbank voor Bodegraven-Reeuwijk, Gouda, Krimpenerwaard
 **Direct bekijken:** open `regiokaart-midden-holland.html` in Chrome of Edge.
 
 **Verder bouwen met Claude Code:**
-1. Pak deze map uit, bijvoorbeeld in `Documenten/regiokaart`.
+**Online:** https://alecaristotelisburger-svg.github.io/regiokaart/
+
+1. Haal de map op van https://github.com/alecaristotelisburger-svg/regiokaart (of pak een zip uit), bijvoorbeeld in `Documenten/regiokaart`.
 2. Open een terminal in die map en start `claude`.
 3. Claude Code leest `CLAUDE.md` met de volledige overdracht. Zeg bijvoorbeeld: "Lees CLAUDE.md en bouw de kaart opnieuw."
 
