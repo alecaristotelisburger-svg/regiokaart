@@ -10,6 +10,9 @@ Uitvoer (data/):
   leefbaarometer.json  Leefbaarometer 2024 per buurt (Provincie Zuid-Holland, WFS)
   reistijd.json      reistijd per buurt naar station, ziekenhuis, middelbare school (OSRM, OpenStreetMap)
   ongevallen.json    verkeersongevallen met letsel of doden 2022-2024 (BRON, Rijkswaterstaat WFS)
+  gezondheid.json    RIVM/GGD Gezondheidsmonitor 2024 per buurt (schattingen, 18+), via CBS 50150NED
+  politie.json       geregistreerde misdrijven en overlast 2025 per buurt (politie, via CBS 47018NED/47024NED)
+  statline.json      opleiding, arbeidsparticipatie, zelfstandigen, stroomverbruik, laadpalen (CBS 2024)
 
 Gebruik (vanuit de projectmap): .venv/bin/python scripts/extra_data.py [--opnieuw] [onderdeel ...]
 """
@@ -231,7 +234,138 @@ def ongevallen():
     print('   in de regio:', len(pts), '| dodelijk:', sum(p[3] for p in pts))
 
 
-ONDERDELEN = {'prognose': prognose, 'klimaat': klimaat, 'sociaal': sociaal, 'leefbaarometer': leefbaarometer, 'reistijd': reistijd, 'ongevallen': ongevallen}
+
+# ---------- gedeeld: Zuid-Holland-gemeenten en gewichten per gemeente (CBS 2024) ----------
+def zh_gemeenten():
+    prov = [f for f in json.load(open(P('data', 'provincie_2024.geojson')))['features'] if f['properties']['statnaam'] == 'Zuid-Holland'][0]
+    Z = shape(prov['geometry']).buffer(0)
+    gem = json.load(open(P('bron-downloads', 'cbs-gemeenten-2024-nederland.geojson')))['features']
+    return {f['properties']['gemeentecode'] for f in gem if f['properties'].get('water') == 'NEE' and Z.contains(shape(f['geometry']).representative_point())}
+
+
+def odata_d(tabel, velden, flt):   # tabellen van derden (politie, RIVM/GGD) staan op dataderden.cbs.nl
+    q = urllib.parse.urlencode({'$format': 'json', '$select': ','.join(velden), '$filter': flt})
+    rows, url = [], f'https://dataderden.cbs.nl/ODataApi/odata/{tabel}/TypedDataSet?{q}'
+    while url:
+        d = json.loads(haal(url)); rows += d['value']; url = d.get('odata.nextLink')
+    return rows
+
+
+FB = '(' + ' or '.join(f"startswith(WijkenEnBuurten,'BU{g}')" for g in GMS) + ')'
+FG = "(startswith(WijkenEnBuurten,'GM'))"
+schoon = lambda v: None if (v is None or (isinstance(v, (int, float)) and v < 0)) else v
+
+
+def kwb_basis():
+    """inwoners, kinderen 0-14 en woningen per buurt en gemeente (KWB 2024), als gewichten"""
+    d = bron('cbs-kwb-2024-gewichten', lambda: {'rijen': odata(SOC24, ['WijkenEnBuurten', 'AantalInwoners_5', 'k_0Tot15Jaar_8', 'Woningvoorraad_35'], FB + ' or ' + FG)})
+    return {r['WijkenEnBuurten'].strip(): {'inw': schoon(r['AantalInwoners_5']), 'k15': schoon(r['k_0Tot15Jaar_8']), 'won': schoon(r['Woningvoorraad_35'])} for r in d['rijen']}
+
+
+def agg_rijen(rijen, regels):
+    """regels: {sleutel: ('w', gewichtveld) | ('ratio', telveld, noemerveld, factor)}"""
+    out = {}
+    for k, rg in regels.items():
+        if rg[0] == 'w':
+            a = sum(x[k] * x[rg[1]] for x in rijen if x.get(k) is not None and x.get(rg[1])); b = sum(x[rg[1]] for x in rijen if x.get(k) is not None and x.get(rg[1]))
+        else:
+            a = sum(x[rg[1]] for x in rijen if x.get(rg[1]) is not None and x.get(rg[2])); b = sum(x[rg[2]] for x in rijen if x.get(rg[1]) is not None and x.get(rg[2]))
+            a = a * rg[3]
+        out[k] = round(a / b, 3) if b else None
+    return out
+
+
+def met_ref(naam, buurt, gm, regels, extra):
+    zh = zh_gemeenten()
+    ref = {'zh': agg_rijen([v for c, v in gm.items() if c in zh], regels), 'nl': agg_rijen(list(gm.values()), regels)}
+    buurt = {c: {k: v for k, v in x.items() if v is not None} for c, x in buurt.items() if c in BP}
+    schrijf(naam, dict(extra, buurt=buurt, ref=ref))
+    return ref
+
+
+# ---------- Gezondheid per buurt (RIVM/GGD Gezondheidsmonitor 2024, schattingen, 18+) ----------
+GGD = {'GoedErvarenGezondheid_4': 'ggd_gezond', 'HoogRisicoAngststoornisOfDepressie_14': 'ggd_angst', 'HeelVeelStressAfg4Weken_17': 'ggd_stress',
+       'Eenzaam_25': 'ggd_eenzaam', 'SterkEenzaam_26': 'ggd_sterk_eenzaam', 'Mantelzorger_30': 'ggd_mantelzorg', 'Vrijwilligerswerk_31': 'ggd_vrijwilliger',
+       'MoeiteMetRondkomen_32': 'ggd_rondkomen', 'Overgewicht_33': 'ggd_overgewicht', 'RooktTabak_35': 'ggd_roken', 'VoldoetAanDeBeweegrichtlijn_40': 'ggd_bewegen',
+       'ErnstigeGeluidhinderWegverkeer_45': 'ggd_geluid', 'TevredenMetDeWoonomgeving_57': 'ggd_woonomgeving', 'KanGoedVerkoelingVindenBinnen_59': 'ggd_verkoeling'}
+def gezondheid():
+    flt = " and Perioden eq '2024JJ00' and Leeftijd eq '20300' and Marges eq 'MW00000'"
+    d = bron('rivm-ggd-gezondheid-2024', lambda: {'b': odata_d('50150NED', ['WijkenEnBuurten'] + list(GGD), FB + flt), 'g': odata_d('50150NED', ['WijkenEnBuurten'] + list(GGD), FG + flt)})
+    W = kwb_basis()
+    def rij(r):
+        c = r['WijkenEnBuurten'].strip(); w = W.get(c, {})
+        x = {GGD[k]: schoon(r[k]) for k in GGD}
+        x['ggd_w'] = (w['inw'] - (w['k15'] or 0)) if w.get('inw') else None   # benadering van het aantal volwassenen
+        return c, x
+    buurt = dict(rij(r) for r in d['b']); gm = dict(rij(r) for r in d['g'])
+    ref = met_ref('gezondheid', buurt, gm, {k: ('w', 'ggd_w') for k in GGD.values()},
+                  {'bron': 'RIVM en GGD’en, Gezondheidsmonitor Volwassenen en Ouderen 2024, via CBS (tabel 50150NED), 18 jaar en ouder', 'opgehaald': d['opgehaald']})
+    print('   buurten met waarde:', sum(1 for x in buurt.values() if x.get('ggd_gezond') is not None), '| NL goed ervaren gezondheid', ref['nl']['ggd_gezond'])
+
+
+# ---------- Politie: geregistreerde misdrijven en overlast 2025 (via CBS-tabellen van derden) ----------
+MISDRIJF = {'pol_totaal': ['0.0.0'], 'pol_inbraak': ['1.1.1'], 'pol_fiets': ['1.2.3'], 'pol_geweld': ['1.4.2', '1.4.3', '1.4.4', '1.4.5', '1.4.6', '1.4.7'], 'pol_vernieling': ['2.2.1']}
+OVERLAST = {'pol_overlast': ['0.0.0'], 'pol_jeugd': ['E35']}
+POL_JAAR = '2025'
+def politie():
+    soorten = sorted({s for v in MISDRIJF.values() for s in v}); osoorten = sorted({s for v in OVERLAST.values() for s in v})
+    fm = ' and (' + ' or '.join(f"startswith(SoortMisdrijf,'{s} ')" for s in soorten) + f") and Perioden eq '{POL_JAAR}JJ00'"
+    fo = ' and (' + ' or '.join(f"startswith(Overlast,'{s}')" for s in osoorten) + f") and Perioden eq '{POL_JAAR}JJ00'"
+    def maak():
+        return {'mb': odata_d('47018NED', ['WijkenEnBuurten', 'SoortMisdrijf', 'GeregistreerdeMisdrijven_1'], FB + fm),
+                'mg': odata_d('47018NED', ['WijkenEnBuurten', 'SoortMisdrijf', 'GeregistreerdeMisdrijven_1'], FG + fm),
+                'ob': odata_d('47024NED', ['WijkenEnBuurten', 'Overlast', 'GeregistreerdeOverlast_1'], FB + fo),
+                'og': odata_d('47024NED', ['WijkenEnBuurten', 'Overlast', 'GeregistreerdeOverlast_1'], FG + fo)}
+    d = bron('politie-misdrijven-overlast-' + POL_JAAR, maak)
+    W = kwb_basis(); tel = {}
+    for rows, veld, dim, groepen in [(d['mb'] + d['mg'], 'GeregistreerdeMisdrijven_1', 'SoortMisdrijf', MISDRIJF), (d['ob'] + d['og'], 'GeregistreerdeOverlast_1', 'Overlast', OVERLAST)]:
+        for r in rows:
+            c, s, v = r['WijkenEnBuurten'].strip(), r[dim].strip(), schoon(r[veld])
+            for k, lijst in groepen.items():
+                if s in lijst and v is not None:
+                    tel.setdefault(c, {}); tel[c][k + '_n'] = tel[c].get(k + '_n', 0) + v
+    def rij(c):
+        x = dict(tel.get(c, {})); inw = W.get(c, {}).get('inw'); x['pol_inw'] = inw
+        for k in list(MISDRIJF) + list(OVERLAST):
+            n = x.get(k + '_n')
+            x[k] = round(n / inw * 1000, 1) if (n is not None and inw and inw >= 200) else None   # kleine buurten: geen per-1.000-cijfer
+        return x
+    buurt = {c: rij(c) for c in tel if c.startswith('BU')}; gm = {c: rij(c) for c in tel if c.startswith('GM')}
+    regels = {k: ('ratio', k + '_n', 'pol_inw', 1000) for k in list(MISDRIJF) + list(OVERLAST)}
+    ref = met_ref('politie', buurt, gm, regels, {'bron': f'Politie, geregistreerde misdrijven en overlast {POL_JAAR} (via CBS, tabellen 47018NED en 47024NED)', 'jaar': int(POL_JAAR), 'opgehaald': d['opgehaald']})
+    print('   regio misdrijven', sum(x.get('pol_totaal_n', 0) for x in buurt.values()), '| NL per 1.000', ref['nl']['pol_totaal'])
+
+
+# ---------- StatLine: opleiding, werk, stroomverbruik, laadpalen (2024) ----------
+def statline():
+    v24 = ['WijkenEnBuurten', 'Nettoarbeidsparticipatie_71', 'PercentageZelfstandigen_75', 'GemiddeldeElektriciteitslevering_53', 'AantalPubliekeLaadpalen_61', 'AantalInwoners_5', 'Woningvoorraad_35']
+    def maak():
+        ol = lambda f: odata('86232NED', ['WijkenEnBuurten', 'Opleidingsniveau', 'Bevolking15Tot75Jaar_2'], f + " and Marges eq 'MW00000'")
+        en = lambda f: odata('86159NED', ['WijkenEnBuurten', 'Woningkenmerken', 'GemiddeldeNettoElektriciteitslevering_6'], f + " and Woningkenmerken eq 'T001100'")
+        return {'kb': odata(SOC24, v24, FB), 'kg': odata(SOC24, v24, FG), 'ob': ol(FB), 'og': ol(FG), 'eb': en(FB), 'eg': en(FG)}
+    d = bron('cbs-statline-extra-2024', maak)
+    x = {}
+    for r in d['kb'] + d['kg']:
+        c = r['WijkenEnBuurten'].strip(); inw, won = schoon(r['AantalInwoners_5']), schoon(r['Woningvoorraad_35']); lp = schoon(r['AantalPubliekeLaadpalen_61'])
+        x[c] = {'sl_arbeid': schoon(r['Nettoarbeidsparticipatie_71']), 'sl_zzp': schoon(r['PercentageZelfstandigen_75']), 'sl_stroom': schoon(r['GemiddeldeElektriciteitslevering_53']),
+                'sl_laadpalen_n': lp, 'sl_laadpalen': (round(lp / won * 1000, 1) if lp is not None and won and won >= 50 else None), 'sl_inw': inw, 'sl_won': won}
+    opl = {}
+    for r in d['ob'] + d['og']:
+        opl.setdefault(r['WijkenEnBuurten'].strip(), {})[r['Opleidingsniveau'].strip()] = schoon(r['Bevolking15Tot75Jaar_2'])
+    for c, o in opl.items():
+        t = sum(v for v in o.values() if v is not None) if all(o.get(k) is not None for k in ['2018700', '2018740', '2018790']) else None
+        x.setdefault(c, {}).update({'sl_1575': t, 'sl_hoog': round(o['2018790'] / t * 100, 1) if t else None, 'sl_laag': round(o['2018700'] / t * 100, 1) if t else None})
+    for r in d['eb'] + d['eg']:
+        x.setdefault(r['WijkenEnBuurten'].strip(), {})['sl_stroom_netto'] = schoon(r['GemiddeldeNettoElektriciteitslevering_6'])
+    buurt = {c: v for c, v in x.items() if c.startswith('BU')}; gm = {c: v for c, v in x.items() if c.startswith('GM')}
+    regels = {'sl_hoog': ('w', 'sl_1575'), 'sl_laag': ('w', 'sl_1575'), 'sl_arbeid': ('w', 'sl_inw'), 'sl_zzp': ('w', 'sl_inw'),
+              'sl_stroom': ('w', 'sl_won'), 'sl_stroom_netto': ('w', 'sl_won'), 'sl_laadpalen': ('ratio', 'sl_laadpalen_n', 'sl_won', 1000)}
+    ref = met_ref('statline', buurt, gm, regels, {'bron': 'CBS Kerncijfers wijken en buurten 2024 (85984NED), opleidingsniveau 2024 (86232NED), energieverbruik 2024 (86159NED)', 'opgehaald': d['opgehaald']})
+    print('   NL:', {k: v for k, v in ref['nl'].items()})
+
+
+ONDERDELEN = {'prognose': prognose, 'klimaat': klimaat, 'sociaal': sociaal, 'leefbaarometer': leefbaarometer, 'reistijd': reistijd, 'ongevallen': ongevallen,
+              'gezondheid': gezondheid, 'politie': politie, 'statline': statline}
 for naam, fn in ONDERDELEN.items():
     if not WEL or naam in WEL:
         print('==', naam); fn()
