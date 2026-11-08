@@ -1178,6 +1178,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
   .btn{font:600 14px "Barlow Semi Condensed","Barlow",system-ui,sans-serif;background:var(--accent);color:var(--cream);border:none;border-radius:8px;padding:9px 14px;cursor:pointer;letter-spacing:.02em}
   .btn:hover{background:#3b0042}
+  .knoprij{display:flex;flex-wrap:wrap;gap:8px}
   .btn:disabled{opacity:.5;cursor:wait}
   .dlrow{display:flex;gap:8px;margin-top:12px}
   .dlrow select{flex:1}
@@ -1350,8 +1351,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     <section>
       <h2>Kaart downloaden</h2>
-      <button class="btn" id="btnMapPdf">Huidige kaart als PDF</button>
-      <p class="note" style="margin-top:6px">Wat je nu ziet, met legenda, actieve lagen en bronnen, op een A4 liggend.</p>
+      <div class="knoprij"><button class="btn" id="btnMapPdf">Huidige kaart als PDF</button><button class="btn" id="btnMapPng">Huidige kaart als PNG</button></div>
+      <p class="note" style="margin-top:6px">Wat je nu ziet, met legenda, actieve lagen en bronnen. PDF: op een A4 liggend. PNG: als afbeelding, handig voor een presentatie, mail of notitie.</p>
       <p id="dlStatusMap" class="note dlst"></p>
     </section>
 
@@ -2146,6 +2147,61 @@ function pdfHeader(doc, W, title, sub){
   doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','normal'); doc.setFontSize(9);
   doc.text(pdfText(sub), 10+lw+6, 21);
 }
+function kaartBronnen(){
+  return 'Bronnen: CBS Kerncijfers Wijken en Buurten 2024 (via PDOK)' + (themed() && currentTheme().trend ? ` en ${TJ}` : '') + '; Kadaster/PDOK (achtergrond, luchtfoto); RWS (AHN); Provincie Zuid-Holland (NNN); RVO (Natura 2000); OpenStreetMap-bijdragers (wegen, OV, voorzieningen).'
+    + ($('lyrNet').checked ? ` Netcongestie: capaciteitskaart Netbeheer Nederland, stand ${dmy(DATA.net.opgehaald)}, indicatief.` : '')
+    + ($('lyrErf').checked ? ' Erfgoed: Rijksdienst voor het Cultureel Erfgoed (via PDOK).' : '')
+    + ($('lyrBag').checked ? ' Bouwjaar: BAG, Kadaster (via PDOK).' : '');
+}
+/* ---------- Kaart als PNG: kop, kaart met legenda erop, bronnen eronder ---------- */
+async function exportMapPng(){
+  dlTarget='dlStatusMap'; const btn=$('btnMapPng'); btn.disabled=true; dlStatus('Kaart wordt omgezet naar PNG…');
+  try{
+    map.closePopup(); await new Promise(r=>setTimeout(r,250));
+    const s=2, t=currentTheme(); let tilesNote='';
+    let kaart=mapToCanvas(s,true);
+    try{ kaart.toDataURL('image/png').length; }catch(e){ kaart=mapToCanvas(s,false); tilesNote=' De achtergrondkaart kon niet worden meegenomen.'; }
+    if(!tilesNote && tileOk===0 && basemap!=='geen') tilesNote=' Achtergrondkaart niet beschikbaar in deze weergave.';
+    const W=kaart.width, KOP=64*s, MW=kaart.height;
+    // bronnen: regels afbreken op de breedte
+    const tmp=document.createElement('canvas').getContext('2d'); const vf=`${10.5*s}px Barlow, Helvetica, Arial, sans-serif`; tmp.font=vf;
+    const breek=(txt,max)=>{ const out=[]; let r=''; for(const w of txt.split(' ')){ const n=r?r+' '+w:w; if(tmp.measureText(n).width>max && r){ out.push(r); r=w; } else r=n; } if(r) out.push(r); return out; };
+    const bron=breek(kaartBronnen()+tilesNote+' Regio Midden-Holland, prototype.', W-32*s), VOET=(bron.length*14+18)*s;
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=KOP+MW+VOET; const c=cv.getContext('2d');
+    c.fillStyle='#ffffff'; c.fillRect(0,0,cv.width,cv.height);
+    // kop
+    c.fillStyle=PURPLE; c.fillRect(0,0,W,KOP); c.textBaseline='alphabetic';
+    c.fillStyle='#fbf2ee'; c.font=`700 ${22*s}px "Barlow Semi Condensed", Barlow, Helvetica, Arial, sans-serif`; c.fillText('Regiokaart Midden-Holland', 16*s, 30*s);
+    c.fillStyle='#f3c6e6'; c.font=`500 ${12.5*s}px Barlow, Helvetica, Arial, sans-serif`; c.fillText(`${themed() ? t.label+(t.trend?` (${TJ}–2024)`:'')+' per buurt · ' : ''}gemaakt op ${today()}`, 16*s, 51*s);
+    c.drawImage(kaart,0,KOP);
+    // legenda rechtsboven op de kaart
+    const reg=[]; // {kop} of {c, l, rond}
+    if(themed() && klassen.length){ reg.push({kop:t.label}); for(const k of klassenHoogLaag()) reg.push({c:k.c,l:klasLabel(t,k)}); reg.push({c:NODATA,l:'geen gegevens'}); }
+    const lay=activeLayers().filter(l=>!l.l.startsWith('Buurtkleuren'));
+    if(lay.length){ reg.push({kop:'Kaartlagen'}); for(const l of lay) reg.push({c:l.c,l:l.l}); }
+    if(reg.length){
+      const fk=`600 ${12*s}px "Barlow Semi Condensed", Barlow, Helvetica, Arial, sans-serif`, fr=`${11*s}px Barlow, Helvetica, Arial, sans-serif`, rh=17*s, pad=10*s, sw=12*s;
+      let bw=0; for(const r of reg){ c.font=r.kop?fk:fr; bw=Math.max(bw, c.measureText(r.kop||r.l).width + (r.kop?0:sw+7*s)); }
+      bw=Math.min(bw+2*pad, W*0.45); const bh=reg.length*rh+2*pad-4*s, bx=W-bw-12*s, by=KOP+12*s;
+      c.fillStyle='rgba(255,255,255,.94)'; c.strokeStyle='#e4d9e2'; c.lineWidth=s;
+      c.beginPath(); c.roundRect ? c.roundRect(bx,by,bw,bh,6*s) : c.rect(bx,by,bw,bh); c.fill(); c.stroke();
+      let y=by+pad; c.textBaseline='middle';
+      for(const r of reg){
+        const cy=y+rh/2-2*s;
+        if(r.kop){ c.font=fk; c.fillStyle=PURPLE; c.fillText(r.kop, bx+pad, cy, bw-2*pad); }
+        else { c.fillStyle=r.c; c.fillRect(bx+pad, cy-sw/2+s, sw, sw-2*s); c.font=fr; c.fillStyle=INK; c.fillText(r.l, bx+pad+sw+7*s, cy, bw-2*pad-sw-7*s); }
+        y+=rh;
+      }
+    }
+    // bronnen
+    c.textBaseline='alphabetic'; c.font=vf; c.fillStyle=MUTED;
+    bron.forEach((r,i)=>c.fillText(r, 16*s, KOP+MW+(16+i*14)*s));
+    const blob = await new Promise(r=>cv.toBlob(r,'image/png'));
+    if(!blob) throw new Error('afbeelding kon niet worden gemaakt');
+    await saveFile(`regiokaart-${slug(themed()?t.label:'lagen')}-${stamp()}.png`, blob);
+  }catch(e){ console.error(e); dlStatus('Het maken van de PNG is mislukt: '+(e.message||e)); }
+  btn.disabled=false;
+}
 async function exportMapPdf(){
   dlTarget='dlStatusMap'; const btn=$('btnMapPdf'); btn.disabled=true; dlStatus('Kaart wordt omgezet naar PDF…');
   try{
@@ -2186,10 +2242,7 @@ async function exportMapPdf(){
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK)); doc.text('Bodegraven-Reeuwijk, Gouda,', x+8, y); doc.text('Krimpenerwaard, Waddinxveen, Zuidplas', x+8, y+4);
     // bronnen
     doc.setFontSize(7); doc.setTextColor(...hex(MUTED));
-    const src = 'Bronnen: CBS Kerncijfers Wijken en Buurten 2024 (via PDOK); Kadaster/PDOK (achtergrond, luchtfoto); RWS (AHN); Provincie Zuid-Holland (NNN); RVO (Natura 2000); OpenStreetMap-bijdragers (wegen, OV, voorzieningen).'
-      + ($('lyrNet').checked ? ` Netcongestie: capaciteitskaart Netbeheer Nederland, stand ${dmy(DATA.net.opgehaald)}, indicatief.` : '')
-      + ($('lyrErf').checked ? ' Erfgoed: Rijksdienst voor het Cultureel Erfgoed (via PDOK).' : '')
-      + ($('lyrBag').checked ? ' Bouwjaar: BAG, Kadaster (via PDOK).' : '') + tilesNote;
+    const src = kaartBronnen() + tilesNote;
     doc.text(doc.splitTextToSize(pdfText(src), 277), 10, 201);
     await saveFile(`regiokaart-${slug(themed()?t.label:'lagen')}-${stamp()}.pdf`, doc.output('blob'));
   }catch(e){ console.error(e); dlStatus('Het maken van de PDF is mislukt: '+(e.message||e)); }
@@ -2327,6 +2380,7 @@ async function exportProfilePdf(){
 }
 for(const [c,n] of Object.entries(GM)){ const o=document.createElement('option'); o.value=c; o.textContent=n; $('profGm').appendChild(o); }
 $('btnMapPdf').addEventListener('click', exportMapPdf);
+$('btnMapPng').addEventListener('click', exportMapPng);
 $('btnProfPdf').addEventListener('click', exportProfilePdf);
 
 /* ---------- Start ---------- */
