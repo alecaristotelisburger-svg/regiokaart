@@ -2124,8 +2124,8 @@ if(window.innerWidth<=760) setPanel(false);
 function aggregateFeats(feats, spec){
   if(!spec) return null;
   const P = f => f.properties || f;
-  if(spec.type==='sum'){ let s=0,n=0; for(const f of feats){ const v=clean(P(f)[spec.key]); if(v!==null){ s+=v; n++; } } return n? s : null; }
-  if(spec.type==='w'){ let s=0,w=0; for(const f of feats){ const p=P(f), v=clean(p[spec.key]), ww=clean(p[spec.w]); if(v!==null && ww){ s+=v*ww; w+=ww; } } return w? s/w : null; }
+  if(spec.type==='sum'){ let s=0,n=0; for(const f of feats){ const v=cleanK(P(f),spec.key); if(v!==null){ s+=v; n++; } } return n? s : null; }
+  if(spec.type==='w'){ let s=0,w=0; for(const f of feats){ const p=P(f), v=cleanK(p,spec.key), ww=clean(p[spec.w]); if(v!==null && ww){ s+=v*ww; w+=ww; } } return w? s/w : null; }
   if(spec.type==='ratio'){ let a=0,b=0; for(const f of feats){ const p=P(f), x=clean(p[spec.num]), y=clean(p[spec.den]); if(x!==null && y){ a+=x; b+=y; } } return b? a/b*spec.mult : null; }
   return null;
 }
@@ -2655,12 +2655,13 @@ function leesTabel(tekst, bron){
     if(code && !buurten.features.some(f=>f.properties.buurtcode===code)) code=null;
     codes.push(code); if(!code) niet.push([ci>=0?r[ci]:'', ni>=0?r[ni]:'', gi>=0?r[gi]:''].filter(Boolean).join(' · ') || '(lege regel)');
   }
+  if(!codes.some(Boolean)) return {fout:'Geen enkele buurt herkend. Gebruik de buurtcodes uit het sjabloon (BU…), of buurtnamen met een kolom “gemeente”.'};
   const sets=[];
   for(let j=0;j<n;j++){
     if(j===ci || j===ni || j===gi) continue;
     const w={}; let goed=0, slecht=0, heel=true;
     rijen.forEach((r,i)=>{ const v=leesGetal(r[j]); if(v===null) return; if(isNaN(v)){ slecht++; return; } goed++; if(codes[i]){ w[codes[i]]=v; if(!Number.isInteger(v)) heel=false; } });
-    if(!goed || slecht>goed) continue;   // geen getallenkolom
+    if(!goed || slecht>goed || !Object.keys(w).length) continue;   // geen getallenkolom, of geen waarden voor herkende buurten
     sets.push({id:Date.now().toString(36)+j, naam:namen[j]||('Kolom '+(j+1)), bron, datum:today(), agg: heel ? 'som' : 'inw', w, niet});
   }
   if(!sets.length) return {fout:'Geen kolommen met getallen gevonden.'};
@@ -2698,7 +2699,7 @@ function dvHoogteZet(h, px){
   map.invalidateSize();
 }
 function zetWeergave(data, stil){
-  if(MOBIEL) data=false;
+  if(MOBIEL) return;   // op de telefoon alleen de gewone vorm
   dataView=data; document.body.classList.toggle('dataview', data);
   document.querySelectorAll('#wissel button').forEach(b=>{ const aan=(b.dataset.w==='data')===data; b.classList.toggle('aan',aan); b.setAttribute('aria-pressed',aan); });
   // echte bedieningselementen verhuizen, zodat alles blijft werken zoals in het paneel
@@ -2827,6 +2828,17 @@ let dvLagen=null;
 function dvLaag(code){ if(!dvLagen){ dvLagen={}; buurtLayer.eachLayer(l=>dvLagen[l.feature.properties.buurtcode]=l); } return dvLagen[code]; }
 function dvLicht(code, aan){ const l=dvLaag(code); if(!l) return; if(aan){ l.setStyle({weight:3,color:'#fc7c00',opacity:1}); l.bringToFront(); } else buurtLayer.resetStyle(l); }
 function dvRijLicht(code, aan){ if(!dataView || dvTab!=='buurten') return; const tr=document.querySelector(`#dvTabel tr[data-c="${code}"]`); if(tr) tr.classList.toggle('aanw', aan); }
+// kaart als PDF/PNG vanuit de databalk: balk even dicht, zodat de kaart groot op de export komt
+async function dvExport(fn){
+  const oud=document.documentElement.style.getPropertyValue('--sheet'), h=dvHoogte;
+  dlTarget='mDl'; dlStatus('Kaart wordt klaargezet…');
+  if(h!=='dicht'){
+    dvHoogteZet('dicht');
+    await new Promise(r=>{ let klaar=false; const k=()=>{ if(!klaar){ klaar=true; r(); } }; const t=basemap==='sat'?photo:brt; if(basemap!=='geen' && map.hasLayer(t)) t.once('load', k); setTimeout(k, basemap==='geen'?300:2500); });
+  }
+  try{ await fn(); }
+  finally{ if(h!=='dicht'){ document.documentElement.style.setProperty('--sheet', oud); dvHoogte=h; document.querySelectorAll('.standen button').forEach(b=>b.classList.toggle('aan', b.dataset.h===h)); map.invalidateSize(); } }
+}
 function dvCsv(){
   const sepj=r=>r.map(v=>{ const s=v==null?'':String(v); return /[;"\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(';');
   const getal=v=> v==null ? '' : String(Math.round(v*1000)/1000).replace('.',',');
@@ -2860,8 +2872,8 @@ if(!MOBIEL){
   $('mTabs').addEventListener('keydown', e=>{ if(!['ArrowLeft','ArrowRight'].includes(e.key)) return; const t=[...document.querySelectorAll('#mTabs [role=tab]')], i=t.findIndex(b=>b.dataset.t===dvTab), n=t[(i+(e.key==='ArrowRight'?1:t.length-1))%t.length]; dvTab=n.dataset.t; dvToon(); n.focus(); });
   document.querySelectorAll('.standen button').forEach(b=>b.addEventListener('click', ()=>dvHoogteZet(b.dataset.h)));
   $('mCsv').addEventListener('click', dvCsv);
-  $('mPng').addEventListener('click', exportMapPng);
-  $('mPdf').addEventListener('click', exportMapPdf);
+  $('mPng').addEventListener('click', ()=>dvExport(exportMapPng));
+  $('mPdf').addEventListener('click', ()=>dvExport(exportMapPdf));
   // slepen aan de greep; klikken wisselt tussen half en vol
   const greep=$('sheet').querySelector('.greep'); let sleep=null;
   greep.addEventListener('pointerdown', e=>{ sleep={y:e.clientY, h:$('sheet').offsetHeight, bewogen:false}; greep.setPointerCapture(e.pointerId); });
