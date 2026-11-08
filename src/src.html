@@ -34,11 +34,11 @@
   header .htxt{padding:14px 20px 0}
   h1,h2,.kicker,.seg button,.pop h3{font-family:"Barlow Semi Condensed","Barlow",system-ui,sans-serif}
   header .kicker{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--magenta);font-weight:700}
-  header h1{font-size:23px;margin:2px 0 4px;line-height:1.15;font-weight:700;color:var(--accent)}
+  header h1{font-size:20px;margin:2px 0 4px;line-height:1.15;font-weight:700;color:var(--accent)}
   header p{margin:0;color:var(--ink2);font-size:13px}
   section{padding:14px 20px;border-bottom:1px solid var(--line)}
   section h2{font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;font-weight:700}
-  .status{font-size:12.5px;padding:8px 10px;border-radius:6px;background:var(--accent-soft);color:var(--accent);margin-top:10px}
+  .status{font-size:11.5px;padding:8px 10px;border-radius:6px;background:var(--accent-soft);color:var(--accent);margin-top:10px}
   .status.warn{background:#fff6e0;color:var(--warn)}
   select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font:inherit;background:#fff;color:var(--ink)}
   .note{font-size:12.5px;color:var(--ink2);margin:8px 0 0}
@@ -435,7 +435,7 @@ function setStatus(msg, warn){ const s=$('status'); s.textContent=msg; s.classNa
 /* ---------- Kaart ---------- */
 const MOBIEL = window.innerWidth<=760;
 // telefoon: regio zo groot mogelijk, boven het dichtgeklapte menu; computer: zoals voorheen
-const map = L.map('map',{zoomControl:true, attributionControl:true, preferCanvas:true, zoomSnap: MOBIEL ? 0.25 : 1});
+const map = L.map('map',{zoomControl:true, attributionControl:true, preferCanvas:true, zoomSnap:0.25, zoomDelta:0.5, wheelPxPerZoomLevel:120});
 if(MOBIEL) map.fitBounds(L.geoJSON(DATA.gemeenten).getBounds(), {paddingTopLeft:[6,56], paddingBottomRight:[6,80]});
 else map.fitBounds([[51.88,4.52],[52.13,4.90]]);
 const brt = L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png',
