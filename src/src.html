@@ -108,6 +108,8 @@
   .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
   .btn{font:600 14px "Barlow Semi Condensed","Barlow",system-ui,sans-serif;background:var(--accent);color:var(--cream);border:none;border-radius:8px;padding:9px 14px;cursor:pointer;letter-spacing:.02em}
   .btn:hover{background:#3b0042}
+  .overzichtknop a{display:flex !important;align-items:center;justify-content:center;color:var(--accent)}
+  .overzichtknop a:hover{color:var(--orange)}
   .knoprij{display:flex;flex-wrap:wrap;gap:8px}
   .btn:disabled{opacity:.5;cursor:wait}
   .dlrow{display:flex;gap:8px;margin-top:12px}
@@ -543,6 +545,26 @@ const MOBIEL = window.innerWidth<=760;
 const map = L.map('map',{zoomControl:true, attributionControl:true, preferCanvas:true, zoomSnap:0.25, zoomDelta:0.5, wheelPxPerZoomLevel:120});
 if(MOBIEL) map.fitBounds(L.geoJSON(DATA.gemeenten).getBounds(), {paddingTopLeft:[6,56], paddingBottomRight:[6,80]});
 else map.fitBounds([[51.88,4.52],[52.13,4.90]]);
+// knop onder + en −: de hele regio precies in beeld, met een kleine rand (ook de beste uitsnede voor PDF en PNG)
+const REGIO_GRENS = L.geoJSON(DATA.gemeenten).getBounds();
+let overzichtStand = null;
+const kaartStand = () => ({z:map.getZoom(), c:map.getCenter()});
+function isOverzicht(){ if(!overzichtStand) return false; const n=kaartStand(); return Math.abs(n.z-overzichtStand.z)<0.01 && map.latLngToContainerPoint(overzichtStand.c).distanceTo(map.latLngToContainerPoint(n.c))<3; }
+function regioInBeeld(animeer, export_){
+  const opt = export_ ? {padding:[24,24]} : MOBIEL ? {paddingTopLeft:[6,56], paddingBottomRight:[6,80]}
+            : document.body.classList.contains('dataview') ? {paddingTopLeft:[24,64], paddingBottomRight:[24,20]} : {padding:[24,24]};
+  map.once('moveend', ()=>{ overzichtStand = kaartStand(); });
+  map.fitBounds(REGIO_GRENS, {...opt, animate:!!animeer});
+}
+const overzichtKnop = L.control({position:'topleft'});
+overzichtKnop.onAdd = () => {
+  const d = L.DomUtil.create('div','leaflet-bar leaflet-control overzichtknop');
+  d.innerHTML = '<a href="#" role="button" title="Hele regio in beeld (ook handig vóór een PDF of PNG)" aria-label="Hele regio in beeld"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><circle cx="10" cy="10" r="2.2" fill="currentColor" stroke="none"/></svg></a>';
+  L.DomEvent.disableClickPropagation(d);
+  d.querySelector('a').addEventListener('click', e=>{ e.preventDefault(); regioInBeeld(true); });
+  return d;
+};
+overzichtKnop.addTo(map);
 const brt = L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png',
   {maxZoom:19, crossOrigin:'anonymous', attribution:'Kaart: <a href="https://www.pdok.nl">Kadaster / PDOK</a> · Data: CBS, RWS (AHN), © OpenStreetMap'}).addTo(map);
 const photo = L.tileLayer('https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
@@ -1637,7 +1659,7 @@ function zetWeergave(data, stil){
   else { $('theme').after($('locRow')); $('ankerAchtergrond').after($('secAchtergrond')); $('secAchtergrond').after($('secLagen')); }
   if(data){ dvHoogteZet(dvHoogte); dvToon(); } else { document.documentElement.style.removeProperty('--sheet'); }
   // de kaart is nu anders van vorm: zet de hele regio weer in beeld
-  map.invalidateSize(); map.fitBounds(L.geoJSON(DATA.gemeenten).getBounds(), {padding:[16,16], paddingTopLeft:[16, data?70:16], animate:false});
+  map.invalidateSize(); regioInBeeld(false);
   if(!stil) schrijfHash();
 }
 function dvKpi(){
@@ -1760,14 +1782,14 @@ function dvLicht(code, aan){ const l=dvLaag(code); if(!l) return; if(aan){ l.set
 function dvRijLicht(code, aan){ if(!dataView || dvTab!=='buurten') return; const tr=document.querySelector(`#dvTabel tr[data-c="${code}"]`); if(tr) tr.classList.toggle('aanw', aan); }
 // kaart als PDF/PNG vanuit de databalk: balk even dicht, zodat de kaart groot op de export komt
 async function dvExport(fn){
-  const oud=document.documentElement.style.getPropertyValue('--sheet'), h=dvHoogte;
+  const oud=document.documentElement.style.getPropertyValue('--sheet'), h=dvHoogte, overzicht=isOverzicht();
   dlTarget='mDl'; dlStatus('Kaart wordt klaargezet…');
   if(h!=='dicht'){
-    dvHoogteZet('dicht');
+    dvHoogteZet('dicht'); if(overzicht) regioInBeeld(false, true);
     await new Promise(r=>{ let klaar=false; const k=()=>{ if(!klaar){ klaar=true; r(); } }; const t=basemap==='sat'?photo:brt; if(basemap!=='geen' && map.hasLayer(t)) t.once('load', k); setTimeout(k, basemap==='geen'?300:2500); });
   }
   try{ await fn(); }
-  finally{ if(h!=='dicht'){ document.documentElement.style.setProperty('--sheet', oud); dvHoogte=h; document.querySelectorAll('.standen button').forEach(b=>b.classList.toggle('aan', b.dataset.h===h)); map.invalidateSize(); } }
+  finally{ if(h!=='dicht'){ document.documentElement.style.setProperty('--sheet', oud); dvHoogte=h; document.querySelectorAll('.standen button').forEach(b=>b.classList.toggle('aan', b.dataset.h===h)); map.invalidateSize(); if(overzicht) regioInBeeld(false); } }
 }
 function dvCsv(){
   const sepj=r=>r.map(v=>{ const s=v==null?'':String(v); return /[;"\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }).join(';');
