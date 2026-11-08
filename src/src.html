@@ -2066,8 +2066,8 @@ if(!MOBIEL){
   buurtLayer.on('mouseout', e=>dvRijLicht(e.layer.feature.properties.buurtcode,false));
 }
 
-/* ---------- Rondleiding: kaartje rechts bij het eerste bezoek (alleen computer en alleen in de paneelweergave), 12 seconden per stap ---------- */
-const TOUR_OPSLAG='regiokaart-rondleiding-v1', TOUR_MS=12000;
+/* ---------- Rondleiding: kaartje rechts bij het eerste bezoek (alleen computer en alleen in de paneelweergave); stap 1 10 s, daarna 12 s per stap ---------- */
+const TOUR_OPSLAG='regiokaart-rondleiding-v1', TOUR_MS=12000, TOUR_MS_START=10000;   // stap 1: 10 s, daarna 12 s per stap
 const zoekSectie = () => $('zoek').closest('section'), sectieVan = id => $(id).closest('section');
 const TOUR = [
   {t:'Welkom bij de Regiokaart', p:'Eén kaart voor Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas: 248 buurten en ruim honderd cijfers van onder meer CBS, GGD, politie en de provincie.', el:()=>[document.querySelector('#panel header')], scroll:()=>document.querySelector('#panel header'), blok:'start'},
@@ -2075,11 +2075,10 @@ const TOUR = [
   {t:'Klik op een buurt', p:'Klik op een buurt op de kaart. Je ziet dan alle cijfers van die buurt, met ▲▼ hoe het sinds 2019 is veranderd.', el:()=>[$('map')]},
   {t:'Vergelijk', p:'De balken zetten de vijf gemeenten naast de regio, Zuid-Holland en Nederland. Via “Alle buurten als tabel” zie je de ranglijst van alle buurten.', el:()=>[sectieVan('cmpChart')], scroll:()=>sectieVan('cmpChart')},
   {t:'Lagen en zoeken', p:'Zet kaartlagen aan, zoals klimaat, netcongestie, verkeersongevallen of het openbaar vervoer. Bovenaan zoek je op adres, buurt of thema.', el:()=>[$('zoek'), $('secLagen').querySelector('h2')], scroll:()=>$('secLagen').querySelector('h2'), blok:'start'},
-  {t:'Paneel of Data', p:'Met deze wissel ga je naar de dataweergave: grote tabellen, trends, de bevolkingsprognose en je eigen cijfers per buurt.', el:()=>[$('wissel')]},
   {t:'Delen en downloaden', p:'De knop onder + en − zet de hele regio netjes in beeld. Download daarna de kaart als PDF of PNG, maak een gemeenteprofiel, of kopieer een link naar precies deze weergave.', el:()=>[document.querySelector('.overzichtknop'), sectieVan('btnMapPdf'), sectieVan('btnProfPdf')], scroll:()=>sectieVan('btnMapPdf')},
 ];
 $('tourTot').textContent = TOUR.length;
-let tourStap=0, tourRest=TOUR_MS, tourVorige=0, tourPauze=false, tourRaf=null, tourWijs=[];
+let tourStap=0, tourDuur=TOUR_MS, tourRest=TOUR_MS, tourVorige=0, tourPauze=false, tourRaf=null, tourWijs=[];
 const RING = 2*Math.PI*15;
 function tourTeken(){
   const s=TOUR[tourStap];
@@ -2090,12 +2089,13 @@ function tourTeken(){
   const doel = s.scroll && s.scroll();   // paneel scrolt mee naar wat oplicht
   if(doel && s.blok==='start'){ const P=$('panel'); P.scrollTo({top: doel.getBoundingClientRect().top - P.getBoundingClientRect().top + P.scrollTop - 20, behavior:'smooth'}); }
   else if(doel) doel.scrollIntoView({behavior:'smooth', block:'center'});
-  tourRest=TOUR_MS; tourVorige=performance.now();   // elke stap krijgt weer 12 seconden
+  tourDuur = tourStap===0 ? TOUR_MS_START : TOUR_MS; tourRest=tourDuur; tourVorige=performance.now();   // elke stap krijgt weer de volle tijd
 }
 function tourTik(nu){
-  if(!tourPauze) tourRest -= nu - tourVorige;
+  // stap 1 telt altijd af (verdwijnt na 10 s als niemand klikt); daarna pauzeert de muis erop het aftellen
+  if(!tourPauze || tourStap===0) tourRest -= nu - tourVorige;
   tourVorige = nu;
-  const f=Math.max(0, tourRest/TOUR_MS);
+  const f=Math.max(0, tourRest/tourDuur);
   $('tourRing').style.strokeDashoffset = (RING*(1-f)).toFixed(2);
   $('tourSec').textContent = Math.ceil(Math.max(0,tourRest)/1000);
   if(tourRest<=0){ tourSluit(); return; }
