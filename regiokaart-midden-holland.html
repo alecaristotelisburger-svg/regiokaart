@@ -1104,7 +1104,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   header .htxt{padding:14px 20px 0}
   h1,h2,.kicker,.seg button,.pop h3{font-family:"Barlow Semi Condensed","Barlow",system-ui,sans-serif}
   header .kicker{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--magenta);font-weight:700}
-  header h1{font-size:20px;margin:2px 0 4px;line-height:1.15;font-weight:700;color:var(--accent)}
+  header h1{font-size:18px;margin:2px 0 4px;line-height:1.15;font-weight:700;color:var(--accent)}
   header p{margin:0;color:var(--ink2);font-size:13px}
   section{padding:14px 20px;border-bottom:1px solid var(--line)}
   section h2{font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;font-weight:700}
@@ -1854,13 +1854,13 @@ const LOCS = {
   zwembad_gemiddelde_afstand_in_km: {k:'zwembad', mv:'zwembaden', een:'Zwembad'},
   // geen locaties: huisartsenpost en kinderopvang (OSM te onvolledig), overstapstation (OSM zegt niet waar intercity's stoppen)
 };
-const LOC_C = '#1d1d1b';
+const LOC_C = '#1d1d1b', LOC_GEEL = '#ffe100';
 const locGroups = {}, locCount = {};
 for(const f of (DATA.locaties ? DATA.locaties.features : [])){
   const p=f.properties, [x,y]=f.geometry.coordinates, def=Object.values(LOCS).find(d=>d.k===p.k);
   if(!def) continue;
   const g = locGroups[p.k] || (locGroups[p.k]=L.layerGroup()); locCount[p.k]=(locCount[p.k]||0)+1;
-  const m=L.circleMarker([y,x],{pane:'ov',radius:p.r?5.5:4.5,color:LOC_C,weight:2,fillColor:'#fff',fillOpacity:p.r?1:.75,opacity:p.r?1:.75});
+  const m=L.circleMarker([y,x],{pane:'ov',radius:p.r?5.5:4.5,color:LOC_C,weight:2,fillColor:LOC_GEEL,fillOpacity:p.r?1:.75,opacity:p.r?1:.75});
   const naam = p.n || def.een, waar = p.r ? 'in de regio' : 'buiten de regio';
   m.bindTooltip(`${naam}${p.r?'':' (buiten de regio)'}`,{className:'hover-tip'});
   m.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3>${naam}</h3><div class="sub">${def.een} · ${waar}</div><table>${p.a?`<tr><td>Adres</td><td>${p.a}</td></tr>`:''}<tr><td>Bron</td><td>OpenStreetMap</td></tr></table></div>`).openOn(map); });
@@ -1999,7 +1999,7 @@ function updateMapLegend(){
   if($('lyrBag').checked){ h+=`<div class="kl-t">Bouwjaar</div>`;
     for(const k of BAG_K) h+=`<div class="kl-r"><i style="background:${k[1]}"></i>${k[2]}</div>`; }
   if($('lyrErf').checked) h+=`<div class="kl-t">Erfgoed</div><div class="kl-r"><i style="background:${ERF};border-radius:50%;width:10px"></i>rijksmonument</div><div class="kl-r"><i style="border:2px dashed ${ERF};background:none"></i>beschermd gezicht</div>`;
-  if($('lyrLoc').checked && currentLoc()) h+=`<div class="kl-r" style="margin-top:6px"><i style="background:#fff;border:2px solid ${LOC_C};border-radius:50%;width:10px"></i>${currentLoc().mv}</div>`;
+  if($('lyrLoc').checked && currentLoc()) h+=`<div class="kl-r" style="margin-top:6px"><i style="background:${LOC_GEEL};border:2px solid ${LOC_C};border-radius:50%;width:10px"></i>${currentLoc().mv}</div>`;
   d.style.display = h ? '' : 'none'; d.classList.toggle('dicht', legendaDicht);
   d.innerHTML = h ? `<button class="kl-kop" aria-expanded="${!legendaDicht}">Legenda <span aria-hidden="true">${legendaDicht?'▸':'▾'}</span></button><div class="kl-in">${h}</div>` : '';
   const k=d.querySelector('.kl-kop'); if(k) k.onclick=()=>{ legendaDicht=!legendaDicht; updateMapLegend(); };
@@ -2125,7 +2125,7 @@ function canvasToJpeg(cv){ try{ return cv.toDataURL('image/jpeg',0.92); }catch(e
 function activeLayers(){
   const L2=[]; const on=id=>$(id)&&$(id).checked;
   if(on('lyrFill')) L2.push(hasTheme() ? {c:'#8a2486', l:'Buurtkleuren: '+currentTheme().label} : {c:'#f1d4ec', l:'Buurten'});
-  if(on('lyrLoc') && currentLoc()) L2.push({c:LOC_C, l:currentLoc().mv[0].toUpperCase()+currentLoc().mv.slice(1)+' (ook tot 5 km buiten de regio)'});
+  if(on('lyrLoc') && currentLoc()) L2.push({c:LOC_GEEL, l:currentLoc().mv[0].toUpperCase()+currentLoc().mv.slice(1)+' (ook tot 5 km buiten de regio)'});
   if(on('lyrNet')) for(const v of [0,1,2,3]) L2.push({c:NET_C[v], l:`Netcongestie ${netMode()==='af'?'verbruik':'teruglevering'}: ${NET_L[v].toLowerCase()}`});
   if(on('lyrErf')) L2.push({c:ERF, l:'Rijksmonumenten en beschermde gezichten (RCE)'});
   if(on('lyrBag')) L2.push({c:'#b2182b', l:'Bouwjaar (BAG): rood = oud, blauw = nieuw'});
