@@ -448,6 +448,9 @@
         <li>Leefbaarheid: Leefbaarometer (Rijksoverheid), via Provincie Zuid-Holland</li>
         <li>Reistijden: routes over OpenStreetMap (OSRM, routing.openstreetmap.de)</li>
         <li>Verkeersongevallen: BRON, Rijkswaterstaat (2022–2024)</li>
+        <li>Gezondheid: Gezondheidsmonitor Volwassenen en Ouderen 2024, GGD’en en RIVM (via CBS)</li>
+        <li>Misdrijven en overlast: Politie (via CBS, data.politie.nl)</li>
+        <li>Opleiding, arbeidsparticipatie en stroomverbruik: CBS StatLine 2024</li>
         <li>Zoeken op adres: PDOK Locatieserver · Lettertype: Barlow (SIL Open Font License)</li>
       </ul>
       <p class="note">De buurtcijfers zitten in de pagina zelf. Achtergrondkaart, satelliet, NAP-hoogte, klimaatkaarten en bouwjaar worden live opgehaald bij de bron.</p>
@@ -533,8 +536,6 @@ const THEMES = [
   {g:'Voorzieningen en bereikbaarheid', key:'apotheek_gemiddelde_afstand_in_km', label:'Afstand tot apotheek', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde apotheek.'},
   {g:'Voorzieningen en bereikbaarheid', key:'basisonderwijs_gemiddelde_afstand_in_km', label:'Afstand tot basisschool', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde basisschool.'},
   {g:'Voorzieningen en bereikbaarheid', key:'voortgezet_onderwijs_gem_afstand_in_km', label:'Afstand tot middelbare school', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde school voor voortgezet onderwijs.'},
-  {g:'Voorzieningen en bereikbaarheid', key:'vmbo_gemiddelde_afstand_in_km', label:'Afstand tot vmbo', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde school met vmbo.'},
-  {g:'Voorzieningen en bereikbaarheid', key:'havo_vwo_gemiddelde_afstand_in_km', label:'Afstand tot havo/vwo', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde school met havo of vwo.'},
   {g:'Voorzieningen en bereikbaarheid', key:'kinderdagverblijf_gemiddelde_afstand_in_km', label:'Afstand tot kinderdagverblijf', fmt:km, note:'Gemiddelde afstand over de weg tot het dichtstbijzijnde kinderdagverblijf.'},
   {g:'Voorzieningen en bereikbaarheid', key:'buitenschoolse_opvang_gem_afstand_in_km', label:'Afstand tot buitenschoolse opvang', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde buitenschoolse opvang.'},
   {g:'Voorzieningen en bereikbaarheid', key:'grote_supermarkt_gemiddelde_afstand_in_km', label:'Afstand tot grote supermarkt', fmt:km, note:'Gemiddelde afstand over de weg tot de dichtstbijzijnde grote supermarkt.'},
@@ -614,6 +615,52 @@ const EXTRA = {
 for(const [na, items] of Object.entries(EXTRA)){ const i=THEMES.findIndex(t=>t.key===na); THEMES.splice(i+1, 0, ...items); }
 if(DATA.ref){ Object.assign(DATA.ref.zh, DATA.sociaal.ref.zh); Object.assign(DATA.ref.nl, DATA.sociaal.ref.nl);
   for(const t of THEMES) if(t.div===LBM_DIV) DATA.ref.nl[t.key]=0; }
+/* ---------- Nog meer thema's (8-11-2026): gezondheid (RIVM/GGD), politie, StatLine ---------- */
+for(const d of [DATA.gezondheid.buurt, DATA.politie.buurt, DATA.statline.buurt]){
+  for(const f of DATA.buurten.features){ const x=d[f.properties.buurtcode]; if(x) Object.assign(f.properties, x); }
+}
+const POL_J = DATA.politie.jaar;
+const ggdT = (key,label,wat) => ({g:'Gezondheid (GGD/RIVM 2024)', key, label, fmt:pct1, agg:{type:'w',w:'ggd_w'},
+  note:`${wat} Schatting voor inwoners van 18 jaar en ouder, op basis van de Gezondheidsmonitor Volwassenen en Ouderen 2024 van de GGD’en en het RIVM (geen telling: het RIVM rekent met een model per buurt). Per gemeente gewogen naar het aantal volwassenen (een benadering).`});
+const polT = (key,label,wat) => ({g:`Veiligheid (politie ${POL_J})`, key, label, fmt:v=>nl1.format(v)+' per 1.000', agg:{type:'ratio',num:key+'_n',den:'pol_inw',mult:1000},
+  note:`${wat} per 1.000 inwoners in ${POL_J} (politie, via CBS). Buurten onder 200 inwoners krijgen geen cijfer (bedrijventerreinen en winkelgebieden geven anders extreme waarden), maar tellen wel mee in de gemeente. Het gaat om geregistreerde feiten: niet alles wordt gemeld.`});
+const EXTRA2 = {
+  ww_per_1000: [
+    {g:'Economie en werk', key:'sl_hoog', label:'Hoogopgeleiden', fmt:pct1, agg:{type:'w',w:'sl_1575'}, note:'Aandeel inwoners van 15 tot 75 jaar met hbo of wo als hoogst behaalde opleiding (CBS, 2024).'},
+    {g:'Economie en werk', key:'sl_laag', label:'Laagopgeleiden', fmt:pct1, agg:{type:'w',w:'sl_1575'}, note:'Aandeel inwoners van 15 tot 75 jaar met hooguit basisonderwijs, vmbo of mbo-1 (CBS, 2024).'},
+    {g:'Economie en werk', key:'sl_arbeid', label:'Nettoarbeidsparticipatie', fmt:pct1, agg:{type:'w',w:'sl_inw'}, note:'Aandeel van de bevolking van 15 tot 75 jaar dat betaald werk heeft (CBS, 2024). Per gemeente gewogen naar inwoners (een benadering).'},
+    {g:'Economie en werk', key:'sl_zzp', label:'Zelfstandigen', fmt:pct1, agg:{type:'w',w:'sl_inw'}, note:'Aandeel zelfstandigen in de werkzame beroepsbevolking (CBS, 2024). Per gemeente gewogen naar inwoners (een benadering).'},
+  ],
+  soc_inkomen_inw: [
+    ggdT('ggd_gezond','Goed ervaren gezondheid','Aandeel volwassenen dat de eigen gezondheid goed of zeer goed vindt.'),
+    ggdT('ggd_angst','Hoog risico op angst of depressie','Aandeel volwassenen met een hoog risico op een angststoornis of depressie.'),
+    ggdT('ggd_stress','(Heel) veel stress','Aandeel volwassenen met (heel) veel stress in de afgelopen vier weken.'),
+    ggdT('ggd_eenzaam','Eenzaamheid','Aandeel volwassenen dat zich eenzaam voelt.'),
+    ggdT('ggd_sterk_eenzaam','Sterke eenzaamheid','Aandeel volwassenen dat zich sterk eenzaam voelt.'),
+    ggdT('ggd_rondkomen','Moeite met rondkomen','Aandeel volwassenen dat moeite heeft om rond te komen.'),
+    ggdT('ggd_mantelzorg','Mantelzorgers','Aandeel volwassenen dat mantelzorg geeft.'),
+    ggdT('ggd_vrijwilliger','Vrijwilligers','Aandeel volwassenen dat vrijwilligerswerk doet.'),
+    ggdT('ggd_overgewicht','Overgewicht','Aandeel volwassenen met overgewicht.'),
+    ggdT('ggd_roken','Rokers','Aandeel volwassenen dat tabak rookt.'),
+    ggdT('ggd_bewegen','Voldoende beweging','Aandeel volwassenen dat voldoet aan de beweegrichtlijn.'),
+    ggdT('ggd_geluid','Ernstige geluidhinder door wegverkeer','Aandeel volwassenen met ernstige geluidhinder door wegverkeer.'),
+    ggdT('ggd_woonomgeving','Tevreden met de woonomgeving','Aandeel volwassenen dat tevreden is met de woonomgeving.'),
+    ggdT('ggd_verkoeling','Kan binnen goed verkoeling vinden','Aandeel volwassenen dat bij hitte binnen goed verkoeling kan vinden.'),
+    polT('pol_totaal','Misdrijven (totaal)','Geregistreerde misdrijven'),
+    polT('pol_inbraak','Woninginbraken','Diefstal en inbraak uit woningen'),
+    polT('pol_fiets','Fietsdiefstal','Diefstal van fietsen, brom- en snorfietsen'),
+    polT('pol_geweld','Geweldsmisdrijven','Mishandeling, bedreiging, openlijk geweld, straatroof, overval en moord/doodslag'),
+    polT('pol_vernieling','Vernieling','Vernieling en zaakbeschadiging'),
+    polT('pol_overlast','Overlastmeldingen','Geregistreerde meldingen van overlast (o.a. jeugd, verwarde personen, alcohol en drugs, geluid)'),
+    polT('pol_jeugd','Jeugdoverlast','Meldingen van jeugdoverlast'),
+  ],
+  gemiddelde_elektriciteitsteruglevering: [
+    {g:'Energie', key:'sl_stroom', label:'Stroomverbruik', fmt:v=>nl0.format(v)+' kWh', agg:{type:'w',w:'sl_won'}, note:'Gemiddelde levering van elektriciteit per woning per jaar, dus zonder wat zonnepanelen zelf opwekken en direct gebruiken (CBS, 2024).'},
+    {g:'Energie', key:'sl_stroom_netto', label:'Netto stroomverbruik', fmt:v=>nl0.format(v)+' kWh', agg:{type:'w',w:'sl_won'}, note:'Gemiddelde levering min teruglevering van elektriciteit per woning per jaar (CBS, 2024). Relevant naast netcongestie.'},
+  ],
+};
+for(const [na, items] of Object.entries(EXTRA2)){ const i=THEMES.findIndex(t=>t.key===na); THEMES.splice(i+1, 0, ...items); }
+if(DATA.ref) for(const d of [DATA.gezondheid, DATA.politie, DATA.statline]){ Object.assign(DATA.ref.zh, d.ref.zh); Object.assign(DATA.ref.nl, d.ref.nl); }
 
 // verandering voor een gemeente (code 'GM0513') of de hele regio (null): 2024 uit de buurten, 2019 uit trend.json
 function trendWaarde(code, k){
@@ -1002,8 +1049,6 @@ const LOCS = {
   treinstation_gemiddelde_afstand_in_km: {k:'station', mv:'treinstations', een:'Treinstation'},
   oprit_hoofdverkeersweg_gemiddelde_afstand_in_km: {k:'oprit', mv:'opritten van snelwegen', een:'Aansluiting op de snelweg'},
   voortgezet_onderwijs_gem_afstand_in_km: {k:'middelbaar', mv:'middelbare scholen', een:'Middelbare school'},
-  vmbo_gemiddelde_afstand_in_km: {k:'middelbaar', mv:'middelbare scholen', een:'Middelbare school', extra:' OpenStreetMap zegt niet welke scholen vmbo hebben; je ziet alle middelbare scholen.'},
-  havo_vwo_gemiddelde_afstand_in_km: {k:'middelbaar', mv:'middelbare scholen', een:'Middelbare school', extra:' OpenStreetMap zegt niet welke scholen havo/vwo hebben; je ziet alle middelbare scholen.'},
   apotheek_gemiddelde_afstand_in_km: {k:'apotheek', mv:'apotheken', een:'Apotheek'},
   brandweerkazerne_gemiddelde_afstand_in_km: {k:'brandweer', mv:'brandweerkazernes', een:'Brandweerkazerne'},
   bibliotheek_gemiddelde_afstand_in_km: {k:'bibliotheek', mv:'bibliotheken', een:'Bibliotheek'},
@@ -1363,7 +1408,10 @@ function kaartBronnen(){
     + ($('lyrKlim').checked ? ' Klimaat: Klimaateffectatlas.' : '') + ($('lyrOng').checked ? ' Verkeersongevallen: BRON, Rijkswaterstaat.' : '')
     + (themed() && currentTheme().key.startsWith('lbm_') ? ` Leefbaarheid: Leefbaarometer ${LBM_J} (Rijksoverheid, via Provincie Zuid-Holland).` : '')
     + (themed() && currentTheme().key.startsWith('rt_') ? ' Reistijden: routes over OpenStreetMap (OSRM).' : '')
-    + (themed() && currentTheme().key.startsWith('soc_') ? ' Sociaal domein: CBS 2024 (inkomen 2023).' : '');
+    + (themed() && currentTheme().key.startsWith('soc_') ? ' Sociaal domein: CBS 2024 (inkomen 2023).' : '')
+    + (themed() && currentTheme().key.startsWith('ggd_') ? ' Gezondheid: Gezondheidsmonitor 2024, GGD’en en RIVM (schattingen).' : '')
+    + (themed() && currentTheme().key.startsWith('pol_') ? ` Veiligheid: politie ${POL_J} (via CBS).` : '')
+    + (themed() && currentTheme().key.startsWith('sl_') ? ' CBS StatLine 2024.' : '');
 }
 /* ---------- Kaart als PNG: kop, kaart met legenda erop, bronnen eronder ---------- */
 async function exportMapPng(){
