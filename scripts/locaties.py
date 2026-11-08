@@ -94,7 +94,7 @@ def soort(t):
     return k
 
 
-out, seen = [], set()
+out, seen, dichtbij = [], set(), {}
 for fn in ['osm-locaties-1.json', 'osm-locaties-2.json', 'osm-locaties-3.json', 'osm-locaties-4.json']:
     for e in json.load(open(P('bron-downloads', fn)))['elements']:
         t = e.get('tags', {})
@@ -106,10 +106,18 @@ for fn in ['osm-locaties-1.json', 'osm-locaties-2.json', 'osm-locaties-3.json', 
             n = t.get('name', '')
             if k == 'oprit':
                 n = ' '.join(filter(None, [('afrit ' + t['ref']) if t.get('ref') else '', t.get('name', '')])) or 'aansluiting'
-            key = (k, n.lower()) if k in ('ziekenhuis', 'station') else (k, n.lower(), round(lon, 3), round(lat, 3))
-            if key in seen:
-                continue
-            seen.add(key)
+            if k in ('ziekenhuis', 'station'):
+                # zelfde naam binnen 1 km = zelfde object (punt + gebouw); verder weg = andere locatie
+                # (bijv. Groene Hart Ziekenhuis in Gouda én in Bodegraven)
+                key = (k, n.lower())
+                if any(pt.distance(q) < 1000 for q in dichtbij.get(key, [])):
+                    continue
+                dichtbij.setdefault(key, []).append(pt)
+            else:
+                key = (k, n.lower(), round(lon, 3), round(lat, 3))
+                if key in seen:
+                    continue
+                seen.add(key)
             adr = ' '.join(filter(None, [t.get('addr:street'), t.get('addr:housenumber')]))
             if t.get('addr:city'):
                 adr = (adr + ', ' if adr else '') + t['addr:city']
