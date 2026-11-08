@@ -1339,7 +1339,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   #wissel .tourknop{all:unset;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 13px Barlow,sans-serif;color:var(--accent);background:var(--accent-soft);margin-right:2px}
   #wissel .tourknop:hover{background:var(--accent);color:#fff}
   .btnTour[hidden],.btnTourSep[hidden]{display:none !important}
-  body.dataview #tour{top:calc((100% - var(--sheet,44vh))/2)}
+  body.dataview .tourknop{display:none !important}  /* rondleiding alleen bij het paneel */
+  #map.tour-wijs{outline-offset:-5px;border-radius:0}
+  #panel header.tour-wijs{outline-offset:-5px;border-radius:0}
+  section.tour-wijs{outline-offset:-4px}
   #wissel[hidden],#tabLagen[hidden],#mInhoud[hidden]{display:none}
   @media (max-width:760px){
     #app{display:block}
@@ -1531,7 +1534,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     <button type="button" class="tourknop btnTour" title="Rondleiding" aria-label="Rondleiding">?</button><div class="seg2" role="group" aria-label="Weergave"><button type="button" data-w="paneel" class="aan" aria-pressed="true">Paneel</button><button type="button" data-w="data" aria-pressed="false">Data</button></div></div>
   <div id="tour" role="dialog" aria-labelledby="tourT" aria-live="polite" hidden>
     <button class="tour-x" id="tourX" type="button" aria-label="Rondleiding sluiten">×</button>
-    <div class="tour-stap">Rondleiding · stap <span id="tourN">1</span> van 4</div>
+    <div class="tour-stap">Rondleiding · stap <span id="tourN">1</span> van <span id="tourTot">7</span></div>
     <h3 id="tourT"></h3>
     <p id="tourP"></p>
     <div class="tour-voet">
@@ -3133,23 +3136,31 @@ if(!MOBIEL){
   buurtLayer.on('mouseout', e=>dvRijLicht(e.layer.feature.properties.buurtcode,false));
 }
 
-/* ---------- Rondleiding: kaartje rechts bij het eerste bezoek (alleen computer), verdwijnt na 15 seconden ---------- */
-const TOUR_OPSLAG='regiokaart-rondleiding-v1', TOUR_MS=15000;
+/* ---------- Rondleiding: kaartje rechts bij het eerste bezoek (alleen computer en alleen in de paneelweergave), 12 seconden per stap ---------- */
+const TOUR_OPSLAG='regiokaart-rondleiding-v1', TOUR_MS=12000;
+const zoekSectie = () => $('zoek').closest('section'), sectieVan = id => $(id).closest('section');
 const TOUR = [
-  {t:'Kies een thema', p:'Kies een thema, bijvoorbeeld 65-plussers, leefbaarheid of de fietstijd naar het station. De buurten kleuren mee. Klik op een buurt voor alle cijfers.', el:()=>dataView?$('mTheme'):$('theme')},
-  {t:'Zet lagen aan', p:'Zet kaartlagen aan zoals klimaat, netcongestie, verkeersongevallen of het openbaar vervoer. Bovenaan zoek je op adres, buurt of thema.', el:()=>dataView?document.querySelector('#mTabs [data-t=lagen]'):$('secLagen').querySelector('h2')},
-  {t:'Paneel of Data', p:'Met deze wissel kies je tussen dit paneel en de dataweergave: grote tabellen, trends, de bevolkingsprognose en je eigen cijfers per buurt.', el:()=>$('wissel')},
-  {t:'Overzicht en downloaden', p:'Deze knop zet de hele regio netjes in beeld, handig vóór je de kaart als PDF of PNG downloadt. Met “Link naar deze weergave kopiëren” deel je precies wat je ziet.', el:()=>document.querySelector('.overzichtknop')},
+  {t:'Welkom bij de Regiokaart', p:'Eén kaart voor Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas: 248 buurten en ruim honderd cijfers van onder meer CBS, GGD, politie en de provincie.', el:()=>[document.querySelector('#panel header')], scroll:()=>document.querySelector('#panel header'), blok:'start'},
+  {t:'Kies een thema', p:'Kies bijvoorbeeld 65-plussers, leefbaarheid of de fietstijd naar het station. De buurten kleuren mee. Bij afstanden kun je de voorzieningen als gele stippen op de kaart zetten.', el:()=>[$('theme')], scroll:()=>$('theme')},
+  {t:'Klik op een buurt', p:'Klik op een buurt op de kaart. Je ziet dan alle cijfers van die buurt, met ▲▼ hoe het sinds 2019 is veranderd.', el:()=>[$('map')]},
+  {t:'Vergelijk', p:'De balken zetten de vijf gemeenten naast de regio, Zuid-Holland en Nederland. Via “Alle buurten als tabel” zie je de ranglijst van alle buurten.', el:()=>[sectieVan('cmpChart')], scroll:()=>sectieVan('cmpChart')},
+  {t:'Lagen en zoeken', p:'Zet kaartlagen aan, zoals klimaat, netcongestie, verkeersongevallen of het openbaar vervoer. Bovenaan zoek je op adres, buurt of thema.', el:()=>[$('zoek'), $('secLagen').querySelector('h2')], scroll:()=>$('secLagen').querySelector('h2'), blok:'start'},
+  {t:'Paneel of Data', p:'Met deze wissel ga je naar de dataweergave: grote tabellen, trends, de bevolkingsprognose en je eigen cijfers per buurt.', el:()=>[$('wissel')]},
+  {t:'Delen en downloaden', p:'De knop onder + en − zet de hele regio netjes in beeld. Download daarna de kaart als PDF of PNG, maak een gemeenteprofiel, of kopieer een link naar precies deze weergave.', el:()=>[document.querySelector('.overzichtknop'), sectieVan('btnMapPdf'), sectieVan('btnProfPdf')], scroll:()=>sectieVan('btnMapPdf')},
 ];
-let tourStap=0, tourRest=TOUR_MS, tourVorige=0, tourPauze=false, tourRaf=null, tourWijs=null;
+$('tourTot').textContent = TOUR.length;
+let tourStap=0, tourRest=TOUR_MS, tourVorige=0, tourPauze=false, tourRaf=null, tourWijs=[];
 const RING = 2*Math.PI*15;
 function tourTeken(){
   const s=TOUR[tourStap];
   $('tourN').textContent=tourStap+1; $('tourT').textContent=s.t; $('tourP').textContent=s.p;
   $('tourVorige').disabled = tourStap===0; $('tourVolgende').textContent = tourStap===TOUR.length-1 ? 'Klaar' : 'Volgende';
-  if(tourWijs) tourWijs.classList.remove('tour-wijs');
-  tourWijs = s.el(); if(tourWijs) tourWijs.classList.add('tour-wijs');
-  tourRest=TOUR_MS; tourVorige=performance.now();   // elke stap krijgt weer 15 seconden
+  tourWijs.forEach(e=>e.classList.remove('tour-wijs'));
+  tourWijs = s.el().filter(Boolean); tourWijs.forEach(e=>e.classList.add('tour-wijs'));
+  const doel = s.scroll && s.scroll();   // paneel scrolt mee naar wat oplicht
+  if(doel && s.blok==='start'){ const P=$('panel'); P.scrollTo({top: doel.getBoundingClientRect().top - P.getBoundingClientRect().top + P.scrollTop - 20, behavior:'smooth'}); }
+  else if(doel) doel.scrollIntoView({behavior:'smooth', block:'center'});
+  tourRest=TOUR_MS; tourVorige=performance.now();   // elke stap krijgt weer 12 seconden
 }
 function tourTik(nu){
   if(!tourPauze) tourRest -= nu - tourVorige;
@@ -3161,23 +3172,25 @@ function tourTik(nu){
   tourRaf=requestAnimationFrame(tourTik);
 }
 function tourOpen(){
-  if(MOBIEL) return;
+  if(MOBIEL || dataView) return;   // alleen in de paneelweergave
   tourStap=0; $('tour').hidden=false; $('tour').classList.remove('weg'); tourTeken();
   cancelAnimationFrame(tourRaf); tourVorige=performance.now(); tourRaf=requestAnimationFrame(tourTik);
 }
-function tourSluit(){
-  cancelAnimationFrame(tourRaf); if(tourWijs) tourWijs.classList.remove('tour-wijs');
-  try{ localStorage.setItem(TOUR_OPSLAG,'1'); }catch(e){}
+function tourSluit(onthoud=true){
+  cancelAnimationFrame(tourRaf); tourWijs.forEach(e=>e.classList.remove('tour-wijs')); tourWijs=[];
+  if(onthoud){ try{ localStorage.setItem(TOUR_OPSLAG,'1'); }catch(e){} }
   $('tour').classList.add('weg'); setTimeout(()=>{ $('tour').hidden=true; }, 350);
 }
 $('tourRing').style.strokeDasharray = RING.toFixed(2);
 $('tourVolgende').addEventListener('click', ()=>{ if(tourStap===TOUR.length-1) tourSluit(); else { tourStap++; tourTeken(); } });
 $('tourVorige').addEventListener('click', ()=>{ if(tourStap>0){ tourStap--; tourTeken(); } });
-$('tourX').addEventListener('click', tourSluit);
+$('tourX').addEventListener('click', ()=>tourSluit());
 $('tour').addEventListener('mouseenter', ()=>tourPauze=true); $('tour').addEventListener('mouseleave', ()=>tourPauze=false);
 $('tour').addEventListener('focusin', ()=>tourPauze=true); $('tour').addEventListener('focusout', ()=>tourPauze=false);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('tour').hidden) tourSluit(); });
 document.querySelectorAll('.btnTour').forEach(b=>b.addEventListener('click', tourOpen));
+// naar de dataweergave tijdens de rondleiding: rondleiding dicht (en later bij het paneel nog niet als 'gezien' tellen)
+document.querySelectorAll('#wissel button[data-w=data]').forEach(b=>b.addEventListener('click', ()=>{ if(!$('tour').hidden) tourSluit(false); }));
 if(MOBIEL) document.querySelectorAll('.btnTour, .btnTourSep').forEach(b=>b.hidden=true);
 else { let gezien=false; try{ gezien = localStorage.getItem(TOUR_OPSLAG)==='1'; }catch(e){} if(!gezien) setTimeout(tourOpen, 1200); }
 
