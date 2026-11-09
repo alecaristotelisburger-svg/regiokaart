@@ -96,7 +96,7 @@ Kan Claude Code hier wel het internet op, dan kunnen deze downloads ook direct.
 Afgeleid van het aangeleverde logo. De website zelf kon niet worden uitgelezen.
 - Paars `#5b0065` (hoofdkleur, koppen, knoppen), magenta `#ed56c2` (kicker, accenten), oranje `#fc7c00` (hover, trein, accent), crème `#fbf2ee` (tekst op paars).
 - Sequentiële buurtkleuren: `#f1d4ec → #d995ce → #bb55ae → #8a2486 → #5b0065` (kwintielen, dubbele klassegrenzen worden samengevoegd).
-- Lagen: wegen grijs, trein oranje, bus `#d63fae`, NNN groen, Natura 2000 donkergroen. Voorzieningen: onderwijs `#2a78d6`, zorg `#d6392f`, sport `#00968a`, maatschappelijk `#b07d00` (gevalideerd op kleurenblindheid).
+- Lagen: wegen felbruin (`#8b4513` snelweg → `#c8834f` overige hoofdweg), trein oranje, bus geel `#f2b705` (haltes met rand `#8a6a00`), NNN groen, Natura 2000 donkergroen. Let op: de gele stippen bij 'Toon … op de kaart' zijn lichter geel `#ffe100` met een zwarte rand. Voorzieningen: onderwijs `#2a78d6`, zorg `#d6392f`, sport `#00968a`, maatschappelijk `#b07d00` (gevalideerd op kleurenblindheid).
 - Letter: Barlow / Barlow Semi Condensed (meegeleverd in `src/fonts`, oorspronkelijk van Google Fonts). Dit is een benadering, het echte huisstijllettertype is niet bekend.
 
 ## Wensen en open punten
