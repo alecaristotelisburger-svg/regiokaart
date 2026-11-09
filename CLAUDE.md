@@ -4,9 +4,9 @@ Dit project is gestart in een gesprek met Claude op claude.ai (7 november 2026) 
 
 ## Wat het is
 
-Een interactieve kaart en kennisbank voor **Regio Midden-Holland**: de intergemeentelijke samenwerking van Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas (CBS 2024: 251.955 inwoners). De regio wil een plek worden waar ambtenaren en bestuurders informatie halen. De kaart is daar het eerste product van.
+Een interactieve kaart en kennisbank voor **Regio Midden-Holland**: de intergemeentelijke samenwerking van Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas (CBS 2024: 251.955 inwoners). De regio wil een plek worden waar ambtenaren en bestuurders informatie halen. De kaart is daar een product van.
 
-De gebruiker werkt bij de regio. Hij is geen ontwikkelaar: hij communiceert in het Nederlands, werkt vaak vanaf zijn telefoon en wil resultaten die hij direct kan delen. Schrijf alle teksten in de kaart en in antwoorden in helder Nederlands.
+De gebruiker werkt bij de regio. Hij is geen ontwikkelaar: hij communiceert in het Nederlands, werkt soms vanaf zijn telefoon en wil resultaten. Schrijf alle teksten in de kaart en in antwoorden in helder Nederlands.
 
 ## Hoe het gebouwd is
 

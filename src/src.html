@@ -108,6 +108,11 @@
   .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
   .btn{font:600 14px "Barlow Semi Condensed","Barlow",system-ui,sans-serif;background:var(--accent);color:var(--cream);border:none;border-radius:8px;padding:9px 14px;cursor:pointer;letter-spacing:.02em}
   .btn:hover{background:#3b0042}
+  .kopmetknop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .allesuit{all:unset;cursor:pointer;font:600 11px "Barlow Semi Condensed",Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1.5px solid var(--accent);border-radius:6px;padding:3px 8px;line-height:1.2}
+  .allesuit:hover{background:var(--accent);color:#fff}
+  .allesuit:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+  .allesuit:disabled{opacity:.35;cursor:default;background:none;color:var(--accent)}
   .overzichtknop a{display:flex !important;align-items:center;justify-content:center;color:var(--accent)}
   .leaflet-control-zoom a{color:var(--accent) !important}
   .leaflet-control-zoom a:hover,.leaflet-control-zoom a:focus,.overzichtknop a:hover,.overzichtknop a:focus{color:#3b0042 !important}
@@ -337,7 +342,7 @@
     </section>
 
     <section id="secLagen">
-      <h2>Kaartlagen</h2>
+      <h2 class="kopmetknop">Kaartlagen <button type="button" id="btnAllesUit" class="allesuit" title="Zet alle kaartlagen in één keer uit">Alles uit</button></h2>
       <div class="layer"><input type="checkbox" id="lyrAhn"><label for="lyrAhn"><span class="t">Hoogte t.o.v. NAP</span><span class="d">Actueel Hoogtebestand Nederland (AHN), maaiveld. Klik op de kaart voor de hoogte op dat punt.</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrRail"><label for="lyrRail"><span class="t"><span class="sw2" style="background:#fc7c00"></span>Treinverbindingen</span><span class="d">7 stations, 5 intercity- en 9 sprinterseries die in de regio stoppen, plus het Nachtnet. Dikte = aantal series op dat stuk spoor (OpenStreetMap).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrOv"><label for="lyrOv"><span class="t"><span class="sw2" style="background:#d63fae"></span>Buslijnen en haltes</span><span class="d">23 buslijnen van Qbuzz en U-OV die in de regio stoppen, en ruim 300 haltes. Klik op een lijn of halte om te zien welke lijnen er rijden (OpenStreetMap).</span></label></div>
@@ -2124,6 +2129,16 @@ document.querySelectorAll('#wissel button[data-w=data]').forEach(b=>b.addEventLi
 if(MOBIEL) document.querySelectorAll('.btnTour, .btnTourSep').forEach(b=>b.hidden=true);
 else { let gezien=false; try{ gezien = localStorage.getItem(TOUR_OPSLAG)==='1'; }catch(e){} if(!gezien) setTimeout(tourOpen, 1200); }
 
+/* ---------- Knop 'Alles uit' bij Kaartlagen ---------- */
+const lagenAan = () => [...document.querySelectorAll('#secLagen .layer > input[type=checkbox]'), $('lyrLoc')].filter(i=>i && i.checked);
+function syncAllesUit(){ $('btnAllesUit').disabled = !lagenAan().length; }
+$('btnAllesUit').addEventListener('click', ()=>{
+  for(const i of lagenAan()){ i.checked=false; i.dispatchEvent(new Event('change', {bubbles:true})); }
+  syncAllesUit(); updateMapLegend(); schrijfHash();
+});
+document.querySelectorAll('#secLagen input[type=checkbox], #lyrLoc, #theme').forEach(i=>i.addEventListener('change', ()=>setTimeout(syncAllesUit,0)));
+syncAllesUit();
+
 /* ---------- Deelbare link: thema, lagen, achtergrond en uitsnede staan in het webadres (#...) ---------- */
 const LAAG_IDS = {fill:'lyrFill', ahn:'lyrAhn', trein:'lyrRail', bus:'lyrOv', vz:'lyrVz', wegen:'lyrRoads', nnn:'lyrNnn', n2k:'lyrN2k', net:'lyrNet', erf:'lyrErf', bouwjaar:'lyrBag', loc:'lyrLoc', klimaat:'lyrKlim', ongevallen:'lyrOng'};
 let hashKlaar=false, hashTimer=null;
@@ -2155,7 +2170,7 @@ function leesHash(){
   updateMapLegend();
 }
 try{ leesHash(); }catch(e){ console.warn('Link kon niet worden gelezen', e); }
-hashKlaar=true;
+hashKlaar=true; syncAllesUit();
 map.on('moveend', schrijfHash);
 document.querySelectorAll('#panel input, #panel select').forEach(el=>el.addEventListener('change', schrijfHash));
 document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click', schrijfHash));
