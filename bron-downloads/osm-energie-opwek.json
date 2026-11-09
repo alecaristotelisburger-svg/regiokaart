@@ -1,0 +1,1027 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-09T13:21:02Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 599507264,
+  "lat": 52.0192825,
+  "lon": 4.6256104,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "135",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 1311518285,
+  "lat": 52.1243783,
+  "lon": 4.6075582,
+  "tags": {
+    "addr:city": "Hazerswoude-Rijndijk",
+    "addr:housenumber": "26",
+    "addr:street": "Spookverlaat",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "80",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator",
+    "rotor:diameter": "90",
+    "source": "BAG",
+    "source:date": "2022-07-01",
+    "start_date": "2007",
+    "website": "https://www.prodeon.nl/wind/projecten/?SECTION_ID=19&ELEMENT_ID=56"
+  }
+},
+{
+  "type": "node",
+  "id": 1311518286,
+  "lat": 52.1247713,
+  "lon": 4.6133269,
+  "tags": {
+    "addr:city": "Hazerswoude-Rijndijk",
+    "addr:housenumber": "24",
+    "addr:street": "Spookverlaat",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "80",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator",
+    "rotor:diameter": "90",
+    "source": "BAG",
+    "source:date": "2022-07-01",
+    "start_date": "2007",
+    "website": "https://www.prodeon.nl/wind/projecten/?SECTION_ID=19&ELEMENT_ID=56"
+  }
+},
+{
+  "type": "node",
+  "id": 1311518288,
+  "lat": 52.1223207,
+  "lon": 4.6237027,
+  "tags": {
+    "addr:city": "Hazerswoude-Rijndijk",
+    "addr:housenumber": "20",
+    "addr:street": "Spookverlaat",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "80",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator",
+    "rotor:diameter": "90",
+    "source": "BAG",
+    "source:date": "2022-07-01",
+    "start_date": "2007",
+    "website": "https://www.prodeon.nl/wind/projecten/?SECTION_ID=19&ELEMENT_ID=56"
+  }
+},
+{
+  "type": "node",
+  "id": 1311518289,
+  "lat": 52.1246842,
+  "lon": 4.6191948,
+  "tags": {
+    "addr:city": "Hazerswoude-Rijndijk",
+    "addr:housenumber": "22",
+    "addr:street": "Spookverlaat",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "80",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator",
+    "rotor:diameter": "90",
+    "source": "BAG",
+    "source:date": "2022-07-01",
+    "start_date": "2007",
+    "website": "https://www.prodeon.nl/wind/projecten/?SECTION_ID=19&ELEMENT_ID=56"
+  }
+},
+{
+  "type": "node",
+  "id": 1617627197,
+  "lat": 51.9860224,
+  "lon": 4.9644241,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 1617627198,
+  "lat": 51.9891101,
+  "lon": 4.9625129,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 1617627199,
+  "lat": 51.9923142,
+  "lon": 4.9605264,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 1622470608,
+  "lat": 52.0193522,
+  "lon": 4.6305779,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "135",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 1622470618,
+  "lat": 52.0194197,
+  "lon": 4.6355467,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "135",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 1622480181,
+  "lat": 52.0342549,
+  "lon": 4.5064223,
+  "tags": {
+    "addr:city": "Zoetermeer",
+    "addr:housenumber": "165",
+    "addr:postcode": "2718TK",
+    "addr:street": "Lansinghageweg",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3000 kW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator",
+    "source": "BAG",
+    "source:date": "2013-11-26"
+  }
+},
+{
+  "type": "node",
+  "id": 1622480240,
+  "lat": 52.0369483,
+  "lon": 4.5100045,
+  "tags": {
+    "addr:city": "Zoetermeer",
+    "addr:housenumber": "54",
+    "addr:postcode": "2718RE",
+    "addr:street": "Koperstraat",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3000 kW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator",
+    "source": "BAG",
+    "source:date": "2013-11-26"
+  }
+},
+{
+  "type": "node",
+  "id": 1765104568,
+  "lat": 52.0195538,
+  "lon": 4.6404509,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "135",
+    "manufacturer": "Vestas",
+    "model": "V90",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 2345425561,
+  "lat": 51.8344995,
+  "lon": 4.8858828,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "108",
+    "manufacturer": "Enercon",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 2345425562,
+  "lat": 51.8355879,
+  "lon": 4.8912040,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "108",
+    "manufacturer": "Enercon",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 2345425563,
+  "lat": 51.8369262,
+  "lon": 4.8963780,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "108",
+    "manufacturer": "Enercon",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 4287977905,
+  "lat": 52.1303542,
+  "lon": 4.5446368,
+  "tags": {
+    "addr:city": "Zoeterwoude",
+    "addr:housenumber": "1W-4",
+    "addr:street": "Burgemeester Smeetsweg",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "operator": "Delta Energy",
+    "power": "generator",
+    "source": "BAG",
+    "source:date": "2022-02-03",
+    "start_date": "2016",
+    "website": "https://subsites.wur.nl/nl/show/HEINEKEN-Nederland-neemt-vier-windturbines-officieel-in-gebruik.htm"
+  }
+},
+{
+  "type": "node",
+  "id": 4287977906,
+  "lat": 52.1318962,
+  "lon": 4.5399850,
+  "tags": {
+    "addr:city": "Zoeterwoude",
+    "addr:housenumber": "1W-3",
+    "addr:street": "Burgemeester Smeetsweg",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "operator": "Delta Energy",
+    "power": "generator",
+    "source": "BAG",
+    "source:date": "2022-02-03",
+    "start_date": "2016",
+    "website": "https://subsites.wur.nl/nl/show/HEINEKEN-Nederland-neemt-vier-windturbines-officieel-in-gebruik.htm"
+  }
+},
+{
+  "type": "node",
+  "id": 4287977907,
+  "lat": 52.1334352,
+  "lon": 4.5353304,
+  "tags": {
+    "addr:city": "Zoeterwoude",
+    "addr:housenumber": "1W-2",
+    "addr:street": "Burgemeester Smeetsweg",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "operator": "Delta Energy",
+    "power": "generator",
+    "source": "BAG",
+    "source:date": "2022-02-03",
+    "start_date": "2016",
+    "website": "https://subsites.wur.nl/nl/show/HEINEKEN-Nederland-neemt-vier-windturbines-officieel-in-gebruik.htm"
+  }
+},
+{
+  "type": "node",
+  "id": 4287977908,
+  "lat": 52.1349762,
+  "lon": 4.5306759,
+  "tags": {
+    "addr:city": "Zoeterwoude",
+    "addr:housenumber": "1W-1",
+    "addr:street": "Burgemeester Smeetsweg",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "operator": "Delta Energy",
+    "power": "generator",
+    "source": "BAG",
+    "source:date": "2022-02-03",
+    "start_date": "2016",
+    "website": "https://subsites.wur.nl/nl/show/HEINEKEN-Nederland-neemt-vier-windturbines-officieel-in-gebruik.htm"
+  }
+},
+{
+  "type": "node",
+  "id": 4431595723,
+  "lat": 51.9090716,
+  "lon": 4.5408698,
+  "tags": {
+    "addr:city": "Capelle aan den IJssel",
+    "addr:housenumber": "2B",
+    "addr:street": "Rivium Quadrant",
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "name": "Windturbine Kralingseveer",
+    "operator": "HVC Groep",
+    "power": "generator",
+    "source": "BAG",
+    "source:date": "2021-09-08"
+  }
+},
+{
+  "type": "node",
+  "id": 7909276298,
+  "lat": 52.1269819,
+  "lon": 4.4879256,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "69",
+    "manufacturer": "Enercon",
+    "model": "E82",
+    "operator": "Coöperatie Rijnland Energie",
+    "power": "generator",
+    "rotor:diameter": "82",
+    "start_date": "2019",
+    "website": "https://www.rijnlandenergiecooperatie.nl/watergeuzen/"
+  }
+},
+{
+  "type": "node",
+  "id": 7909276299,
+  "lat": 52.1257925,
+  "lon": 4.4857752,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "3 MW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "height": "69",
+    "manufacturer": "Enercon",
+    "model": "E82",
+    "operator": "Coöperatie Rijnland Energie",
+    "power": "generator",
+    "rotor:diameter": "82",
+    "start_date": "2019",
+    "website": "https://www.rijnlandenergiecooperatie.nl/watergeuzen/"
+  }
+},
+{
+  "type": "node",
+  "id": 9077043980,
+  "lat": 52.0143048,
+  "lon": 4.6854107,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "600 kW",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "hub:height": "47",
+    "manufacturer": "Enercon",
+    "model": "E-40",
+    "name": "De Gouwevogel",
+    "power": "generator",
+    "rotor:diameter": "44",
+    "seamark:landmark:category": "windmotor",
+    "seamark:type": "landmark",
+    "start_date": "2000-11"
+  }
+},
+{
+  "type": "node",
+  "id": 9501695081,
+  "lat": 51.9235612,
+  "lon": 4.8579668,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "yes",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 9501695082,
+  "lat": 51.9237956,
+  "lon": 4.8577582,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "yes",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 9501712904,
+  "lat": 51.9172312,
+  "lon": 4.8710861,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "yes",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "power": "generator"
+  }
+},
+{
+  "type": "node",
+  "id": 9501712905,
+  "lat": 51.9171186,
+  "lon": 4.8706694,
+  "tags": {
+    "generator:method": "wind_turbine",
+    "generator:output:electricity": "yes",
+    "generator:source": "wind",
+    "generator:type": "horizontal_axis",
+    "power": "generator"
+  }
+},
+{
+  "type": "way",
+  "id": 162151078,
+  "center": {
+    "lat": 51.8655628,
+    "lon": 4.5320751
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark De Punt",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "2.9 MWp",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 481849536,
+  "center": {
+    "lat": 52.2048764,
+    "lon": 4.4405773
+  },
+  "tags": {
+    "landuse": "industrial",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 713488645,
+  "center": {
+    "lat": 51.8186509,
+    "lon": 4.7393905
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark Crayestein",
+    "operator": "ECD",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "3.5 MWp",
+    "plant:source": "solar",
+    "power": "plant",
+    "source": "local knowledge"
+  }
+},
+{
+  "type": "way",
+  "id": 733785765,
+  "center": {
+    "lat": 51.8629262,
+    "lon": 4.5123079
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark A15 Barendrecht",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 795374942,
+  "center": {
+    "lat": 51.8650825,
+    "lon": 4.4477184
+  },
+  "tags": {
+    "barrier": "fence",
+    "landuse": "industrial",
+    "name": "Zonnepark Rhoon",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "4.5 MWp",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 825957090,
+  "center": {
+    "lat": 51.9059804,
+    "lon": 4.5321791
+  },
+  "tags": {
+    "floating": "yes",
+    "landuse": "industrial",
+    "layer": "1",
+    "operator": "Evides",
+    "operator:wikidata": "Q2199007",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "6 MW",
+    "plant:source": "solar",
+    "power": "plant",
+    "source": "survey & PDOK 25 13-07-20"
+  }
+},
+{
+  "type": "way",
+  "id": 902014444,
+  "center": {
+    "lat": 51.8414002,
+    "lon": 4.5174714
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark RWZI Barendrecht",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 913246031,
+  "center": {
+    "lat": 51.8097154,
+    "lon": 4.5513896
+  },
+  "tags": {
+    "barrier": "fence",
+    "landuse": "industrial",
+    "name": "Cosun Solar Park Puttershoek",
+    "operator": "KiesZon",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "20.6 MWp",
+    "plant:source": "solar",
+    "power": "plant",
+    "start_date": "2020",
+    "website": "https://www.cosunsolarpark.nl/"
+  }
+},
+{
+  "type": "way",
+  "id": 914812517,
+  "center": {
+    "lat": 52.0091113,
+    "lon": 4.6248560
+  },
+  "tags": {
+    "barrier": "fence",
+    "name": "Zonnepark Zuidplas",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "13 MWp",
+    "plant:source": "solar",
+    "power": "plant",
+    "website": "https://zonnepark-zuidplas.nl/"
+  }
+},
+{
+  "type": "way",
+  "id": 916806071,
+  "center": {
+    "lat": 51.8217657,
+    "lon": 4.8360388
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark RWZI Hardinxveld-Giessendam",
+    "operator": "Waterschap Rivierenland",
+    "plant:method": "photovoltaic",
+    "plant:source": "solar",
+    "power": "plant",
+    "start_date": "aug 2020"
+  }
+},
+{
+  "type": "way",
+  "id": 937467221,
+  "center": {
+    "lat": 51.8136033,
+    "lon": 4.5782784
+  },
+  "tags": {
+    "name": "Zonnepark RWZI Zwijndrecht",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1039521949,
+  "center": {
+    "lat": 52.0965131,
+    "lon": 4.6684550
+  },
+  "tags": {
+    "floating": "yes",
+    "name": "Zonnevijver Boskoop",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "3.4 MWp",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1105157549,
+  "center": {
+    "lat": 51.8321543,
+    "lon": 4.7991659
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark RWZI Sliedrecht",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1208444050,
+  "center": {
+    "lat": 52.0829753,
+    "lon": 4.7364315
+  },
+  "tags": {
+    "name": "Zonnepark RWZI Bodegraven",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1216827691,
+  "center": {
+    "lat": 52.0813213,
+    "lon": 4.8759349
+  },
+  "tags": {
+    "building": "roof",
+    "layer": "1",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant",
+    "source:power": "p"
+  }
+},
+{
+  "type": "way",
+  "id": 1216827692,
+  "center": {
+    "lat": 52.0813966,
+    "lon": 4.8761681
+  },
+  "tags": {
+    "building": "roof",
+    "layer": "1",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant",
+    "source:power": "p"
+  }
+},
+{
+  "type": "way",
+  "id": 1220611809,
+  "center": {
+    "lat": 52.1280966,
+    "lon": 4.5848683
+  },
+  "tags": {
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1314793789,
+  "center": {
+    "lat": 51.9696975,
+    "lon": 4.8298588
+  },
+  "tags": {
+    "landuse": "industrial",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1377210328,
+  "center": {
+    "lat": 52.1717539,
+    "lon": 4.4657293
+  },
+  "tags": {
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1417467327,
+  "center": {
+    "lat": 52.0347381,
+    "lon": 4.5290785
+  },
+  "tags": {
+    "layer": "1",
+    "level": "1",
+    "operator": "Prologic",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "1,2 MW",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1426216554,
+  "center": {
+    "lat": 51.9737227,
+    "lon": 4.4856050
+  },
+  "tags": {
+    "landuse": "industrial",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1426216558,
+  "center": {
+    "lat": 51.9714607,
+    "lon": 4.4848694
+  },
+  "tags": {
+    "landuse": "industrial",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1426247909,
+  "center": {
+    "lat": 51.9496729,
+    "lon": 4.5292297
+  },
+  "tags": {
+    "landuse": "industrial",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1426247910,
+  "center": {
+    "lat": 51.9515504,
+    "lon": 4.5309886
+  },
+  "tags": {
+    "landuse": "industrial",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1441511102,
+  "center": {
+    "lat": 51.9667523,
+    "lon": 4.4605712
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark Schiebroek",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "2.25 MWp",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1452962624,
+  "center": {
+    "lat": 52.0187238,
+    "lon": 4.5905747
+  },
+  "tags": {
+    "floating": "yes",
+    "landuse": "industrial",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1452962625,
+  "center": {
+    "lat": 52.0182191,
+    "lon": 4.5870033
+  },
+  "tags": {
+    "floating": "yes",
+    "landuse": "industrial",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "way",
+  "id": 1471606535,
+  "center": {
+    "lat": 52.0917594,
+    "lon": 4.6239221
+  },
+  "tags": {
+    "operator": "Pure Energie",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "1.4 MW",
+    "plant:source": "solar",
+    "power": "plant",
+    "source:url": "https://pure-energie.nl/cases/pure-energie-bouwt-oude-kwekerij-om-tot-zonnepark-met-5-000-zonnepanelen/"
+  }
+},
+{
+  "type": "way",
+  "id": 1573439519,
+  "center": {
+    "lat": 51.9805902,
+    "lon": 4.7672849
+  },
+  "tags": {
+    "operator": "Hoogheemraadschap van Schieland en de Krimpenerwaard",
+    "plant:source": "solar",
+    "power": "plant"
+  }
+},
+{
+  "type": "relation",
+  "id": 13791991,
+  "center": {
+    "lat": 51.9590486,
+    "lon": 4.4410712
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark Rotterdam The Hague Airport",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "14 MWp",
+    "plant:source": "solar",
+    "power": "plant",
+    "type": "multipolygon"
+  }
+},
+{
+  "type": "relation",
+  "id": 14286185,
+  "center": {
+    "lat": 51.8171222,
+    "lon": 4.9300503
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark RWZI Sleeuwijk",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "yes",
+    "plant:source": "solar",
+    "power": "plant",
+    "type": "multipolygon"
+  }
+},
+{
+  "type": "relation",
+  "id": 17884208,
+  "center": {
+    "lat": 52.1266382,
+    "lon": 4.6180192
+  },
+  "tags": {
+    "landuse": "industrial",
+    "name": "Zonnepark Alphen aan den Rijn - N11",
+    "plant:method": "photovoltaic",
+    "plant:output:electricity": "7.2 MW",
+    "plant:source": "solar",
+    "power": "plant",
+    "type": "multipolygon",
+    "wikidata": "Q128022222"
+  }
+}
+
+  ]
+}
