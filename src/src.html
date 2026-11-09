@@ -346,6 +346,7 @@
       <div class="layer"><input type="checkbox" id="lyrAhn"><label for="lyrAhn"><span class="t">Hoogte t.o.v. NAP</span><span class="d">Actueel Hoogtebestand Nederland (AHN), maaiveld. Klik op de kaart voor de hoogte op dat punt.</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrRail"><label for="lyrRail"><span class="t"><span class="sw2" style="background:#fc7c00"></span>Treinverbindingen</span><span class="d">7 stations, 5 intercity- en 9 sprinterseries die in de regio stoppen, plus het Nachtnet. Dikte = aantal series op dat stuk spoor (OpenStreetMap).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrOv"><label for="lyrOv"><span class="t"><span class="sw2" style="background:#d63fae"></span>Buslijnen en haltes</span><span class="d">23 buslijnen van Qbuzz en U-OV die in de regio stoppen, en ruim 300 haltes. Klik op een lijn of halte om te zien welke lijnen er rijden (OpenStreetMap).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrRoads"><label for="lyrRoads"><span class="t">Hoofdwegennet</span><span class="d">Snelwegen (A12, A20), autowegen en provinciale en lokale hoofdwegen, met wegnummer en beheerder (OpenStreetMap). Dikte = wegtype.</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrVz"><label for="lyrVz"><span class="t">Voorzieningen</span><span class="d" id="vzD">Scholen, zorgpunten, sportaccommodaties en maatschappelijke voorzieningen (OpenStreetMap). Kies hieronder welke.</span></label></div>
       <div class="vzcats" id="vzcats">
         <label><input type="checkbox" data-c="onderwijs" checked><span class="dot" style="background:#2a78d6"></span>Onderwijs</label>
@@ -353,7 +354,6 @@
         <label><input type="checkbox" data-c="sport" checked><span class="dot" style="background:#00968a"></span>Sport</label>
         <label><input type="checkbox" data-c="maatsch" checked><span class="dot" style="background:#b07d00"></span>Maatschappelijk</label>
       </div>
-      <div class="layer"><input type="checkbox" id="lyrRoads"><label for="lyrRoads"><span class="t">Hoofdwegennet</span><span class="d">Snelwegen (A12, A20), autowegen en provinciale en lokale hoofdwegen, met wegnummer en beheerder (OpenStreetMap). Dikte = wegtype.</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrNnn"><label for="lyrNnn"><span class="t"><span class="sw2" style="background:#5fa36a"></span>Natuurnetwerk Nederland</span><span class="d">Ca. 7.500 ha beschermde natuur en ecologische verbindingen in de regio (Provincie Zuid-Holland).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrN2k"><label for="lyrN2k"><span class="t"><span class="sw2" style="background:#1f5c35"></span>Natura 2000</span><span class="d">Broekvelden, Vettenbroek &amp; Polder Stein (ca. 700 ha, Vogel- en Habitatrichtlijn).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrNet"><label for="lyrNet"><span class="t">Netcongestie</span><span class="d">Ruimte op het stroomnet per voedingsgebied, van Stedin en Liander. Kies hieronder verbruik of teruglevering. Bron: capaciteitskaart Netbeheer Nederland, stand <span id="netDate"></span>; indicatief.</span></label></div>
@@ -1394,8 +1394,8 @@ function activeLayers(){
   if(on('lyrAhn')) L2.push({c:'#4b8fd6', l:'Hoogte t.o.v. NAP (AHN)'});
   if(on('lyrRail')) L2.push({c:'#fc7c00', l:'Treinverbindingen en stations'});
   if(on('lyrOv')) L2.push({c:'#d63fae', l:'Buslijnen en haltes'});
-  if(on('lyrVz')) document.querySelectorAll('#vzcats input').forEach(i=>{ if(i.checked) L2.push({c:VZC[i.dataset.c], l:'Voorzieningen: '+i.parentElement.textContent.trim()}); });
   if(on('lyrRoads')) L2.push({c:'#3a3a3a', l:'Hoofdwegennet'});
+  if(on('lyrVz')) document.querySelectorAll('#vzcats input').forEach(i=>{ if(i.checked) L2.push({c:VZC[i.dataset.c], l:'Voorzieningen: '+i.parentElement.textContent.trim()}); });
   if(on('lyrNnn')) L2.push({c:'#5fa36a', l:'Natuurnetwerk Nederland'});
   if(on('lyrN2k')) L2.push({c:'#1f5c35', l:'Natura 2000'});
   return L2;
