@@ -356,6 +356,7 @@
       </div>
       <div class="layer"><input type="checkbox" id="lyrNnn"><label for="lyrNnn"><span class="t"><span class="sw2" style="background:#5fa36a"></span>Natuurnetwerk Nederland</span><span class="d">Ca. 7.500 ha beschermde natuur en ecologische verbindingen in de regio (Provincie Zuid-Holland).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrN2k"><label for="lyrN2k"><span class="t"><span class="sw2" style="background:#1f5c35"></span>Natura 2000</span><span class="d">Broekvelden, Vettenbroek &amp; Polder Stein (ca. 700 ha, Vogel- en Habitatrichtlijn).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrKer"><label for="lyrKer"><span class="t"><span class="sw2" style="background:#0b3d91"></span>Dijken en waterkeringen</span><span class="d" id="kerD"></span></label></div>
       <div class="layer"><input type="checkbox" id="lyrNet"><label for="lyrNet"><span class="t">Netcongestie</span><span class="d">Ruimte op het stroomnet per voedingsgebied, van Stedin en Liander. Kies hieronder verbruik of teruglevering. Bron: capaciteitskaart Netbeheer Nederland, stand <span id="netDate"></span>; indicatief.</span></label></div>
       <div class="vzcats" id="netmode">
         <label><input type="radio" name="netmode" value="af" checked>Verbruik (afname)</label>
@@ -456,6 +457,7 @@
         <li>Leefbaarheid: Leefbaarometer (Rijksoverheid), via Provincie Zuid-Holland</li>
         <li>Reistijden: routes over OpenStreetMap (OSRM, routing.openstreetmap.de)</li>
         <li>Verkeersongevallen: BRON, Rijkswaterstaat (2022–2024)</li>
+        <li>Dijken en waterkeringen: waterschappen (Waterschappen Keringen IMWA), via PDOK</li>
         <li>Gezondheid: Gezondheidsmonitor Volwassenen en Ouderen 2024, GGD’en en RIVM (via CBS)</li>
         <li>Misdrijven en overlast: Politie (via CBS, data.politie.nl)</li>
         <li>Opleiding, arbeidsparticipatie en stroomverbruik: CBS StatLine 2024</li>
@@ -1182,6 +1184,21 @@ const ongLayer = L.layerGroup(DATA.ongevallen.punten.map(([x,y,jaar,dood,aard,wi
   $('ongD').textContent = `${nl0.format(n)} geregistreerde ongevallen met gewonden of doden in 2022–2024, waarvan ${d} dodelijk (BRON, Rijkswaterstaat). Niet elk ongeval wordt door de politie geregistreerd. Klik op een punt voor details.`; }
 $('lyrOng').addEventListener('change', e=>{ if(e.target.checked) ongLayer.addTo(map); else map.removeLayer(ongLayer); });
 
+// ---- Dijken en waterkeringen (waterschappen, via PDOK) ----
+const KER = {primair:{c:'#0b3d91',w:4.5,l:'Primaire waterkering',u:'beschermt tegen overstroming vanuit de rivieren (Lek, Hollandse IJssel) of zee; landelijke veiligheidsnorm'},
+             regionaal:{c:'#3a7bd5',w:2.6,l:'Regionale waterkering',u:'beschermt tegen water uit boezems, kanalen en vaarten; norm van de provincie'},
+             overig:{c:'#8fb4e8',w:1.6,l:'Overige waterkering',u:'kade of dijk zonder wettelijke norm, wel in beheer bij het waterschap'}};
+const kerInfo = c => KER[c] || KER.overig;
+const kerLayer = L.geoJSON(DATA.keringen, {pane:'roads', style:f=>{ const k=kerInfo(f.properties.c); return {color:k.c, weight:k.w, opacity:.95, lineCap:'round'}; },
+  onEachFeature:(f,l)=>{ const p=f.properties, k=kerInfo(p.c);
+    l.on('mouseover',e=>{ l.setStyle({weight:k.w+3}); l.bindTooltip(`${p.n||k.l} (${k.l.toLowerCase()})`,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng); });
+    l.on('mouseout',()=>{ kerLayer.resetStyle(l); l.closeTooltip(); });
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup({maxWidth:300}).setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:${k.c}">${p.n||k.l}</h3><div class="sub">${k.l}${p.t&&p.t!=='Dijk'?' · '+p.t.toLowerCase():''}</div><p style="margin:6px 0;font-size:12.5px;line-height:1.4;white-space:normal">Een ${k.l.toLowerCase()} ${k.u}.</p><div class="sub">Beheerder: ${p.b}</div><div class="sub" style="margin-top:4px">Bron: waterschappen, via PDOK</div></div>`).openOn(map); }); }});
+{ const km={}; for(const f of DATA.keringen.features){ const g=f.geometry, lijnen=g.type==='LineString'?[g.coordinates]:g.coordinates; let m=0;
+    for(const ln of lijnen) for(let i=1;i<ln.length;i++) m+=map.distance([ln[i-1][1],ln[i-1][0]],[ln[i][1],ln[i][0]]); km[f.properties.c]=(km[f.properties.c]||0)+m/1000; }
+  $('kerD').textContent = `Dijken en kaden van de waterschappen: ${nl0.format(km.primair||0)} km primair (tegen de rivieren), ${nl0.format(km.regionaal||0)} km regionaal en ${nl0.format(km.overig||0)} km overig. Klik op een dijk voor naam en beheerder. Bron: waterschappen, via PDOK.`; }
+$('lyrKer').addEventListener('change', e=>{ if(e.target.checked) kerLayer.addTo(map); else map.removeLayer(kerLayer); });
+
 // ---- Bevolkingsprognose 2023–2050 (CBS/PBL), per gemeente ----
 const PROG = DATA.prognose;
 function progHtml(compact){
@@ -1257,6 +1274,7 @@ function updateMapLegend(){
     for(const k of BAG_K) h+=`<div class="kl-r"><i style="background:${k[1]}"></i>${k[2]}</div>`; }
   if($('lyrRoads').checked){ h+=`<div class="kl-t">Hoofdwegennet</div>`; for(const r of Object.values(ROAD)) h+=`<div class="kl-r"><i style="background:${r.c};height:${Math.max(2,r.w)}px;border-radius:2px"></i>${r.l.toLowerCase()}</div>`; }
   if($('lyrOv').checked) h+=`<div class="kl-t">Bus</div><div class="kl-r"><i style="background:${BUS};height:3px;border-radius:2px"></i>buslijn</div><div class="kl-r"><i style="background:${BUS};border:1.5px solid ${BUS_RAND};border-radius:50%;width:8px;height:8px"></i>halte</div>`;
+  if($('lyrKer').checked){ h+=`<div class="kl-t">Dijken en waterkeringen</div>`; for(const k of Object.values(KER)) h+=`<div class="kl-r"><i style="background:${k.c};height:${Math.max(2,Math.round(k.w))}px;border-radius:2px"></i>${k.l.replace(' waterkering','').toLowerCase()}</div>`; }
   if($('lyrKlim').checked){ const k=klimInfo(); h+=`<div class="kl-t">${k.naam}</div><img alt="" src="${k.legenda}">`; }
   if($('lyrOng').checked) h+=`<div class="kl-t">Verkeersongevallen 2022–2024</div><div class="kl-r"><i style="background:${ONG};border-radius:50%;width:10px"></i>met letsel</div><div class="kl-r"><i style="background:#1d1d1b;border-radius:50%;width:10px"></i>dodelijk</div>`;
   if($('lyrErf').checked) h+=`<div class="kl-t">Erfgoed</div><div class="kl-r"><i style="background:${ERF};border-radius:50%;width:10px"></i>rijksmonument</div><div class="kl-r"><i style="border:2px dashed ${ERF};background:none"></i>beschermd gezicht</div>`;
@@ -1265,7 +1283,7 @@ function updateMapLegend(){
   d.innerHTML = h ? `<button class="kl-kop" aria-expanded="${!legendaDicht}">Legenda <span aria-hidden="true">${legendaDicht?'▸':'▾'}</span></button><div class="kl-in">${h}</div>` : '';
   const k=d.querySelector('.kl-kop'); if(k) k.onclick=()=>{ legendaDicht=!legendaDicht; updateMapLegend(); };
 }
-['theme','lyrFill','lyrNet','lyrBag','lyrErf','lyrLoc','lyrNnn','lyrN2k','lyrAhn','lyrKlim','lyrOng','lyrRoads','lyrOv'].forEach(id=>$(id).addEventListener('change', updateMapLegend));
+['theme','lyrFill','lyrNet','lyrBag','lyrErf','lyrLoc','lyrNnn','lyrN2k','lyrAhn','lyrKlim','lyrOng','lyrRoads','lyrOv','lyrKer'].forEach(id=>$(id).addEventListener('change', updateMapLegend));
 document.querySelectorAll('input[name=netmode]').forEach(i=>i.addEventListener('change', updateMapLegend));
 updateMapLegend();
 
@@ -1389,6 +1407,7 @@ function activeLayers(){
   if(on('lyrFill')) L2.push(hasTheme() ? {c:'#8a2486', l:'Buurtkleuren: '+currentTheme().label} : {c:'#f1d4ec', l:'Buurten'});
   if(on('lyrLoc') && currentLoc()) L2.push({c:LOC_GEEL, l:currentLoc().mv[0].toUpperCase()+currentLoc().mv.slice(1)+' (ook tot 5 km buiten de regio)'});
   if(on('lyrNet')) for(const v of [0,1,2,3]) L2.push({c:NET_C[v], l:`Netcongestie ${netMode()==='af'?'verbruik':'teruglevering'}: ${NET_L[v].toLowerCase()}`});
+  if(on('lyrKer')) for(const k of Object.values(KER)) L2.push({c:k.c, l:k.l+' (waterschappen)'});
   if(on('lyrKlim')) L2.push({c:'#3d7fd0', l:'Klimaat: '+klimInfo().naam+' (Klimaateffectatlas)', img:klimImg[klimMode()]});
   if(on('lyrOng')) L2.push({c:ONG, l:'Verkeersongevallen met letsel of doden 2022–2024 (BRON)'});
   if(on('lyrErf')) L2.push({c:ERF, l:'Rijksmonumenten en beschermde gezichten (RCE)'});
@@ -1415,7 +1434,7 @@ function kaartBronnen(){
     + ($('lyrNet').checked ? ` Netcongestie: capaciteitskaart Netbeheer Nederland, stand ${dmy(DATA.net.opgehaald)}, indicatief.` : '')
     + ($('lyrErf').checked ? ' Erfgoed: Rijksdienst voor het Cultureel Erfgoed (via PDOK).' : '')
     + ($('lyrBag').checked ? ' Bouwjaar: BAG, Kadaster (via PDOK).' : '')
-    + ($('lyrKlim').checked ? ' Klimaat: Klimaateffectatlas.' : '') + ($('lyrOng').checked ? ' Verkeersongevallen: BRON, Rijkswaterstaat.' : '')
+    + ($('lyrKer').checked ? ' Waterkeringen: waterschappen (via PDOK).' : '') + ($('lyrKlim').checked ? ' Klimaat: Klimaateffectatlas.' : '') + ($('lyrOng').checked ? ' Verkeersongevallen: BRON, Rijkswaterstaat.' : '')
     + (themed() && currentTheme().key.startsWith('lbm_') ? ` Leefbaarheid: Leefbaarometer ${LBM_J} (Rijksoverheid, via Provincie Zuid-Holland).` : '')
     + (themed() && currentTheme().key.startsWith('rt_') ? ' Reistijden: routes over OpenStreetMap (OSRM).' : '')
     + (themed() && currentTheme().key.startsWith('soc_') ? ' Sociaal domein: CBS 2024 (inkomen 2023).' : '')
@@ -2142,7 +2161,7 @@ document.querySelectorAll('#secLagen input[type=checkbox], #lyrLoc, #theme').for
 syncAllesUit();
 
 /* ---------- Deelbare link: thema, lagen, achtergrond en uitsnede staan in het webadres (#...) ---------- */
-const LAAG_IDS = {fill:'lyrFill', ahn:'lyrAhn', trein:'lyrRail', bus:'lyrOv', vz:'lyrVz', wegen:'lyrRoads', nnn:'lyrNnn', n2k:'lyrN2k', net:'lyrNet', erf:'lyrErf', bouwjaar:'lyrBag', loc:'lyrLoc', klimaat:'lyrKlim', ongevallen:'lyrOng'};
+const LAAG_IDS = {fill:'lyrFill', ahn:'lyrAhn', trein:'lyrRail', bus:'lyrOv', vz:'lyrVz', wegen:'lyrRoads', nnn:'lyrNnn', n2k:'lyrN2k', net:'lyrNet', erf:'lyrErf', bouwjaar:'lyrBag', loc:'lyrLoc', klimaat:'lyrKlim', ongevallen:'lyrOng', dijken:'lyrKer'};
 let hashKlaar=false, hashTimer=null;
 function stateHash(){
   const c=map.getCenter(), q=new URLSearchParams();
