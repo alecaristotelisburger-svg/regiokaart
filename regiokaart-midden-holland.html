@@ -3535,7 +3535,7 @@ syncAllesUit();
 /* ---------- Programma's van Regio Midden-Holland: per programma de belangrijkste thema's en kaartlagen ---------- */
 // lagen: [checkbox-id, naam, optioneel {radio:[naam, waarde]} of {vz:[categorieën]}]
 const PROGRAMMAS = [
-  {k:'economie', naam:'Economie, Onderwijs & Arbeidsmarkt', kort:'Economie',
+  {k:'economie', naam:'Economie, Onderwijs & Arbeidsmarkt', kort:'Economie, Onderwijs & Arbeidsmarkt',
    start:{thema:'bedrijven_per_1000_inwoners', lagen:['lyrBedr']},
    themas:['bedrijven_per_1000_inwoners','ww_per_1000','sl_arbeid','sl_zzp','sl_hoog','sl_laag','soc_inkomen_inw','aantal_bedrijfsvestigingen','basisonderwijs_gemiddelde_afstand_in_km','voortgezet_onderwijs_gem_afstand_in_km','rt_vo'],
    lagen:[['lyrBedr','Bedrijventerreinen'],['lyrRoads','Hoofdwegennet'],['lyrRail','Treinverbindingen'],['lyrNet','Netcongestie'],['lyrVz','Voorzieningen: onderwijs',{vz:['onderwijs']}],['lyrInd','Arbeidsmarktregio',{radio:['indmode','arbeidsmarktregio']}]]},
@@ -3550,11 +3550,11 @@ const PROGRAMMAS = [
      'huisartsenpraktijk_gemiddelde_afstand_in_km','huisartsenpost_gemiddelde_afstand_in_km','apotheek_gemiddelde_afstand_in_km','ziekenhuis_incl_buitenpolikliniek_gem_afst_in_km','grote_supermarkt_gemiddelde_afstand_in_km','kinderdagverblijf_gemiddelde_afstand_in_km','bibliotheek_gemiddelde_afstand_in_km','zwembad_gemiddelde_afstand_in_km',
      'pol_totaal','pol_inbraak','pol_geweld','pol_overlast','pol_jeugd','pol_vernieling','pol_fiets','lbm_overlast'],
    lagen:[['lyrVz','Voorzieningen'],['lyrOv','Buslijnen en haltes'],['lyrKlim','Klimaat: hitte',{radio:['klimmode','hitte']}],['lyrInd','GGD-regio',{radio:['indmode','ggdregio']}]]},
-  {k:'duurzaam', naam:'Duurzaamheid & Energietransitie', kort:'Duurzaamheid & Energie',
+  {k:'duurzaam', naam:'Duurzaamheid & Energietransitie', kort:'Duurzaamheid & Energietransitie',
    start:{thema:'percentage_woningen_met_zonnestroom', lagen:['lyrEn']},   // geen netcongestie: die vlakken zetten de buurtkleuren uit
    themas:['percentage_woningen_met_zonnestroom','percentage_aardgasvrije_woningen','percentage_aardgaswoningen','gemiddeld_aardgasverbruik','sl_stroom_netto','sl_stroom','gemiddelde_elektriciteitsteruglevering','perc_bouwjaar_afgelopen_10_jaar','ggd_verkoeling','lbm_fysiek'],
    lagen:[['lyrNet','Netcongestie'],['lyrEn','Energie: hoogspanning, zon en wind'],['lyrKlim','Klimaat (hitte, water, bodemdaling)'],['lyrBod','Veenweide: veenoxidatie',{radio:['bodmode','veenoxidatie']}],['lyrKer','Dijken en waterkeringen'],['lyrNnn','Natuurnetwerk Nederland'],['lyrN2k','Natura 2000'],['lyrBag','Bouwjaar van gebouwen'],['lyrInd','RES-regio',{radio:['indmode','regionale_energiestrategie']}]]},
-  {k:'mobiliteit', naam:'Bereikbaarheid & Mobiliteit', kort:'Bereikbaarheid',
+  {k:'mobiliteit', naam:'Bereikbaarheid & Mobiliteit', kort:'Bereikbaarheid & Mobiliteit',
    start:{thema:'rt_station', lagen:['lyrRail','lyrOv']},
    themas:['rt_station','rt_ziekenhuis','rt_vo','treinstation_gemiddelde_afstand_in_km','overstapstation_gemiddelde_afstand_in_km','oprit_hoofdverkeersweg_gemiddelde_afstand_in_km','personenautos_per_huishouden','ong_aantal','ggd_geluid'],
    lagen:[['lyrRail','Treinverbindingen'],['lyrOv','Buslijnen en haltes'],['lyrRoads','Hoofdwegennet'],['lyrOng','Verkeersongevallen'],['lyrBedr','Bedrijventerreinen']]},
