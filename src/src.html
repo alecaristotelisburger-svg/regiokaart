@@ -212,8 +212,6 @@
   .proglagen{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:12.5px}
   .proglagen label{display:flex;gap:6px;align-items:flex-start;cursor:pointer;line-height:1.3}
   .proglagen input{margin:2px 0 0;accent-color:var(--accent);flex:none}
-  .progstart{margin-top:12px;padding:7px 12px;font-size:13px}
-  .progstartnoot{margin:5px 0 0}
   .filters input[type=search]{border:1px solid #d9cbd6;border-radius:8px;padding:5px 10px;font:13px Barlow,sans-serif;width:200px}
   .filters .rechts{margin-left:auto;color:var(--muted)}
   .kolkies{position:relative;display:inline-block}
@@ -2470,26 +2468,21 @@ syncAllesUit();
 // lagen: [checkbox-id, naam, optioneel {radio:[naam, waarde]} of {vz:[categorieën]}]
 const PROGRAMMAS = [
   {k:'economie', naam:'Economie, Onderwijs & Arbeidsmarkt', kort:'Economie, Onderwijs & Arbeidsmarkt',
-   start:{thema:'bedrijven_per_1000_inwoners', lagen:['lyrBedr']},
    themas:['bedrijven_per_1000_inwoners','ww_per_1000','sl_arbeid','sl_zzp','sl_hoog','sl_laag','soc_inkomen_inw','aantal_bedrijfsvestigingen','basisonderwijs_gemiddelde_afstand_in_km','voortgezet_onderwijs_gem_afstand_in_km','rt_vo'],
    lagen:[['lyrBedr','Bedrijventerreinen'],['lyrRoads','Hoofdwegennet'],['lyrRail','Treinverbindingen'],['lyrNet','Netcongestie'],['lyrVz','Voorzieningen: onderwijs',{vz:['onderwijs']}],['lyrInd','Arbeidsmarktregio',{radio:['indmode','arbeidsmarktregio']}]]},
   {k:'wonen', naam:'Ruimte & Wonen', kort:'Ruimte & Wonen',
-   start:{thema:'nieuwbouw_per_1000_woningen', lagen:['lyrBod']},
    themas:['nieuwbouw_per_1000_woningen','gemiddelde_woningwaarde','perc_huurwoningen_in_bezit_woningcorporaties','percentage_koopwoningen','perc_huurwoningen_in_bezit_overige_verhuurders','perc_bouwjaar_afgelopen_10_jaar','percentage_meergezinswoning','percentage_onbewoond','bevolkingsdichtheid_inwoners_per_km2','omgevingsadressendichtheid','percentage_eenpersoonshuishoudens','lbm_totaal','lbm_woning','tr_woningvoorraad','tr_gemiddelde_woningwaarde','tr_perc_huurwoningen_in_bezit_woningcorporaties'],
    lagen:[['lyrBod','Veenweide en bodem'],['lyrKer','Dijken en waterkeringen'],['lyrKlim','Klimaat: bodemdaling',{radio:['klimmode','bodemdaling']}],['lyrNet','Netcongestie'],['lyrNnn','Natuurnetwerk Nederland'],['lyrN2k','Natura 2000'],['lyrErf','Erfgoed'],['lyrBag','Bouwjaar van gebouwen'],['lyrAhn','Hoogte t.o.v. NAP']]},
   {k:'mens', naam:'Mens & Voorzieningen', kort:'Mens & Voorzieningen',
-   start:{thema:'percentage_personen_65_jaar_en_ouder', lagen:['lyrVz'], vz:['zorg']},
    themas:['percentage_personen_65_jaar_en_ouder','soc_wmo_per_1000','soc_jeugdzorg_pct','soc_armoede_pct','ggd_eenzaam','ggd_gezond','ggd_rondkomen','ggd_mantelzorg','percentage_personen_0_tot_15_jaar','percentage_personen_15_tot_25_jaar','percentage_huishoudens_met_kinderen','soc_laag_inkomen_pct','bijstand_per_1000',
      'ggd_angst','ggd_stress','ggd_sterk_eenzaam','ggd_vrijwilliger','ggd_overgewicht','ggd_roken','ggd_bewegen','lbm_sociaal','lbm_voorz',
      'huisartsenpraktijk_gemiddelde_afstand_in_km','huisartsenpost_gemiddelde_afstand_in_km','apotheek_gemiddelde_afstand_in_km','ziekenhuis_incl_buitenpolikliniek_gem_afst_in_km','grote_supermarkt_gemiddelde_afstand_in_km','kinderdagverblijf_gemiddelde_afstand_in_km','bibliotheek_gemiddelde_afstand_in_km','zwembad_gemiddelde_afstand_in_km',
      'pol_totaal','pol_inbraak','pol_geweld','pol_overlast','pol_jeugd','pol_vernieling','pol_fiets','lbm_overlast'],
    lagen:[['lyrVz','Voorzieningen'],['lyrOv','Buslijnen en haltes'],['lyrKlim','Klimaat: hitte',{radio:['klimmode','hitte']}],['lyrInd','GGD-regio',{radio:['indmode','ggdregio']}]]},
   {k:'duurzaam', naam:'Duurzaamheid & Energietransitie', kort:'Duurzaamheid & Energietransitie',
-   start:{thema:'percentage_woningen_met_zonnestroom', lagen:['lyrEn']},   // geen netcongestie: die vlakken zetten de buurtkleuren uit
    themas:['percentage_woningen_met_zonnestroom','percentage_aardgasvrije_woningen','percentage_aardgaswoningen','gemiddeld_aardgasverbruik','sl_stroom_netto','sl_stroom','gemiddelde_elektriciteitsteruglevering','perc_bouwjaar_afgelopen_10_jaar','ggd_verkoeling','lbm_fysiek'],
    lagen:[['lyrNet','Netcongestie'],['lyrEn','Energie: hoogspanning, zon en wind'],['lyrKlim','Klimaat (hitte, water, bodemdaling)'],['lyrBod','Veenweide: veenoxidatie',{radio:['bodmode','veenoxidatie']}],['lyrKer','Dijken en waterkeringen'],['lyrNnn','Natuurnetwerk Nederland'],['lyrN2k','Natura 2000'],['lyrBag','Bouwjaar van gebouwen'],['lyrInd','RES-regio',{radio:['indmode','regionale_energiestrategie']}]]},
   {k:'mobiliteit', naam:'Bereikbaarheid & Mobiliteit', kort:'Bereikbaarheid & Mobiliteit',
-   start:{thema:'rt_station', lagen:['lyrRail','lyrOv']},
    themas:['rt_station','rt_ziekenhuis','rt_vo','treinstation_gemiddelde_afstand_in_km','overstapstation_gemiddelde_afstand_in_km','oprit_hoofdverkeersweg_gemiddelde_afstand_in_km','personenautos_per_huishouden','ong_aantal','ggd_geluid'],
    lagen:[['lyrRail','Treinverbindingen'],['lyrOv','Buslijnen en haltes'],['lyrRoads','Hoofdwegennet'],['lyrOng','Verkeersongevallen'],['lyrBedr','Bedrijventerreinen']]},
 ];
@@ -2516,18 +2509,10 @@ function renderProg(){
     <div class="proglabel">Thema's per buurt</div>
     <div class="progchips">${th.slice(0,PROG_ZICHTBAAR).map(knop).join('')}${progMeer?th.slice(PROG_ZICHTBAAR).map(knop).join(''):''}${rest>0?`<button type="button" class="linkbtn progmeer">${progMeer?'minder':'+ '+rest+' meer'}</button>`:''}</div>
     <div class="proglabel">Kaartlagen</div>
-    <div class="proglagen">${p.lagen.map(([id,naam],i)=>`<label><input type="checkbox" data-i="${i}" ${$(id).checked?'checked':''}>${naam}</label>`).join('')}</div>
-    <button type="button" class="btn progstart">Toon startweergave</button>
-    <p class="note progstartnoot">Zet ${THEMES.find(t=>t.key===p.start.thema).label.toLowerCase()} en ${p.start.lagen.map(id=>p.lagen.find(l=>l[0]===id)[1].toLowerCase()).join(' en ')} aan, en de rest van de kaartlagen uit.</p>`;
+    <div class="proglagen">${p.lagen.map(([id,naam],i)=>`<label><input type="checkbox" data-i="${i}" ${$(id).checked?'checked':''}>${naam}</label>`).join('')}</div>`;
   box.querySelectorAll('.progthema').forEach(b=>b.onclick=()=>{ kiesThema(b.dataset.k); });
   const m=box.querySelector('.progmeer'); if(m) m.onclick=()=>{ progMeer=!progMeer; renderProg(); };
   box.querySelectorAll('.proglagen input').forEach(c=>c.onchange=()=>{ const [id,,opt]=p.lagen[+c.dataset.i]; zetLaag(id, c.checked, opt); });
-  box.querySelector('.progstart').onclick=()=>{
-    $('btnAllesUit').click();
-    kiesThema(p.start.thema);
-    for(const id of p.start.lagen){ const l=p.lagen.find(x=>x[0]===id); zetLaag(id, true, p.start.vz && id==='lyrVz' ? {vz:p.start.vz} : l[2]); }
-    regioInBeeld(true); renderProg(); schrijfHash();
-  };
 }
 $('progKnoppen').innerHTML = PROGRAMMAS.map(p=>`<button type="button" class="progknop" data-p="${p.k}" aria-pressed="false" title="${p.naam}">${p.kort}</button>`).join('');
 document.querySelectorAll('#progKnoppen button').forEach(b=>b.addEventListener('click', ()=>{ progKeuze = progKeuze===b.dataset.p ? null : b.dataset.p; progMeer=false; renderProg(); schrijfHash(); }));

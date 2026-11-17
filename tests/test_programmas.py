@@ -1,4 +1,4 @@
-"""Test van het blok Programma's: startweergaven, vinkjes, thema-knoppen, link en telefoon. Gebruik: .venv/bin/python tests/test_programmas.py"""
+"""Test van het blok Programma's: thema-knoppen, vinkjes, thema-knoppen, link en telefoon. Gebruik: .venv/bin/python tests/test_programmas.py"""
 import sys
 from playwright.sync_api import sync_playwright
 import os; S=sys.argv[1] if len(sys.argv)>1 else os.path.join(os.path.dirname(__file__),'uit'); os.makedirs(S,exist_ok=True); U='file:///Users/alecburger/MEGA/regiokaart/regiokaart-midden-holland.html'
@@ -15,10 +15,8 @@ with sync_playwright() as p:
     pg.screenshot(path=S+'/start.png', clip={'x':0,'y':0,'width':360,'height':900})
     for k in ['economie','wonen','mens','duurzaam','mobiliteit']:
         pg.click(f'#progKnoppen [data-p={k}]'); pg.wait_for_timeout(200)
-        pg.click('.progstart'); pg.wait_for_timeout(1500)
-        r=pg.evaluate("[progInfo().start.thema===$('theme').value, progInfo().start.lagen.every(id=>$(id).checked), $('lyrFill').checked, [...document.querySelectorAll('#secLagen .layer > input:checked')].map(i=>i.id)]")
-        check(f'startweergave {k}', r[0] and r[1] and r[2], r)
-        pg.evaluate("document.getElementById('secProg').scrollIntoView()"); pg.wait_for_timeout(200)
+        check(f'programma {k} toont thema\'s en lagen, geen startweergave', pg.evaluate("document.querySelectorAll('.progthema').length>0 && document.querySelectorAll('.proglagen input').length>0 && !document.querySelector('.progstart')"))
+        pg.evaluate("document.getElementById('secProg').scrollIntoView()"); pg.wait_for_timeout(100)
         pg.screenshot(path=S+f'/{k}.png')
     # vinkje in programma = echte laag
     pg.click('#progKnoppen [data-p=economie]'); pg.wait_for_timeout(200)
