@@ -455,15 +455,15 @@
       <div class="layer"><input type="checkbox" id="lyrInd"><label for="lyrInd"><span class="t">Regionale indelingen</span><span class="d">Met welke regio’s de vijf gemeenten samenwerken: veiligheidsregio, GGD, RES, arbeidsmarkt, jeugdzorg en meer. Kies hieronder welke je op de kaart ziet.</span></label></div>
       <div class="vzcats" id="indmode"></div>
       <div class="legend sub" id="indOverzicht" hidden></div>
-      <div class="layer"><input type="checkbox" id="lyrFill"><label for="lyrFill"><span class="t">Buurtkleuren tonen</span><span class="d">Toont de 248 buurten. Kies je hierboven een thema, dan krijgen ze de kleur van dat thema. Klik op een buurt voor de kerncijfers.</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrFill"><label for="lyrFill"><span class="t">Buurtkleuren tonen</span><span class="d">Toont alle buurten. Kies je hierboven een thema, dan krijgen ze de kleur van dat thema. Klik op een buurt voor de kerncijfers.</span></label></div>
     </section>
 
     <section class="klap" id="klapCmp">
       <h2><button class="klapkop" aria-expanded="false" aria-controls="klapCmpIn">Gemeenten vergeleken <span class="pijl" aria-hidden="true">▾</span></button></h2>
       <div class="klap-in" id="klapCmpIn">
       <div class="tblwrap"><table id="cmp"><tbody><tr><td>Laden…</td></tr></tbody></table></div>
-      <p class="note">Berekend uit de buurtcijfers van CBS (2024). Percentages zijn gewogen naar woningen of inwoners; geheime buurtwaarden tellen niet mee. Haltes: bushaltes uit OpenStreetMap (haltes aan twee kanten van de weg tellen als één).</p>
-      <h3 class="subkop">Verandering in vijf jaar (2019–2024)</h3>
+      <p class="note">Berekend uit de buurtcijfers van CBS (<span class="kwbjaar"></span>). Percentages zijn gewogen naar woningen of inwoners; geheime buurtwaarden tellen niet mee. Haltes: bushaltes uit OpenStreetMap (haltes aan twee kanten van de weg tellen als één).</p>
+      <h3 class="subkop">Verandering in vijf jaar (<span class="trendjaren"></span>)</h3>
       <div class="tblwrap"><table id="cmpTrend"></table></div>
       <p class="note" id="cmpTrendNote"></p>
       </div>
@@ -514,7 +514,7 @@
     <section>
       <h2>Bronnen</h2>
       <ul class="src">
-        <li>Buurtcijfers en grenzen: CBS Wijk- en Buurtkaart 2024, via PDOK (CC BY 4.0)</li>
+        <li>Buurtcijfers en grenzen: CBS Kerncijfers Wijken en Buurten <span class="kwbjaren"></span> (CBS StatLine en PDOK, CC BY 4.0); per thema staat het jaar in de toelichting</li>
         <li>Hoogte: AHN, Rijkswaterstaat, via PDOK (CC0)</li>
         <li>Grenzen gemeenten: samengevoegd uit de CBS-buurtgrenzen</li>
         <li>Achtergrondkaart: Kadaster / PDOK · Luchtfoto: Beeldmateriaal Nederland / PDOK</li>
@@ -581,7 +581,7 @@ document.getElementById('logoImg').src = DATA.logo;
 
 const GM = {GM1901:'Bodegraven-Reeuwijk',GM0513:'Gouda',GM1931:'Krimpenerwaard',GM0627:'Waddinxveen',GM1892:'Zuidplas'};
 const BBOX = [4.50,51.86,4.93,52.15];
-const API = 'https://api.pdok.nl/cbs/wijken-en-buurten-2024/ogc/v1/collections/';
+const API = 'https://api.pdok.nl/cbs/wijken-en-buurten-2025/ogc/v1/collections/';
 const RAMP = ['#f1d4ec','#d995ce','#bb55ae','#8a2486','#5b0065'];
 const NODATA = '#e9eaec';
 
@@ -642,9 +642,16 @@ const THEMES = [
   {g:'Energie', key:'gemiddelde_elektriciteitsteruglevering', label:'Teruglevering van stroom', fmt:v=>nl0.format(v)+' kWh', note:'Gemiddelde teruglevering van stroom aan het net per woning per jaar, vooral door zonnepanelen. Relevant naast netcongestie.'}
 ];
 for(const t of THEMES){ Object.assign(t, DATA.spec[t.key]||{agg:{type:'w',w:'aantal_inwoners'}}); }
+// CBS-jaar per kenmerk (scripts/kwb_jaar.py): het nieuwste jaar dat gevuld is, anders het jaar ervoor
+const KWB = DATA.kwb_jaar, KJ = KWB.nieuw, KV = KWB.vorig, NB = DATA.buurten.features.length;
+const KWB_JAREN = Object.values(KWB.jaar).some(j=>j!==KJ) ? `${KJ} (deels ${KV})` : String(KJ);
+for(const t of THEMES){ const j = KWB.jaar[t.key]; if(!j) continue;
+  t.jaar = j; t.label = t.label.replace(/\b20\d\d\b/g, j); t.note = t.note.replace(/\b2024\b/g, j) + ` Bron: CBS, ${j}.`; }
+document.querySelectorAll('.kwbjaar').forEach(e=>e.textContent=KJ); document.querySelectorAll('.kwbjaren').forEach(e=>e.textContent=KWB_JAREN);
 
-/* ---------- Trend: verandering sinds 2019 (scripts/trend.py) ---------- */
+/* ---------- Trend: verandering over vijf jaar (scripts/trend.py) ---------- */
 const TREND = DATA.trend, TJ = TREND.jaar;
+document.querySelectorAll('.trendjaren').forEach(e=>e.textContent=`${TJ}–${KJ}`);
 const TR_NAAM = {aantal_inwoners:'inwoners', aantal_huishoudens:'huishoudens', woningvoorraad:'woningen', gemiddelde_woningwaarde:'WOZ-waarde',
   percentage_personen_0_tot_15_jaar:'kinderen (0–14 jaar)', percentage_personen_65_jaar_en_ouder:'65-plussers',
   percentage_eenpersoonshuishoudens:'eenpersoonshuishoudens', percentage_koopwoningen:'koopwoningen', perc_huurwoningen_in_bezit_woningcorporaties:'corporatiewoningen'};
@@ -657,8 +664,8 @@ const N_VERGELIJKBAAR = Object.keys(TREND.buurt).length;
 for(const i of TREND.ind){
   const naam = TR_NAAM[i.key];
   const wat = i.soort==='pct' ? `Procentuele verandering van het aantal ${naam}` : `Verandering van het aandeel ${naam}, in procentpunten,`;
-  THEMES.push({g:`Verandering ${TJ}–2024`, key:'tr_'+i.key, label:'Verandering '+naam, trend:i, fmt:trFmt(i.soort), fmtKort:v=>teken(v, i.soort==='pct'?nl1v:nl1), agg:null, cmp:null,
-    note:(i.key==='gemiddelde_woningwaarde' ? 'Procentuele verandering van de gemiddelde WOZ-waarde' : wat)+` tussen ${TJ} en 2024 (CBS, peildatum 1 januari). Alleen buurten waarvan de grens niet veranderde (${N_VERGELIJKBAAR} van de 248); buurten met weinig inwoners of woningen vallen af. Grijs: geen vergelijking mogelijk.${i.soort==='pp'?' Het CBS rondt de aandelen per buurt af op hele procenten, dus een verschil van 1 procentpunt telt als vrijwel gelijk.':''}`});
+  THEMES.push({g:`Verandering ${TJ}–${KJ}`, key:'tr_'+i.key, label:'Verandering '+naam, trend:i, fmt:trFmt(i.soort), fmtKort:v=>teken(v, i.soort==='pct'?nl1v:nl1), agg:null, cmp:null,
+    note:(i.key==='gemiddelde_woningwaarde' ? 'Procentuele verandering van de gemiddelde WOZ-waarde' : wat)+` tussen ${TJ} en ${KJ} (CBS, peildatum 1 januari). Alleen buurten waarvan de grens niet veranderde (${N_VERGELIJKBAAR} van de ${NB}); buurten met weinig inwoners of woningen vallen af. Grijs: geen vergelijking mogelijk.${i.soort==='pp'?' Het CBS rondt de aandelen per buurt af op hele procenten, dus een verschil van 1 procentpunt telt als vrijwel gelijk.':''}`});
 }
 for(const f of DATA.buurten.features){ const tr=TREND.buurt[f.properties.buurtcode]; if(!tr) continue; f.properties.tr_ok=true; for(const k in tr) f.properties['tr_'+k]=tr[k]; }
 const isTr = k => k.startsWith('tr_') || k.startsWith('eigen_') || k.startsWith('lbm_');  // waarden mogen negatief zijn
@@ -750,7 +757,7 @@ const EXTRA2 = {
 for(const [na, items] of Object.entries(EXTRA2)){ const i=THEMES.findIndex(t=>t.key===na); THEMES.splice(i+1, 0, ...items); }
 if(DATA.ref) for(const d of [DATA.gezondheid, DATA.politie, DATA.statline]){ Object.assign(DATA.ref.zh, d.ref.zh); Object.assign(DATA.ref.nl, d.ref.nl); }
 
-// verandering voor een gemeente (code 'GM0513') of de hele regio (null): 2024 uit de buurten, 2019 uit trend.json
+// verandering voor een gemeente (code 'GM0513') of de hele regio (null): huidig jaar uit de buurten, basisjaar uit trend.json
 function trendWaarde(code, k){
   const soort = TREND.ind.find(i=>i.key===k).soort;
   const v24 = aggregateFeats(code ? gmFeats(code) : buurten.features, baseSpec(k));
@@ -1515,7 +1522,7 @@ let legendaDicht = false;
 function updateMapLegend(){
   const d=$('kaartLegenda'); let h='';
   if(themed() && klassen.length){ const t=currentTheme();
-    h+=`<div class="kl-t">${t.label}${t.trend?' ('+TJ+'–2024)':''}</div>`;
+    h+=`<div class="kl-t">${t.label}${t.trend?' ('+TJ+'–'+KJ+')':''}</div>`;
     for(const k of klassenHoogLaag()) h+=`<div class="kl-r"><i style="background:${k.c}"></i>${klasLabel(t,k)}</div>`;
     h+=`<div class="kl-r"><i style="background:${NODATA}"></i>geen gegevens</div>`; }
   if($('lyrNet').checked){ h+=`<div class="kl-t">Netcongestie: ${netMode()==='af'?'verbruik':'teruglevering'}</div>`;
@@ -1578,7 +1585,7 @@ function renderCmpChart(){
   if(t.trend){ // verandering per gemeente en regio
     const k=t.trend.key, rows = Object.entries(GM).map(([c,n])=>({l:n, v:trendWaarde(c,k), cls:''}));
     rows.push({l:'Regio', v:trendWaarde(null,k), cls:'reg', sep:true});
-    $('cmpTitle').textContent = `Vergelijking: ${t.label.toLowerCase()} (${TJ}–2024)`;
+    $('cmpTitle').textContent = `Vergelijking: ${t.label.toLowerCase()} (${TJ}–${KJ})`;
     const max = Math.max(...rows.map(r=>Math.abs(r.v||0))) || 1;
     $('cmpChart').innerHTML = rows.map(r=>`${r.sep?'<div class="sep"></div>':''}<div class="crow ${r.cls} ${r.v<=-0.05?'neg':''}"><div class="cl" title="${r.l}">${r.l}</div><div class="cb"><span style="width:${r.v?(Math.abs(r.v)/max*100).toFixed(1):0}%"></span></div><div class="cv">${r.v==null?'–':trFmtGm(t.trend.soort)(r.v)}</div></div>`).join('');
     $('cmpNote').textContent = `Per gemeente: alle buurten van ${TJ} en van 2024 opgeteld (de gemeentegrenzen zijn sinds 2015 niet veranderd), dus ook buurten die op de kaart grijs zijn.${t.trend.soort==='pp'?' In procentpunten.':''} Rode balk: daling.`;
@@ -1594,7 +1601,7 @@ function renderCmpChart(){
   }
   const max = Math.max(...rows.map(r=>r.v||0)) || 1;
   $('cmpChart').innerHTML = rows.map(r=>`${r.sep?'<div class="sep"></div>':''}<div class="crow ${r.cls}"><div class="cl" title="${r.l}">${r.l}</div><div class="cb"><span style="width:${r.v?(r.v/max*100).toFixed(1):0}%"></span></div><div class="cv">${fmtCmp(t,r.v)}</div></div>`).join('');
-  let note = 'Per gemeente berekend uit de CBS-buurtcijfers 2024';
+  let note = 'Per gemeente berekend uit de CBS-buurtcijfers '+(t.jaar||KJ);
   if(t.agg.type==='w') note += ', gewogen naar ' + ({aantal_inwoners:'inwoners',woningvoorraad:'woningen',aantal_huishoudens:'huishoudens'}[t.agg.w]||'') ;
   note += '.';
   if(t.eigen) note = 'Eigen gegevens, per gemeente: '+EIGEN_AGG_L[t.eigen.agg]+'. Geen vergelijking met Zuid-Holland en Nederland.';
@@ -1721,7 +1728,7 @@ function pdfHeader(doc, W, title, sub){
   doc.text(pdfText(sub), 10+lw+6, 21);
 }
 function kaartBronnen(){
-  return 'Bronnen: CBS Kerncijfers Wijken en Buurten 2024 (via PDOK)' + (themed() && currentTheme().trend ? ` en ${TJ}` : '') + '; Kadaster/PDOK (achtergrond, luchtfoto); RWS (AHN); Provincie Zuid-Holland (NNN); RVO (Natura 2000); OpenStreetMap-bijdragers (wegen, OV, voorzieningen).'
+  return `Bronnen: CBS Kerncijfers Wijken en Buurten ${themed() && currentTheme().jaar ? currentTheme().jaar : KWB_JAREN}` + (themed() && currentTheme().trend ? ` en ${TJ}` : '') + '; Kadaster/PDOK (achtergrond, luchtfoto); RWS (AHN); Provincie Zuid-Holland (NNN); RVO (Natura 2000); OpenStreetMap-bijdragers (wegen, OV, voorzieningen).'
     + ($('lyrNet').checked ? ` Netcongestie: capaciteitskaart Netbeheer Nederland, stand ${dmy(DATA.net.opgehaald)}, indicatief.` : '')
     + ($('lyrErf').checked ? ' Erfgoed: Rijksdienst voor het Cultureel Erfgoed (via PDOK).' : '')
     + ($('lyrBag').checked ? ' Bouwjaar: BAG, Kadaster (via PDOK).' : '')
@@ -1753,7 +1760,7 @@ async function exportMapPng(){
     // kop
     c.fillStyle=PURPLE; c.fillRect(0,0,W,KOP); c.textBaseline='alphabetic';
     c.fillStyle='#fbf2ee'; c.font=`700 ${22*s}px "Barlow Semi Condensed", Barlow, Helvetica, Arial, sans-serif`; c.fillText('Regiokaart Midden-Holland', 16*s, 30*s);
-    c.fillStyle='#f3c6e6'; c.font=`500 ${12.5*s}px Barlow, Helvetica, Arial, sans-serif`; c.fillText(`${themed() ? t.label+(t.trend?` (${TJ}–2024)`:'')+' per buurt · ' : ''}gemaakt op ${today()}`, 16*s, 51*s);
+    c.fillStyle='#f3c6e6'; c.font=`500 ${12.5*s}px Barlow, Helvetica, Arial, sans-serif`; c.fillText(`${themed() ? t.label+(t.trend?` (${TJ}–${KJ})`:'')+' per buurt · ' : ''}gemaakt op ${today()}`, 16*s, 51*s);
     c.drawImage(kaart,0,KOP);
     // legenda rechtsboven op de kaart
     const reg=[]; // {kop} of {c, l, rond}
@@ -1806,7 +1813,7 @@ async function exportMapPdf(){
     let x=222, y=my+2;
     doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
     if(themed() && klassen.length){
-      doc.text(pdfText(t.label+(t.trend?' ('+TJ+'-2024)':'')), x, y); y+=5;
+      doc.text(pdfText(t.label+(t.trend?' ('+TJ+'-'+KJ+')':'')), x, y); y+=5;
       doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
       for(const k of klassenHoogLaag()){ doc.setFillColor(...hex(k.c)); doc.rect(x,y-3,6,3.6,'F'); doc.text(pdfText(klasLabel(t,k)), x+8, y); y+=5; }
       doc.setFillColor(...hex(NODATA)); doc.rect(x,y-3,6,3.6,'F'); doc.text('geen gegevens / geheim', x+8, y); y+=6;
@@ -1860,7 +1867,7 @@ async function exportProfilePdf(){
     const doc=new jsPDF({unit:'mm',format:'a4'}); const W=210; let y;
     const fs=gmFeats(code), all=buurten.features, t=currentTheme();
     const val=(feats,k)=>aggregateFeats(feats,{type:'sum',key:k});
-    pdfHeader(doc, W, 'Gemeenteprofiel '+naam, `Regio Midden-Holland · CBS Kerncijfers Wijken en Buurten 2024 · ${today()}`);
+    pdfHeader(doc, W, 'Gemeenteprofiel '+naam, `Regio Midden-Holland · CBS Kerncijfers Wijken en Buurten ${KWB_JAREN} · ${today()}`);
     // kerncijfertegels
     y=34; const tiles=[['Inwoners',nl0.format(val(fs,'aantal_inwoners'))],['Huishoudens',nl0.format(val(fs,'aantal_huishoudens'))],['Woningen',nl0.format(val(fs,'woningvoorraad'))],['Bedrijfsvestigingen',nl0.format(val(fs,'aantal_bedrijfsvestigingen'))]];
     tiles.forEach((tl,i)=>{ const x=10+i*47.5; doc.setFillColor(...hex('#f6eaf5')); doc.roundedRect(x,y,45,19,2,2,'F'); doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text(tl[1],x+4,y+9); doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...hex(MUTED)); doc.text(tl[0],x+4,y+15); });
@@ -1899,8 +1906,8 @@ async function exportProfilePdf(){
     if(!DATA.ref){ doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED)); doc.text('Zuid-Holland en Nederland zijn nog niet toegevoegd.', 12, y+1); y+=5; }
     // verandering in vijf jaar
     y+=8; if(y+70>280){ doc.addPage(); y=20; }
-    doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text(pdfText(`Verandering in vijf jaar (${TJ}-2024)`), 10, y); y+=7;
-    { const tc=[10,110,140,170,201], th2=['Kerncijfer',String(TJ),'2024','Verandering','Regio'];
+    doc.setTextColor(...hex(PURPLE)); doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text(pdfText(`Verandering in vijf jaar (${TJ}-${KJ})`), 10, y); y+=7;
+    { const tc=[10,110,140,170,201], th2=['Kerncijfer',String(TJ),String(KJ),'Verandering','Regio'];
       doc.setFillColor(...hex(PURPLE)); doc.rect(10,y-4.5,190,6.5,'F'); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
       th2.forEach((h,i)=> i? doc.text(h, tc[i]-2, y, {align:'right'}) : doc.text(h, tc[0]+2, y)); y+=6;
       for(const ind of TREND.ind){
@@ -1913,7 +1920,7 @@ async function exportProfilePdf(){
         doc.setDrawColor(236,228,234); doc.line(10,y+1.6,200,y+1.6); y+=5;
       }
       doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','normal');
-      doc.text(doc.splitTextToSize(pdfText(`CBS Kerncijfers wijken en buurten ${TJ} en 2024 (peildatum 1 januari), per gemeente opgeteld uit alle buurten. Aandelen veranderen in procentpunten (%-punt). Bedrijfsvestigingen ontbreken: hun stijging van ongeveer 50% wijst op een andere telwijze en is geen betrouwbare trend.`),186), 12, y+1); y+=9;
+      doc.text(doc.splitTextToSize(pdfText(`CBS Kerncijfers wijken en buurten ${TJ} en ${KJ} (peildatum 1 januari), per gemeente opgeteld uit alle buurten. Aandelen veranderen in procentpunten (%-punt). Bedrijfsvestigingen ontbreken: hun stijging van ongeveer 50% wijst op een andere telwijze en is geen betrouwbare trend.`),186), 12, y+1); y+=9;
     }
     // bevolkingsprognose
     { if(y+40>280){ doc.addPage(); y=20; }
@@ -1972,7 +1979,7 @@ async function exportProfilePdf(){
     // voetnoot op alle pagina's
     const pages=doc.getNumberOfPages();
     for(let i=1;i<=pages;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(6.8); doc.setTextColor(...hex(MUTED));
-      doc.text(doc.splitTextToSize(pdfText('Bronnen: CBS Kerncijfers Wijken en Buurten 2024 (via PDOK), per gemeente berekend uit buurtcijfers; percentages gewogen naar inwoners, woningen of huishoudens; geheime buurtwaarden tellen niet mee. Voorzieningen, OV en wegen: OpenStreetMap-bijdragers. Natuur: Provincie Zuid-Holland, RVO. Regio Midden-Holland - prototype.'),170), 10, 287);
+      doc.text(doc.splitTextToSize(pdfText(`Bronnen: CBS Kerncijfers Wijken en Buurten ${KWB_JAREN} (CBS en PDOK), per gemeente berekend uit buurtcijfers; percentages gewogen naar inwoners, woningen of huishoudens; geheime buurtwaarden tellen niet mee. Voorzieningen, OV en wegen: OpenStreetMap-bijdragers. Natuur: Provincie Zuid-Holland, RVO. Regio Midden-Holland - prototype.`),170), 10, 287);
       doc.text(`${i}/${pages}`, 200, 291, {align:'right'}); }
     await saveFile(`gemeenteprofiel-${slug(naam)}-${stamp()}.pdf`, doc.output('blob'));
   }catch(e){ console.error(e); dlStatus('Het maken van het profiel is mislukt: '+(e.message||e)); }
@@ -2005,7 +2012,7 @@ $('btnProfPdf').addEventListener('click', exportProfilePdf);
     zet(false);
     new ResizeObserver(()=>{ if(!sec.classList.contains('open')) box.style.maxHeight=dichtHoogte()+'px'; }).observe(sec);
   });
-  setStatus(`${buurten.features.length} buurten · CBS Kerncijfers Wijken en Buurten 2024`);
+  setStatus(`${buurten.features.length} buurten · CBS Kerncijfers Wijken en Buurten ${KWB_JAREN}`);
 })();
 
 /* ---------- Zoeken: thema's, gemeenten en buurten (in de pagina) + adressen (PDOK Locatieserver, online) ---------- */
@@ -2089,7 +2096,7 @@ const EIGEN_AGG_L = {som:'optellen', inw:'gemiddelde, gewogen naar inwoners', wo
 function eigenBewaar(){ try{ localStorage.setItem(EIGEN_OPSLAG, JSON.stringify(eigenSets)); return true; }catch(e){ return false; } }
 function eigenThema(d){
   return {g:'Eigen data', key:'eigen_'+d.id, label:'Eigen: '+d.naam, fmt:v=>nlE.format(v), eigen:d, agg:EIGEN_AGG[d.agg]||EIGEN_AGG.som, cmp:null,
-    note:`Eigen gegevens: ${d.naam} (bron: ${d.bron}, toegevoegd op ${d.datum}). ${Object.keys(d.w).length} van de 248 buurten hebben een waarde. Deze gegevens staan alleen in deze browser en zijn niet zichtbaar voor anderen die de link openen.`};
+    note:`Eigen gegevens: ${d.naam} (bron: ${d.bron}, toegevoegd op ${d.datum}). ${Object.keys(d.w).length} van de ${NB} buurten hebben een waarde. Deze gegevens staan alleen in deze browser en zijn niet zichtbaar voor anderen die de link openen.`};
 }
 function eigenOpties(){
   for(const sel of [$('theme'), $('mTheme')]){
@@ -2212,7 +2219,7 @@ function dvKpi(){
   if(!r.length){ $('mKpi').innerHTML='<div><b>–</b>geen gegevens</div>'; return; }
   const reg = t.trend ? trendWaarde(null,t.trend.key) : themeValue(buurten.features,t,false);
   const rf = t.trend ? trFmtGm(t.trend.soort) : t.fmt;
-  $('mKpi').innerHTML=`<div><b>${reg==null?'–':rf(reg)}</b>Regio${t.trend?' ('+TJ+'–2024)':''}</div><div title="${esc(r[0].n)}"><b>${t.fmt(r[0].v)}</b>Hoogste: ${esc(r[0].n)}</div><div title="${esc(r[r.length-1].n)}"><b>${t.fmt(r[r.length-1].v)}</b>Laagste: ${esc(r[r.length-1].n)}</div><div><b>${r.length}</b>buurten met gegevens</div>`;
+  $('mKpi').innerHTML=`<div><b>${reg==null?'–':rf(reg)}</b>Regio${t.trend?' ('+TJ+'–'+KJ+')':''}</div><div title="${esc(r[0].n)}"><b>${t.fmt(r[0].v)}</b>Hoogste: ${esc(r[0].n)}</div><div title="${esc(r[r.length-1].n)}"><b>${t.fmt(r[r.length-1].v)}</b>Laagste: ${esc(r[r.length-1].n)}</div><div><b>${r.length}</b>buurten met gegevens</div>`;
 }
 const dvLabel = t => t.trend ? 'Δ '+TR_NAAM[t.trend.key]+' 5 jr' : t.label;
 function dvKolomLijst(){ const t=currentTheme(), k=dvKolommen.filter(x=>thema(x)); if(hasTheme() && !k.includes(t.key)) k.unshift(t.key); return k; }
@@ -2237,7 +2244,7 @@ function dvBuurten(){
       kol.map(k=>`<th class="${k===t.key&&hasTheme()?'hl':''}" title="${esc(thema(k).label)}"><button data-s="${k}">${esc(dvLabel(thema(k)))}${pijl(k)}</button></th>`).join('')}</tr></thead><tbody>${
       rows.map(f=>{ const p=f.properties; return `<tr data-c="${p.buurtcode}" tabindex="0"><td class="tl"><span class="sw" style="background:${hasTheme()&&$('lyrFill').checked?colorFor(cleanK(p,t.key)):'#f1d4ec'}"></span>${esc(p.buurtnaam)}</td><td class="tl">${esc(p.gemeentenaam)}</td>${
         kol.map(k=>{ const v=cleanK(p,k), th=thema(k); const c=isTr(k)&&v!=null&&th.trend?(v>0?'op':v<0?'neer':''):''; return `<td class="${k===t.key&&hasTheme()?'hl':''} ${c}">${v==null?'–':th.fmt(v)}</td>`; }).join('')}</tr>`; }).join('')}</tbody></table>
-    <p class="tabnoot">Klik op een buurt om ernaartoe te gaan. Bron: CBS Kerncijfers Wijken en Buurten 2024${kol.some(isTr)?' en '+TJ:''}. – = geen gegevens of geheim.</p>`;
+    <p class="tabnoot">Klik op een buurt om ernaartoe te gaan. Bron: CBS Kerncijfers Wijken en Buurten ${KWB_JAREN}${kol.some(isTr)?' en '+TJ:''}. – = geen gegevens of geheim.</p>`;
 }
 function dvGemeenten(){
   const head=`<tr><th class="tl">Kerncijfer</th>${Object.values(GM).map(n=>`<th>${n}</th>`).join('')}<th class="hl">Regio</th><th>Zuid-Holland</th><th>Nederland</th></tr>`;
@@ -2250,7 +2257,7 @@ function dvGemeenten(){
     rows+=`<tr><td class="tl">${esc(lbl)}</td>${Object.keys(GM).map(c=>`<td>${fmtCmp(t,themeValue(gmFeats(c),t,true))}</td>`).join('')}<td class="hl">${fmtCmp(t,themeValue(buurten.features,t,true))}</td><td>${t.eigen?'–':fmtCmp(t,zh)}</td><td>${t.eigen?'–':fmtCmp(t,nl)}</td></tr>`;
   }
   return `<table class="dt statisch"><caption class="sr">Kerncijfers per gemeente</caption><thead>${head}</thead><tbody>${rows}</tbody></table>
-    <p class="tabnoot">Per gemeente berekend uit de CBS-buurtcijfers 2024: percentages gewogen naar inwoners, woningen of huishoudens; geheime buurtwaarden tellen niet mee. Zuid-Holland en Nederland op dezelfde manier uit alle gemeenten.</p>`;
+    <p class="tabnoot">Per gemeente berekend uit de CBS-buurtcijfers ${KWB_JAREN}: percentages gewogen naar inwoners, woningen of huishoudens; geheime buurtwaarden tellen niet mee. Zuid-Holland en Nederland op dezelfde manier uit alle gemeenten.</p>`;
 }
 function dvTrend(){
   const fv=(i,v)=> v==null ? '–' : (i.soort==='pp' ? nl1v.format(v)+'%' : (thema(i.key)||{fmt:x=>nl0.format(x)}).fmt(v));
@@ -2259,13 +2266,13 @@ function dvTrend(){
     const cel=c=>{ const v=trendWaarde(c,i.key); return `<td class="${c===null?'hl':''} ${v>=0.05?'op':v<=-0.05?'neer':''}">${v==null?'–':trFmtGm(i.soort)(v)}</td>`; };
     return `<tr data-t="tr_${i.key}" tabindex="0"><td class="tl">${naam}</td><td>${fv(i,TREND.regio[i.key])}</td><td>${fv(i,aggregateFeats(buurten.features, baseSpec(i.key)))}</td>${Object.keys(GM).map(cel).join('')}${cel(null)}</tr>`;
   }).join('');
-  return `<table class="dt"><caption class="sr">Verandering ${TJ}–2024 per gemeente</caption><thead><tr><th class="tl">Verandering ${TJ}–2024</th><th>Regio ${TJ}</th><th>Regio 2024</th>${Object.values(GM).map(n=>`<th>${n}</th>`).join('')}<th class="hl">Regio</th></tr></thead><tbody>${rows}</tbody></table>
+  return `<table class="dt"><caption class="sr">Verandering ${TJ}–${KJ} per gemeente</caption><thead><tr><th class="tl">Verandering ${TJ}–${KJ}</th><th>Regio ${TJ}</th><th>Regio 2024</th>${Object.values(GM).map(n=>`<th>${n}</th>`).join('')}<th class="hl">Regio</th></tr></thead><tbody>${rows}</tbody></table>
     <p class="tabnoot">Klik op een regel om die verandering per buurt op de kaart te zien. Peildatum 1 januari; per gemeente alle buurten opgeteld. Aandelen in procentpunten. Bedrijfsvestigingen ontbreken: hun stijging van ongeveer 50% wijst op een andere telwijze.</p>
     <div class="h3" style="margin-top:18px">Bevolkingsprognose</div>${progHtml()}<p class="tabnoot">${progNote()}</p>`;
 }
 function dvEigen(){
   const lijst = eigenSets.length ? eigenSets.map(d=>{ const n=Object.keys(d.w).length;
-    return `<div class="eigen"><b>Eigen: ${esc(d.naam)}</b><br><span class="${n?'ok':'let'}">${n?'✓':'!'} ${n} van 248 buurten herkend</span>${d.niet&&d.niet.length?` · <span class="let">${d.niet.length} regel${d.niet.length===1?'':'s'} niet herkend</span>`:''}
+    return `<div class="eigen"><b>Eigen: ${esc(d.naam)}</b><br><span class="${n?'ok':'let'}">${n?'✓':'!'} ${n} van ${NB} buurten herkend</span>${d.niet&&d.niet.length?` · <span class="let">${d.niet.length} regel${d.niet.length===1?'':'s'} niet herkend</span>`:''}
       <br><span style="color:var(--muted)">Toegevoegd op ${esc(d.datum)} · bron: ${esc(d.bron)}</span>
       ${d.niet&&d.niet.length?`<details><summary>Niet herkend</summary>${d.niet.slice(0,40).map(esc).join('<br>')}${d.niet.length>40?'<br>…':''}</details>`:''}
       <div class="acties"><button class="btn" type="button" data-toon="${d.id}">Toon op de kaart</button>
@@ -2274,7 +2281,7 @@ function dvEigen(){
     : '<p class="note">Nog niets toegevoegd.</p>';
   return `<div class="twee"><div>
       <div class="h3">Eigen cijfers per buurt toevoegen</div>
-      <div class="stap"><span class="n">1</span><div><b>Download het sjabloon</b>: een CSV-bestand voor Excel met de 248 buurtcodes, buurtnamen en gemeenten. <button class="linkbtn" type="button" id="dvSjabloon">sjabloon-buurten-midden-holland.csv</button></div></div>
+      <div class="stap"><span class="n">1</span><div><b>Download het sjabloon</b>: een CSV-bestand voor Excel met de ${NB} buurtcodes, buurtnamen en gemeenten. <button class="linkbtn" type="button" id="dvSjabloon">sjabloon-buurten-midden-holland.csv</button></div></div>
       <div class="stap"><span class="n">2</span><div><b>Vul je eigen kolommen in</b>, bijvoorbeeld meldingen, plancapaciteit of een enquêtescore. Elke kolom met getallen wordt een eigen thema.</div></div>
       <div class="stap"><span class="n">3</span><div><b>Sleep het bestand hierheen, of kopieer de kolommen in Excel (met de kopregel) en plak ze hieronder.</b> Buurten worden herkend aan de buurtcode (BU…) of aan buurtnaam + gemeente.</div></div>
       <label class="drop" id="dvDrop"><b>Sleep een CSV-bestand hierheen</b><br>of klik om een bestand te kiezen<input type="file" id="dvBestand" accept=".csv,.txt,.tsv,text/csv" hidden></label>
@@ -2346,9 +2353,9 @@ function dvCsv(){
       regels.push(sepj([t.label+(t.cmp?' ('+t.cmp.label+')':''), ...Object.keys(GM).map(c=>getal(themeValue(gmFeats(c),t,true))), getal(themeValue(buurten.features,t,true)), t.eigen?'':getal(zh), t.eigen?'':getal(nl)])); }
     naam='gemeenten-vergeleken';
   } else if(dvTab==='trend'){
-    regels=[sepj([`Verandering ${TJ}-2024`,'Eenheid',...Object.values(GM),'Regio'])];
+    regels=[sepj([`Verandering ${TJ}-${KJ}`,'Eenheid',...Object.values(GM),'Regio'])];
     for(const i of TREND.ind) regels.push(sepj([TR_NAAM[i.key], i.soort==='pct'?'%':'procentpunt', ...[...Object.keys(GM),null].map(c=>getal(trendWaarde(c,i.key)))]));
-    naam='verandering-'+TJ+'-2024';
+    naam='verandering-'+TJ+'-'+KJ;
   } else {
     const kol=dvKolomLijst(), {rows}=dvRijen();
     regels=[sepj(['buurtcode','buurtnaam','gemeente',...kol.map(k=>thema(k).label+eenh(thema(k)))]), ...rows.map(f=>{ const p=f.properties; return sepj([p.buurtcode,p.buurtnaam,p.gemeentenaam,...kol.map(k=>getal(cleanK(p,k)))]); })];
@@ -2388,9 +2395,9 @@ if(!MOBIEL){
 const TOUR_OPSLAG='regiokaart-rondleiding-v1', TOUR_MS=12000, TOUR_MS_START=10000;   // stap 1: 10 s, daarna 12 s per stap
 const zoekSectie = () => $('zoek').closest('section'), sectieVan = id => $(id).closest('section');
 const TOUR = [
-  {t:'Welkom bij de Regiokaart', p:'Eén kaart voor Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas: 248 buurten en ruim honderd cijfers van onder meer CBS, GGD, politie en de provincie.', el:()=>[document.querySelector('#panel header')], scroll:()=>document.querySelector('#panel header'), blok:'start'},
+  {t:'Welkom bij de Regiokaart', p:'Eén kaart voor Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas: ruim 250 buurten en ruim honderd cijfers van onder meer CBS, GGD, politie en de provincie.', el:()=>[document.querySelector('#panel header')], scroll:()=>document.querySelector('#panel header'), blok:'start'},
   {t:'Kies een thema', p:'Kies bijvoorbeeld 65-plussers, leefbaarheid of de fietstijd naar het station. De buurten kleuren mee. Bij afstanden kun je de voorzieningen als gele stippen op de kaart zetten.', el:()=>[$('theme')], scroll:()=>$('theme')},
-  {t:'Klik op een buurt', p:'Klik op een buurt op de kaart. Je ziet dan alle cijfers van die buurt, met ▲▼ hoe het sinds 2019 is veranderd.', el:()=>[$('map')]},
+  {t:'Klik op een buurt', p:`Klik op een buurt op de kaart. Je ziet dan alle cijfers van die buurt, met ▲▼ hoe het sinds ${TJ} is veranderd.`, el:()=>[$('map')]},
   {t:'Vergelijk', p:'De balken zetten de vijf gemeenten naast de regio, Zuid-Holland en Nederland. Via “Alle buurten als tabel” zie je de ranglijst van alle buurten.', el:()=>[sectieVan('cmpChart')], scroll:()=>sectieVan('cmpChart')},
   {t:'Lagen en zoeken', p:'Zet kaartlagen aan, zoals klimaat, netcongestie, verkeersongevallen of het openbaar vervoer. Bovenaan zoek je op adres, buurt of thema.', el:()=>[$('zoek'), $('secLagen').querySelector('h2')], scroll:()=>$('secLagen').querySelector('h2'), blok:'start'},
   {t:'Delen en downloaden', p:'De knop onder + en − zet de hele regio netjes in beeld. Download daarna de kaart als PDF of PNG, maak een gemeenteprofiel, of kopieer een link naar precies deze weergave.', el:()=>[document.querySelector('.overzichtknop'), sectieVan('btnMapPdf'), sectieVan('btnProfPdf')], scroll:()=>sectieVan('btnMapPdf')},

@@ -34,7 +34,7 @@ async def main():
         await (await d.value).save_as(str(UIT / 'gemeenteprofiel-gouda.pdf'))
         status = await pg.inner_text('#status')
         await br.close()
-    assert '248 buurten' in status, status
+    assert '251 buurten' in status and '2025' in status, status
     assert not errs, errs
     print('OK:', status, '| uitvoer in', UIT)
 
