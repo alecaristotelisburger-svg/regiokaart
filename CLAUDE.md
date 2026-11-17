@@ -116,6 +116,8 @@ Afgeleid van het aangeleverde logo. De website zelf kon niet worden uitgelezen.
 8. **Regionale afspraken en projecten op de kaart**, met contactpersonen (de kennisbankfunctie).
 9. **Hosting op een eigen domein** van de regio. Sinds 7-11-2026 staat de kaart op GitHub Pages (zie onder), waar de achtergrondkaart werkt. Een eigen domein kan later aan GitHub Pages worden gekoppeld (CNAME).
 
+Het blok 'Volgende lagen' in het paneel is op 17-11-2026 weggehaald. Daar stonden als nog te maken lagen: bodemkwaliteit (opvragen bij ODMH), bodemdaling met satellietmetingen (bodemdalingskaart.nl), sociale huur per complex (via corporaties), bedrijventerreinen van BCI Vellum en woningbouwlocaties (Provincie Zuid-Holland).
+
 ## Gepubliceerde versie
 
 **Website (hoofdlink om te delen):** https://alecaristotelisburger-svg.github.io/regiokaart/ via GitHub Pages, branch `main`, map `/`. `index.html` stuurt door naar `regiokaart-midden-holland.html`. Hier laden achtergrondkaart, luchtfoto en AHN wel. Openbaar: iedereen met het adres kan de kaart openen.
