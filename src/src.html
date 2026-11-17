@@ -347,7 +347,7 @@
   .tk-tekst-icoon{background:none;border:none}
   .tk-tekst{display:inline-block;white-space:pre;font-family:Barlow,system-ui,sans-serif;font-weight:600;line-height:1.25;padding:5px 9px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
   .tk-kader{position:absolute;border:1.5px dashed var(--accent);border-radius:4px;pointer-events:none}
-  .tk-handvat{position:absolute;width:12px;height:12px;background:#fff;border:2px solid var(--accent);border-radius:3px;cursor:nwse-resize;box-sizing:border-box}
+  .tk-handvat{position:absolute;width:14px;height:14px;background:#fff;border:2px solid var(--accent);border-radius:3px;cursor:nwse-resize;box-sizing:border-box}
   .tk-invoer{position:absolute;min-width:200px;min-height:40px;font-family:Barlow,system-ui,sans-serif;font-weight:600;line-height:1.25;padding:5px 9px;border:2px solid var(--accent);border-radius:6px;resize:both;z-index:2;background:#fff;color:var(--ink)}
   #wissel[hidden],#tabLagen[hidden],#mInhoud[hidden]{display:none}
   @media (max-width:760px){
@@ -2586,14 +2586,18 @@ function tkHandvatten(){
   const k=tkKader(it); if(!k) return;
   const d=document.createElement('div'); d.className='tk-kader'; Object.assign(d.style,{left:k.x0+'px',top:k.y0+'px',width:(k.x1-k.x0)+'px',height:(k.y1-k.y0)+'px'}); tkVlak.appendChild(d);
   const hv = it.t==='rect'||it.t==='pijl' ? [0,1] : it.t==='cirkel' ? [1] : [];
-  for(const j of hv){ const p=PT(it.pts[j]), h=document.createElement('div'); h.className='tk-handvat'; h.dataset.j=j; Object.assign(h.style,{left:(p.x-6)+'px',top:(p.y-6)+'px'}); tkVlak.appendChild(h); }
+  for(const j of hv){ const p=PT(it.pts[j]), h=document.createElement('div'); h.className='tk-handvat'; h.dataset.j=j; Object.assign(h.style,{left:(p.x-7)+'px',top:(p.y-7)+'px'}); tkVlak.appendChild(h); }
 }
 // wat ligt er onder de muis? (bovenste eerst)
 function afstSeg(p,a,b){ const dx=b.x-a.x, dy=b.y-a.y, t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/((dx*dx+dy*dy)||1))); return Math.hypot(p.x-a.x-t*dx, p.y-a.y-t*dy); }
 function tkRaak(p){
   for(let i=tkItems.length-1;i>=0;i--){ const it=tkItems[i], marge=it.w/2+7;
-    if(it.t==='tekst'||it.t==='rect'){ const k=tkKader(it); if(k && p.x>=k.x0-3 && p.x<=k.x1+3 && p.y>=k.y0-3 && p.y<=k.y1+3) return i; continue; }
-    if(it.t==='cirkel'){ const c=PT(it.pts[0]); if(c.distanceTo(p) <= c.distanceTo(PT(it.pts[1]))+marge) return i; continue; }
+    if(it.t==='tekst'){ const k=tkKader(it); if(k && p.x>=k.x0-3 && p.x<=k.x1+3 && p.y>=k.y0-3 && p.y<=k.y1+3) return i; continue; }
+    if(it.t==='rect'){ const a=PT(it.pts[0]), b=PT(it.pts[1]), x0=Math.min(a.x,b.x), x1=Math.max(a.x,b.x), y0=Math.min(a.y,b.y), y1=Math.max(a.y,b.y);
+      const binnen = p.x>=x0-marge && p.x<=x1+marge && p.y>=y0-marge && p.y<=y1+marge;
+      const rand = Math.min(Math.abs(p.x-x0), Math.abs(p.x-x1), Math.abs(p.y-y0), Math.abs(p.y-y1)) <= marge;
+      if(binnen && (rand || (x1-x0<40 && y1-y0<40))) return i; continue; }   // alleen op de rand pakken: wat binnen het kader ligt blijft bereikbaar
+    if(it.t==='cirkel'){ const c=PT(it.pts[0]), r=c.distanceTo(PT(it.pts[1])), d=c.distanceTo(p); if(Math.abs(d-r)<=marge || (r<20 && d<=r)) return i; continue; }
     const ps=it.pts.map(PT); if(ps.length===1 && ps[0].distanceTo(p)<marge) return i;
     for(let j=1;j<ps.length;j++) if(afstSeg(p,ps[j-1],ps[j])<marge) return i;
   }
@@ -2620,12 +2624,12 @@ tkVlak.addEventListener('pointerdown', e=>{
   if(e.button!==0 || e.target.classList.contains('tk-invoer')) return;
   const p=cp(e), ll=naarP(p); tkVlak.setPointerCapture(e.pointerId);
   if(tkTool==='selecteer'){
-    if(e.target.classList.contains('tk-handvat')){ tkSnap(); tkActie={soort:'formaat', j:+e.target.dataset.j}; return; }
+    if(e.target.classList.contains('tk-handvat')){ tkSnap(); tkActie={soort:'formaat', j:+e.target.dataset.j, start:p, bewogen:false}; return; }
     tkSel=tkRaak(p); tkHandvatten(); tkSyncBalk();
     if(tkSel>=0){ tkSnap(); tkActie={soort:'verplaats', start:p, orig:JSON.parse(JSON.stringify(tkItems[tkSel].pts)), bewogen:false}; }
     return;
   }
-  if(tkTool==='gum'){ const i=tkRaak(p); if(i>=0){ tkSnap(); tkItems.splice(i,1); tkSel=-1; tkTeken(); tkBewaar(); } tkActie={soort:'gum'}; return; }
+  if(tkTool==='gum'){ const i=tkRaak(p); if(i>=0){ tkSnap(); tkItems.splice(i,1); tkSel=-1; tkTeken(); tkBewaar(); } return; }   // alleen aanklikken, niet vegen
   if(tkTool==='tekst'){ const i=tkRaak(p); if(i>=0 && tkItems[i].t==='tekst'){ tkTekstBewerk(i); return; }
     tkSnap(); tkItems.push({t:'tekst', c:tkKleur, w:tkDikte, pts:[ll], s:''}); tkTeken(); tkTekstBewerk(tkItems.length-1); return; }
   tkSnap();
@@ -2635,24 +2639,29 @@ tkVlak.addEventListener('pointerdown', e=>{
 tkVlak.addEventListener('pointermove', e=>{
   const p=cp(e); if(!tkActie){ if(tkTool==='selecteer'||tkTool==='gum') tkVlak.style.cursor = tkRaak(p)>=0 ? (tkTool==='gum'?'not-allowed':'move') : 'default'; return; }
   if(tkActie.soort==='teken'){ const it=tkActie.it;
-    if(it.t==='pen'){ if(p.distanceTo(tkActie.laatste)<2) return; tkActie.laatste=p; it.pts.push(naarP(p)); }
+    if(it.t==='pen'){ if(p.distanceTo(tkActie.laatste)<3) return; tkActie.laatste=p; it.pts.push(naarP(p)); }
     else it.pts[1]=naarP(p);
     tkTeken();
-  } else if(tkActie.soort==='verplaats'){ const d=p.subtract(tkActie.start); if(d.x||d.y) tkActie.bewogen=true;
-    tkItems[tkSel].pts = tkActie.orig.map(q=>naarP(PT(q).add(d))); tkTeken();
-  } else if(tkActie.soort==='formaat'){ tkItems[tkSel].pts[tkActie.j]=naarP(p); tkTeken();
-  } else if(tkActie.soort==='gum'){ const i=tkRaak(p); if(i>=0){ tkItems.splice(i,1); tkSel=-1; tkTeken(); tkBewaar(); } }
+  } else if(tkActie.soort==='verplaats'){ const d=p.subtract(tkActie.start);
+    if(!tkActie.bewogen && Math.hypot(d.x,d.y)<4) return;   // kleine trilling bij het klikken: niet verschuiven
+    tkActie.bewogen=true; tkItems[tkSel].pts = tkActie.orig.map(q=>naarP(PT(q).add(d))); tkTeken();
+  } else if(tkActie.soort==='formaat'){ if(!tkActie.bewogen && p.distanceTo(tkActie.start)<4) return; tkActie.bewogen=true; tkItems[tkSel].pts[tkActie.j]=naarP(p); tkTeken(); }
 });
 tkVlak.addEventListener('pointerup', e=>{
   const a=tkActie; tkActie=null; if(!a) return;
   if(a.soort==='teken'){ const it=a.it, klein = it.t==='pen' ? it.pts.length<2 : PT(it.pts[0]).distanceTo(PT(it.pts[1]))<5;
-    if(klein){ tkItems.pop(); tkGesch.pop(); } tkTeken(); }
-  if(a.soort==='verplaats' && !a.bewogen) tkGesch.pop();
+    if(klein){ tkItems.pop(); tkGesch.pop(); }
+    else if(it.t==='pen'){   // trillen van de hand wegwerken: twee keer middelen over de buren, dan overbodige punten weg
+      let ps=it.pts.map(PT);
+      for(let r=0;r<2;r++) ps=ps.map((q,i)=> i===0||i===ps.length-1 ? q : L.point((ps[i-1].x+2*q.x+ps[i+1].x)/4, (ps[i-1].y+2*q.y+ps[i+1].y)/4));
+      it.pts=L.LineUtil.simplify(ps, 0.8).map(naarP); }
+    else if(it.t!=='pen'){ tkZetTool('selecteer'); tkSel=tkItems.indexOf(it); }   // na een vorm: meteen selecteren, dan teken je niet per ongeluk nog een vorm
+    tkTeken(); }
+  if((a.soort==='verplaats' || a.soort==='formaat') && !a.bewogen) tkGesch.pop();
   tkBewaar();
 });
 tkVlak.addEventListener('dblclick', e=>{ const i=tkRaak(cp(e)); if(i>=0 && tkItems[i].t==='tekst' && tkTool!=='gum') tkTekstBewerk(i); });
-// zoomen met het scrollwiel blijft werken tijdens het tekenen
-tkVlak.addEventListener('wheel', e=>{ e.preventDefault(); map.setZoomAround(cp(e), map.getZoom() + (e.deltaY<0?0.5:-0.5)); }, {passive:false});
+// zoomen met scrollwiel of trackpad: niet zelf afhandelen; het wiel gaat door naar de kaart, die kleine stapjes rustig optelt
 map.on('zoomend moveend', ()=>{ if(tkItems.some(it=>it.t==='pijl')) tkTeken(); else tkHandvatten(); });
 map.on('move', tkHandvatten);
 
@@ -2670,7 +2679,7 @@ const TK_ICOON = {
   wis:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
 };
 const ico = n => `<svg viewBox="0 0 24 24" aria-hidden="true">${TK_ICOON[n]}</svg>`;
-const TK_TOOLS=[['hand','Kaart bewegen (Esc)'],['selecteer','Selecteren, verplaatsen en aanpassen (V)'],['pen','Pen (P)'],['rect','Rechthoek (R)'],['cirkel','Cirkel (C)'],['pijl','Pijl (A)'],['tekst','Tekstblokje (T)'],['gum','Gum (E)']];
+const TK_TOOLS=[['hand','Kaart bewegen (Esc)'],['selecteer','Selecteren, verplaatsen en aanpassen (V)'],['pen','Pen (P)'],['rect','Rechthoek (R)'],['cirkel','Cirkel (C)'],['pijl','Pijl (A)'],['tekst','Tekstblokje (T)'],['gum','Gum: klik op een tekening om hem te wissen (E)']];
 $('tekenBalk').innerHTML = `<div class="tk-groep">${TK_TOOLS.map(([k,t])=>`<button type="button" class="tk-knop" data-tool="${k}" title="${t}" aria-label="${t}">${ico(k)}</button>`).join('')}</div>
   <div class="tk-groep">${TK_DIKTES.map(([w,n])=>`<button type="button" class="tk-dikte" data-w="${w}" title="${n}" aria-label="Dikte: ${n.toLowerCase()}"><i style="width:${w+4}px;height:${w+4}px"></i></button>`).join('')}</div>
   <div class="tk-groep">${TK_KLEUREN.map(([c,n])=>`<button type="button" class="tk-kleur" data-c="${c}" title="${n}" aria-label="Kleur: ${n}" style="background:${c}"></button>`).join('')}</div>
@@ -2699,7 +2708,7 @@ $('tkWis').addEventListener('click', ()=>{ if(tkItems.length && confirm('Alle te
 $('btnTekenen').addEventListener('click', ()=>{
   const open=!$('wissel').classList.contains('tekenen');
   $('wissel').classList.toggle('tekenen', open); $('btnTekenen').setAttribute('aria-pressed', open); $('tekenBalk').setAttribute('aria-hidden', !open);
-  tkZetTool(open ? (tkItems.length ? 'selecteer' : 'pen') : 'hand');
+  tkZetTool('hand');   // na openen eerst niets tekenen: kies zelf een gereedschap
 });
 document.addEventListener('keydown', e=>{
   if(!$('wissel').classList.contains('tekenen') || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;

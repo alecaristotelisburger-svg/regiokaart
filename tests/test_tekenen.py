@@ -16,12 +16,14 @@ with sync_playwright() as p:
     n = lambda: pg.evaluate('tkItems.length')
     check('balk dicht bij start', pg.evaluate("getComputedStyle(document.getElementById('tekenBalk')).opacity") == '0')
     pg.click('#btnTekenen'); pg.wait_for_timeout(500)
-    check('balk rolt uit, pen actief', pg.evaluate("getComputedStyle(document.getElementById('tekenBalk')).opacity") == '1' and pg.evaluate('tkTool') == 'pen')
+    check('balk rolt uit, nog geen tekengereedschap actief', pg.evaluate("getComputedStyle(document.getElementById('tekenBalk')).opacity") == '1' and pg.evaluate('tkTool') == 'hand')
+    pg.mouse.move(700,400); pg.mouse.down(); pg.mouse.move(800,450, steps=5); pg.mouse.up(); check('slepen na openen verschuift de kaart, tekent niet', pg.evaluate('tkItems.length')==0)
+    pg.wait_for_timeout(900); pg.evaluate('regioInBeeld(false); 0'); pg.wait_for_timeout(500); pg.click('[data-tool=pen]')
     def sleep(x0, y0, x1, y1, stappen=12):
         pg.mouse.move(x0, y0); pg.mouse.down()
         for i in range(1, stappen + 1): pg.mouse.move(x0 + (x1 - x0) * i / stappen, y0 + (y1 - y0) * i / stappen + (8 if 0 < i < stappen else 0))
         pg.mouse.up(); pg.wait_for_timeout(100)
-    c0 = pg.evaluate('JSON.stringify(map.getCenter())'); sleep(700, 300, 900, 360); check('kaart schuift niet mee', pg.evaluate('JSON.stringify(map.getCenter())') == c0); check('pen tekent een lijn', n() == 1 and pg.evaluate("tkItems[0].t==='pen' && tkItems[0].pts.length>5"))
+    c0 = pg.evaluate('JSON.stringify(map.getCenter())'); sleep(700, 300, 900, 360); check('kaart schuift niet mee', pg.evaluate('JSON.stringify(map.getCenter())') == c0); check('pen tekent een lijn', n() == 1 and pg.evaluate("tkItems[0].t==='pen' && tkItems[0].pts.length>=2"))
     zonder_klik = pg.evaluate('document.querySelector(".leaflet-popup") === null'); check('tekenen opent geen buurt-pop-up', zonder_klik)
     pg.click('[data-tool=rect]'); pg.click('[data-c="#fc7c00"]'); pg.click('.tk-dikte[data-w="8"]'); sleep(950, 250, 1150, 420, 4)
     check('rechthoek oranje en dik', pg.evaluate("tkItems[1].t==='rect' && tkItems[1].c==='#fc7c00' && tkItems[1].w===8"))
@@ -45,7 +47,19 @@ with sync_playwright() as p:
     # zoomen: tekening blijft op dezelfde plek op de kaart
     ll = pg.evaluate('JSON.stringify(tkItems[2].pts)'); pg.evaluate('map.setZoom(map.getZoom()+1); 0'); pg.wait_for_timeout(600)
     check('zoomen verandert de tekening niet', pg.evaluate('JSON.stringify(tkItems[2].pts)') == ll); pg.evaluate('regioInBeeld(false); 0'); pg.wait_for_timeout(400)
+    # gevoeligheid
+    pg.click('[data-tool=selecteer]'); v=pg.evaluate('JSON.stringify(tkItems)'); k=pg.evaluate("(()=>{const q=map.latLngToContainerPoint(L.latLng(...tkItems[1].pts[0])); const r=map.getContainer().getBoundingClientRect(); return [q.x+r.left,q.y+r.top]})()")
+    pg.mouse.move(k[0],k[1]); pg.mouse.down(); pg.mouse.move(k[0]+2,k[1]+1); pg.mouse.up(); check('trilling van 2 px verschuift niets', pg.evaluate('JSON.stringify(tkItems)')==v)
+    c=pg.evaluate("(()=>{const a=map.latLngToContainerPoint(L.latLng(...tkItems[1].pts[0])), b=map.latLngToContainerPoint(L.latLng(...tkItems[1].pts[1])); const r=map.getContainer().getBoundingClientRect(); return [(a.x+b.x)/2+r.left,(a.y+b.y)/2+r.top]})()")
+    pg.mouse.click(c[0],c[1]); check('klik midden in de rechthoek pakt de rechthoek niet', pg.evaluate('tkSel')!=1)
+    def wiel():
+        z0=pg.evaluate('map.getZoom()'); pg.mouse.move(900,450)
+        for i in range(20): pg.mouse.wheel(0,4); pg.wait_for_timeout(10)
+        pg.wait_for_timeout(800); z1=pg.evaluate('map.getZoom()'); pg.evaluate('map.setZoom(%s,{animate:false}); 0'%z0); pg.wait_for_timeout(400); return z0-z1
+    met=wiel(); pg.click('[data-tool=hand]'); zonder=wiel(); pg.click('[data-tool=selecteer]')
+    check(f'trackpad zoomt even rustig als zonder tekenen ({met} / {zonder})', abs(met-zonder)<=0.25)
     # gum en ongedaan maken
+    pg.click('[data-tool=gum]'); a0=n(); pg.mouse.move(600,250); pg.mouse.down(); pg.mouse.move(1200,750,steps=25); pg.mouse.up(); check('gum veegt niet alles weg', n()==a0)
     pg.click('[data-tool=gum]'); a = n(); pt = pg.evaluate("(()=>{const q=map.latLngToContainerPoint(L.latLng(...tkItems[3].pts[0])); const r=map.getContainer().getBoundingClientRect(); return [q.x+r.left,q.y+r.top]})()")
     pg.mouse.click(pt[0], pt[1]); pg.wait_for_timeout(100); check('gum wist de pijl', n() == a - 1)
     pg.keyboard.press('Meta+z'); pg.wait_for_timeout(100); check('ongedaan maken zet hem terug', n() == a)
@@ -58,7 +72,7 @@ with sync_playwright() as p:
     with pg.expect_download(timeout=60000) as d: pg.click('#btnMapPdf')
     d.value.save_as(os.path.join(UIT, 'tekenen-export.pdf')); check('export PNG en PDF', True)
     # dataweergave
-    pg.click('#wissel button[data-w=data]'); pg.wait_for_timeout(400); pg.click('#btnTekenen'); pg.wait_for_timeout(400)
+    pg.click('#wissel button[data-w=data]'); pg.wait_for_timeout(400); pg.click('#btnTekenen'); pg.wait_for_timeout(400); pg.click('[data-tool=pen]')
     check('werkt in de dataweergave', pg.evaluate("document.getElementById('tekenvlak').classList.contains('aan')"))
     pg.click('#tkWis'); pg.wait_for_timeout(200); check('alles wissen', n() == 0)
     print('fouten:', fout); print(f'{len(ok)} goed, {len(mis)} fout'); b.close()
