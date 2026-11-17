@@ -198,6 +198,22 @@
   .filters{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;font-size:12.5px}
   .chip{all:unset;cursor:pointer;border:1px solid #d9cbd6;border-radius:20px;padding:3px 10px;color:var(--ink2)}
   .chip.aan{background:var(--accent);border-color:var(--accent);color:#fff}
+  .progknoppen{display:flex;flex-wrap:wrap;gap:6px}
+  .progknop{all:unset;cursor:pointer;font:600 12.5px "Barlow Semi Condensed",Barlow,sans-serif;letter-spacing:.02em;color:var(--accent);background:var(--accent-soft);border:1.5px solid transparent;border-radius:8px;padding:6px 10px;line-height:1.2}
+  .progknop:hover{border-color:var(--accent)}
+  .progknop.aan{background:var(--accent);color:#fff}
+  .progknop:focus-visible,.progthema:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+  .proginhoud{margin-top:12px;padding:12px;border:1px solid var(--line);border-left:4px solid var(--magenta);border-radius:8px;background:#fff}
+  .progkop{font:700 15px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--accent);margin-bottom:8px}
+  .proglabel{font:600 11px Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 5px}
+  .progchips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+  .progchips .chip{font-size:12px;padding:3px 9px}
+  .progchips .linkbtn{margin:0 0 0 4px;font-size:12px}
+  .proglagen{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:12.5px}
+  .proglagen label{display:flex;gap:6px;align-items:flex-start;cursor:pointer;line-height:1.3}
+  .proglagen input{margin:2px 0 0;accent-color:var(--accent);flex:none}
+  .progstart{margin-top:12px;padding:7px 12px;font-size:13px}
+  .progstartnoot{margin:5px 0 0}
   .filters input[type=search]{border:1px solid #d9cbd6;border-radius:8px;padding:5px 10px;font:13px Barlow,sans-serif;width:200px}
   .filters .rechts{margin-left:auto;color:var(--muted)}
   .kolkies{position:relative;display:inline-block}
@@ -327,6 +343,13 @@
       <ul id="zoekRes" role="listbox" hidden></ul>
       <button id="btnDeel" class="linkbtn" type="button">Link naar deze weergave kopiëren</button> <span class="btnTourSep" aria-hidden="true">·</span> <button class="linkbtn btnTour" type="button">Rondleiding</button>
       <div id="deelStatus" class="note" aria-live="polite"></div>
+    </section>
+
+    <section id="secProg">
+      <h2>Programma's</h2>
+      <p class="note" style="margin:-4px 0 8px">Kies een programma van Regio Midden-Holland voor de thema's en kaartlagen die erbij horen.</p>
+      <div class="progknoppen" id="progKnoppen" role="group" aria-label="Programma's"></div>
+      <div id="progInhoud" class="proginhoud" hidden></div>
     </section>
 
     <section>
@@ -2267,6 +2290,75 @@ $('btnAllesUit').addEventListener('click', ()=>{
 document.querySelectorAll('#secLagen input[type=checkbox], #lyrLoc, #theme').forEach(i=>i.addEventListener('change', ()=>setTimeout(syncAllesUit,0)));
 syncAllesUit();
 
+/* ---------- Programma's van Regio Midden-Holland: per programma de belangrijkste thema's en kaartlagen ---------- */
+// lagen: [checkbox-id, naam, optioneel {radio:[naam, waarde]} of {vz:[categorieën]}]
+const PROGRAMMAS = [
+  {k:'economie', naam:'Economie, Onderwijs & Arbeidsmarkt', kort:'Economie',
+   start:{thema:'bedrijven_per_1000_inwoners', lagen:['lyrBedr']},
+   themas:['bedrijven_per_1000_inwoners','ww_per_1000','sl_arbeid','sl_zzp','sl_hoog','sl_laag','soc_inkomen_inw','aantal_bedrijfsvestigingen','basisonderwijs_gemiddelde_afstand_in_km','voortgezet_onderwijs_gem_afstand_in_km','rt_vo'],
+   lagen:[['lyrBedr','Bedrijventerreinen'],['lyrRoads','Hoofdwegennet'],['lyrRail','Treinverbindingen'],['lyrNet','Netcongestie'],['lyrVz','Voorzieningen: onderwijs',{vz:['onderwijs']}],['lyrInd','Arbeidsmarktregio',{radio:['indmode','arbeidsmarktregio']}]]},
+  {k:'wonen', naam:'Ruimte & Wonen', kort:'Ruimte & Wonen',
+   start:{thema:'nieuwbouw_per_1000_woningen', lagen:['lyrBod']},
+   themas:['nieuwbouw_per_1000_woningen','gemiddelde_woningwaarde','perc_huurwoningen_in_bezit_woningcorporaties','percentage_koopwoningen','perc_huurwoningen_in_bezit_overige_verhuurders','perc_bouwjaar_afgelopen_10_jaar','percentage_meergezinswoning','percentage_onbewoond','bevolkingsdichtheid_inwoners_per_km2','omgevingsadressendichtheid','percentage_eenpersoonshuishoudens','lbm_totaal','lbm_woning','tr_woningvoorraad','tr_gemiddelde_woningwaarde','tr_perc_huurwoningen_in_bezit_woningcorporaties'],
+   lagen:[['lyrBod','Veenweide en bodem'],['lyrKer','Dijken en waterkeringen'],['lyrKlim','Klimaat: bodemdaling',{radio:['klimmode','bodemdaling']}],['lyrNet','Netcongestie'],['lyrNnn','Natuurnetwerk Nederland'],['lyrN2k','Natura 2000'],['lyrErf','Erfgoed'],['lyrBag','Bouwjaar van gebouwen'],['lyrAhn','Hoogte t.o.v. NAP']]},
+  {k:'mens', naam:'Mens & Voorzieningen', kort:'Mens & Voorzieningen',
+   start:{thema:'percentage_personen_65_jaar_en_ouder', lagen:['lyrVz'], vz:['zorg']},
+   themas:['percentage_personen_65_jaar_en_ouder','soc_wmo_per_1000','soc_jeugdzorg_pct','soc_armoede_pct','ggd_eenzaam','ggd_gezond','ggd_rondkomen','ggd_mantelzorg','percentage_personen_0_tot_15_jaar','percentage_personen_15_tot_25_jaar','percentage_huishoudens_met_kinderen','soc_laag_inkomen_pct','bijstand_per_1000',
+     'ggd_angst','ggd_stress','ggd_sterk_eenzaam','ggd_vrijwilliger','ggd_overgewicht','ggd_roken','ggd_bewegen','lbm_sociaal','lbm_voorz',
+     'huisartsenpraktijk_gemiddelde_afstand_in_km','huisartsenpost_gemiddelde_afstand_in_km','apotheek_gemiddelde_afstand_in_km','ziekenhuis_incl_buitenpolikliniek_gem_afst_in_km','grote_supermarkt_gemiddelde_afstand_in_km','kinderdagverblijf_gemiddelde_afstand_in_km','bibliotheek_gemiddelde_afstand_in_km','zwembad_gemiddelde_afstand_in_km',
+     'pol_totaal','pol_inbraak','pol_geweld','pol_overlast','pol_jeugd','pol_vernieling','pol_fiets','lbm_overlast'],
+   lagen:[['lyrVz','Voorzieningen'],['lyrOv','Buslijnen en haltes'],['lyrKlim','Klimaat: hitte',{radio:['klimmode','hitte']}],['lyrInd','GGD-regio',{radio:['indmode','ggdregio']}]]},
+  {k:'duurzaam', naam:'Duurzaamheid & Energietransitie', kort:'Duurzaamheid & Energie',
+   start:{thema:'percentage_woningen_met_zonnestroom', lagen:['lyrEn']},   // geen netcongestie: die vlakken zetten de buurtkleuren uit
+   themas:['percentage_woningen_met_zonnestroom','percentage_aardgasvrije_woningen','percentage_aardgaswoningen','gemiddeld_aardgasverbruik','sl_stroom_netto','sl_stroom','gemiddelde_elektriciteitsteruglevering','perc_bouwjaar_afgelopen_10_jaar','ggd_verkoeling','lbm_fysiek'],
+   lagen:[['lyrNet','Netcongestie'],['lyrEn','Energie: hoogspanning, zon en wind'],['lyrKlim','Klimaat (hitte, water, bodemdaling)'],['lyrBod','Veenweide: veenoxidatie',{radio:['bodmode','veenoxidatie']}],['lyrKer','Dijken en waterkeringen'],['lyrNnn','Natuurnetwerk Nederland'],['lyrN2k','Natura 2000'],['lyrBag','Bouwjaar van gebouwen'],['lyrInd','RES-regio',{radio:['indmode','regionale_energiestrategie']}]]},
+  {k:'mobiliteit', naam:'Bereikbaarheid & Mobiliteit', kort:'Bereikbaarheid',
+   start:{thema:'rt_station', lagen:['lyrRail','lyrOv']},
+   themas:['rt_station','rt_ziekenhuis','rt_vo','treinstation_gemiddelde_afstand_in_km','overstapstation_gemiddelde_afstand_in_km','oprit_hoofdverkeersweg_gemiddelde_afstand_in_km','personenautos_per_huishouden','ong_aantal','ggd_geluid'],
+   lagen:[['lyrRail','Treinverbindingen'],['lyrOv','Buslijnen en haltes'],['lyrRoads','Hoofdwegennet'],['lyrOng','Verkeersongevallen'],['lyrBedr','Bedrijventerreinen']]},
+];
+const PROG_ZICHTBAAR = 6;   // eerste thema's als knop, de rest onder 'meer'
+let progKeuze = null, progMeer = false;
+const progInfo = () => PROGRAMMAS.find(p=>p.k===progKeuze);
+function zetLaag(id, aan, opt){
+  if(aan && opt && opt.radio){ const r=document.querySelector(`input[name=${opt.radio[0]}][value="${opt.radio[1]}"]`); if(r && !r.checked){ r.checked=true; if($(id).checked) r.dispatchEvent(new Event('change')); } }
+  if(aan && opt && opt.vz) document.querySelectorAll('#vzcats input').forEach(i=>{ i.checked = opt.vz.includes(i.dataset.c); });
+  if($(id).checked!==aan){ $(id).checked=aan; $(id).dispatchEvent(new Event('change', {bubbles:true})); }
+  else if(aan && opt && opt.vz) syncVz();
+}
+function kiesThema(k){
+  $('theme').value=k; $('theme').dispatchEvent(new Event('change'));
+  if(!$('lyrFill').checked){ $('lyrFill').checked=true; $('lyrFill').dispatchEvent(new Event('change')); }
+}
+function renderProg(){
+  document.querySelectorAll('#progKnoppen button').forEach(b=>{ const aan=b.dataset.p===progKeuze; b.classList.toggle('aan',aan); b.setAttribute('aria-pressed',aan); });
+  const p=progInfo(), box=$('progInhoud'); box.hidden=!p; if(!p) return;
+  const th=p.themas.map(k=>THEMES.find(t=>t.key===k)).filter(Boolean), tk=$('theme').value;
+  const knop=t=>`<button type="button" class="chip progthema ${t.key===tk?'aan':''}" data-k="${t.key}">${t.label}</button>`;
+  const rest=th.length-PROG_ZICHTBAAR;
+  box.innerHTML = `<div class="progkop">${p.naam}</div>
+    <div class="proglabel">Thema's per buurt</div>
+    <div class="progchips">${th.slice(0,PROG_ZICHTBAAR).map(knop).join('')}${progMeer?th.slice(PROG_ZICHTBAAR).map(knop).join(''):''}${rest>0?`<button type="button" class="linkbtn progmeer">${progMeer?'minder':'+ '+rest+' meer'}</button>`:''}</div>
+    <div class="proglabel">Kaartlagen</div>
+    <div class="proglagen">${p.lagen.map(([id,naam],i)=>`<label><input type="checkbox" data-i="${i}" ${$(id).checked?'checked':''}>${naam}</label>`).join('')}</div>
+    <button type="button" class="btn progstart">Toon startweergave</button>
+    <p class="note progstartnoot">Zet ${THEMES.find(t=>t.key===p.start.thema).label.toLowerCase()} en ${p.start.lagen.map(id=>p.lagen.find(l=>l[0]===id)[1].toLowerCase()).join(' en ')} aan, en de rest van de kaartlagen uit.</p>`;
+  box.querySelectorAll('.progthema').forEach(b=>b.onclick=()=>{ kiesThema(b.dataset.k); });
+  const m=box.querySelector('.progmeer'); if(m) m.onclick=()=>{ progMeer=!progMeer; renderProg(); };
+  box.querySelectorAll('.proglagen input').forEach(c=>c.onchange=()=>{ const [id,,opt]=p.lagen[+c.dataset.i]; zetLaag(id, c.checked, opt); });
+  box.querySelector('.progstart').onclick=()=>{
+    $('btnAllesUit').click();
+    kiesThema(p.start.thema);
+    for(const id of p.start.lagen){ const l=p.lagen.find(x=>x[0]===id); zetLaag(id, true, p.start.vz && id==='lyrVz' ? {vz:p.start.vz} : l[2]); }
+    regioInBeeld(true); renderProg(); schrijfHash();
+  };
+}
+$('progKnoppen').innerHTML = PROGRAMMAS.map(p=>`<button type="button" class="progknop" data-p="${p.k}" aria-pressed="false" title="${p.naam}">${p.kort}</button>`).join('');
+document.querySelectorAll('#progKnoppen button').forEach(b=>b.addEventListener('click', ()=>{ progKeuze = progKeuze===b.dataset.p ? null : b.dataset.p; progMeer=false; renderProg(); schrijfHash(); }));
+// thema en lagen elders veranderd: knopjes en vinkjes bijwerken
+document.querySelectorAll('#theme, #secLagen input, #panel input[type=checkbox]').forEach(i=>i.addEventListener('change', ()=>setTimeout(()=>{ if(progKeuze) renderProg(); },0)));
+renderProg();
+
 /* ---------- Deelbare link: thema, lagen, achtergrond en uitsnede staan in het webadres (#...) ---------- */
 const LAAG_IDS = {fill:'lyrFill', ahn:'lyrAhn', trein:'lyrRail', bus:'lyrOv', vz:'lyrVz', wegen:'lyrRoads', nnn:'lyrNnn', n2k:'lyrN2k', net:'lyrNet', erf:'lyrErf', bouwjaar:'lyrBag', loc:'lyrLoc', klimaat:'lyrKlim', ongevallen:'lyrOng', dijken:'lyrKer', bedrijven:'lyrBedr', energie:'lyrEn', bodem:'lyrBod', indelingen:'lyrInd'};
 let hashKlaar=false, hashTimer=null;
@@ -2280,6 +2372,7 @@ function stateHash(){
   if($('lyrInd').checked) q.set('indeling', indMode());
   if(basemap!=='kaart') q.set('achtergrond', basemap);
   if(dataView) q.set('weergave','data');
+  if(progKeuze) q.set('programma', progKeuze);
   q.set('kaart', `${+map.getZoom().toFixed(2)}/${c.lat.toFixed(5)}/${c.lng.toFixed(5)}`);
   return '#'+q.toString().replace(/%2C/g,',').replace(/%2F/g,'/');
 }
@@ -2288,6 +2381,7 @@ function leesHash(){
   const q=new URLSearchParams((location.hash||'').slice(1)); if(![...q.keys()].length) return;
   const fire=(id,v)=>{ if($(id).checked!==v){ $(id).checked=v; $(id).dispatchEvent(new Event('change')); } };
   if(q.get('weergave')==='data') zetWeergave(true, true);
+  if(q.get('programma') && PROGRAMMAS.some(x=>x.k===q.get('programma'))){ progKeuze=q.get('programma'); renderProg(); }
   if(q.get('achtergrond')) setBasemap(q.get('achtergrond'));
   if(q.get('thema') && THEMES.some(t=>t.key===q.get('thema'))){ $('theme').value=q.get('thema'); $('theme').dispatchEvent(new Event('change')); }
   for(const [par,naam] of [['bodemkaart','bodmode'],['indeling','indmode']]) if(q.get(par)){ const r=document.querySelector(`input[name=${naam}][value="${q.get(par)}"]`); if(r) r.checked=true; }
