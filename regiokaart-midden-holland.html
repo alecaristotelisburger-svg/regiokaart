@@ -1474,17 +1474,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   #vglDl{margin:0 0 0 auto;font-size:12.5px}
   #vglInhoud{flex:1;overflow:auto;padding:18px 22px 40px}
   .vg-themas{background:#fff;border-bottom:1px solid var(--line);padding:9px 22px;box-shadow:0 2px 6px rgba(40,0,50,.05);position:relative;z-index:2}
-  .vg-tk-rij{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1180px;margin:0 auto}
+  .vg-tk-rij{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;white-space:nowrap;overflow-x:auto;scrollbar-width:thin;margin:0 auto}
   .vg-tk-knop{padding:6px 12px;font-size:13px}
   .vg-tk-tel{font:600 13px Barlow,sans-serif;color:var(--accent)}
-  .vg-tk-snel{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-left:auto}
+  .vg-tk-snel{display:flex;flex-wrap:nowrap;gap:4px;align-items:center;margin-left:auto;flex:none}
+  .vg-tk-knop,.vg-tk-tel{flex:none}
   .vg-tk-lbl{font-size:12px;color:var(--muted);margin-right:2px}
-  .vg-chip{font:12px Barlow,sans-serif;color:var(--accent);background:#fff;border:1px solid #e4d9e2;border-radius:14px;padding:3px 10px;cursor:pointer}
+  .vg-chip{font:12px Barlow,sans-serif;color:var(--accent);background:#fff;border:1px solid #e4d9e2;border-radius:14px;padding:3px 9px;cursor:pointer;white-space:nowrap;flex:none}
   .vg-chip:hover{border-color:var(--accent)}
   .vg-chip.aan{background:var(--accent);border-color:var(--accent);color:#fff}
-  .vg-tk-gekozen{display:flex;flex-wrap:wrap;gap:5px;max-width:1180px;margin:8px auto 0}
+  .vg-tk-gekozen{display:flex;flex-wrap:wrap;gap:5px;margin:8px auto 0}
   .vg-tk-gekozen .vg-chip span{opacity:.75;margin-left:2px}
-  .vg-tk-lijst{max-width:1180px;margin:10px auto 2px;max-height:min(46vh,420px);overflow:auto;columns:4 240px;column-gap:18px;border-top:1px solid var(--line);padding-top:8px}
+  .vg-tk-lijst{margin:10px auto 2px;max-height:min(46vh,420px);overflow:auto;columns:4 240px;column-gap:18px;border-top:1px solid var(--line);padding-top:8px}
   .vg-tk-lijst[hidden]{display:none}
   .vg-tk-lijst fieldset{break-inside:avoid;border:0;margin:0 0 10px;padding:0}
   .vg-tk-lijst legend{font:700 11.5px Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);padding:0;margin-bottom:3px}
@@ -1496,7 +1497,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   .vg-twee{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;max-width:1180px;margin:0 auto}
   .vg-gebied{background:#fff;border-radius:12px;border-top:6px solid var(--k);box-shadow:0 1px 4px rgba(40,0,50,.08);padding:14px 16px}
   .vg-kop{display:flex;gap:14px;align-items:center}
-  .vg-kaartje{width:96px;flex:none}
+  .vg-kaartje{width:96px;height:96px;flex:none}
+  .vg-kop{min-height:96px}
   .vg-soort{font:600 11px Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
   .vg-kies{font:700 18px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--k);border:1.5px solid #e4d9e2;border-radius:8px;padding:6px 10px;width:100%;max-width:330px;background:#fff}
   .vg-tegels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
