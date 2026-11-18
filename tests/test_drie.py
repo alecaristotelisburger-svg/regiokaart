@@ -1,0 +1,100 @@
+"""Test van Kaart voor nota, Presentatiemodus en Vergelijken.
+Gebruik: .venv/bin/python tests/test_drie.py   (afbeeldingen in tests/uit/)"""
+import os
+from playwright.sync_api import sync_playwright
+UIT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uit'); os.makedirs(UIT, exist_ok=True)
+U = 'file://' + os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'regiokaart-midden-holland.html')
+ok, mis = [], []
+def check(n, c, i=''):
+    (ok if c else mis).append(n); print(('  ok   ' if c else '  FOUT ') + n, '' if c else i)
+with sync_playwright() as p:
+    b = p.chromium.launch(); ctx = b.new_context(viewport={'width': 1440, 'height': 900}, accept_downloads=True)
+    ctx.add_init_script("try{localStorage.setItem('regiokaart-rondleiding-v1','1')}catch(e){}")
+    pg = ctx.new_page(); fout = []; pg.on('pageerror', lambda e: fout.append(str(e))); pg.on('dialog', lambda d: d.accept())
+    pg.goto(U); pg.wait_for_timeout(1500)
+
+    # ---------- Kaart voor nota ----------
+    pg.select_option('#theme', 'percentage_personen_65_jaar_en_ouder'); pg.wait_for_timeout(500)
+    for f, (w, h) in {'nota': (1000, 625), 'dia': (1280, 720), 'vierkant': (900, 900), 'smal': (1200, 400)}.items():
+        pg.select_option('#nkFormaat', f); z0 = pg.evaluate('map.getZoom()')
+        with pg.expect_download() as d: pg.click('#btnNota')
+        pad = os.path.join(UIT, f'nota-{f}.png'); d.value.save_as(pad)
+        import fitz; im = fitz.Pixmap(pad); check(f'nota {f}: breedte = 2x kaart + marges', im.width == 2 * w + 88, (im.width, im.height))
+        check(f'nota {f}: kaart weer terug op zijn plek', pg.evaluate("document.getElementById('map').style.position!=='fixed'") and abs(pg.evaluate('map.getZoom()') - z0) < 0.01)
+    pg.fill('#nkTitel', 'Vergrijzing in Midden-Holland'); pg.select_option('#nkFormaat', 'nota')
+    with pg.expect_download() as d: pg.click('#btnNota')
+    check('eigen titel in bestandsnaam', 'vergrijzing-in-midden-holland' in d.value.suggested_filename, d.value.suggested_filename)
+    d.value.save_as(os.path.join(UIT, 'nota-titel.png'))
+
+    # ---------- Vergelijken ----------
+    pg.click('#btnVergelijken'); pg.wait_for_timeout(400)
+    check('vergelijken opent', pg.is_visible('#vgl'))
+    sel = pg.query_selector_all('.vg-kies'); check('twee keuzelijsten', len(sel) == 2)
+    opties = pg.evaluate("[...document.querySelectorAll('.vg-kies')[0].options].map(o=>o.textContent)")
+    check('8 gebieden in de keuzelijst', len(opties) == 8, opties)
+    check('standaard regio tegen Nederland', pg.evaluate("[...document.querySelectorAll('.vg-kies')].map(s=>s.value).join()") == 'regio,nl')
+    check('vier grafieken', len(pg.query_selector_all('.vg-blok svg')) >= 4)
+    rijen = len(pg.query_selector_all('.vg-tabel tbody tr:not(.vg-groep)')); check('tabel met veel thema’s', rijen > 60, rijen)
+    pg.wait_for_timeout(400); check('link bevat vergelijk', 'vergelijk=regio~nl' in pg.evaluate('decodeURIComponent(location.hash)'))
+    pg.screenshot(path=os.path.join(UIT, 'vergelijken-regio-nl.png'), full_page=False)
+    pg.select_option('.vg-kies[data-kant=L]', 'GM0513'); pg.wait_for_timeout(300)
+    pg.select_option('.vg-kies[data-kant=R]', 'GM1892'); pg.wait_for_timeout(300)
+    check('Gouda tegen Zuidplas', pg.evaluate("[...document.querySelectorAll('.vg-kies')].map(s=>s.value).join()") == 'GM0513,GM1892')
+    check('trendgrafiek bij twee gemeenten', 'Trend' in pg.inner_text('#vglInhoud') or pg.query_selector('.vg-blok:nth-child(4) svg') is not None)
+    pg.screenshot(path=os.path.join(UIT, 'vergelijken-gouda-zuidplas.png'))
+    pg.click('#vgWissel'); pg.wait_for_timeout(300)
+    check('wisselen draait om', pg.evaluate("[...document.querySelectorAll('.vg-kies')].map(s=>s.value).join()") == 'GM1892,GM0513')
+    pg.check('#vgFilter'); pg.wait_for_timeout(200)
+    r2 = len(pg.query_selector_all('.vg-tabel tbody tr:not(.vg-groep):not([hidden])')); check('filter grote verschillen', 0 < r2 < rijen, r2)
+    with pg.expect_download() as d: pg.click('#vgCsv')
+    check('CSV', d.value.suggested_filename.endswith('.csv'), d.value.suggested_filename)
+    d.value.save_as(os.path.join(UIT, 'vergelijken.csv'))
+    pg.evaluate("document.getElementById('vglInhoud').scrollTop=2000"); pg.wait_for_timeout(200)
+    pg.screenshot(path=os.path.join(UIT, 'vergelijken-tabel.png'))
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(600); check('Esc sluit', not pg.is_visible('#vgl'))
+    check('link zonder vergelijk na sluiten', 'vergelijk' not in pg.evaluate('location.hash'))
+    pg.goto('about:blank'); pg.goto(U + '#vergelijk=GM0627~zh'); pg.wait_for_timeout(1500)
+    check('link opent vergelijken met Waddinxveen tegen ZH', pg.is_visible('#vgl') and pg.evaluate("[...document.querySelectorAll('.vg-kies')].map(s=>s.value).join()") == 'GM0627,zh')
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    pg.click('#btnVglPaneel') if pg.is_visible('#btnVglPaneel') else None
+
+    # ---------- Presentatie ----------
+    pg.goto(U); pg.wait_for_timeout(1500); pg.keyboard.press('Escape')
+    pg.click('#btnPresenteren'); pg.wait_for_timeout(300); check('presentatiepaneel open', pg.is_visible('#presPaneel'))
+    check('start uit zonder dia’s', pg.is_disabled('#presStart'))
+    pg.click('#presVoorbeeld'); pg.wait_for_timeout(200)
+    check('voorbeeld: 7 dia’s', len(pg.query_selector_all('#presLijst li[data-i]')) == 7)
+    pg.select_option('#theme', 'gemiddelde_woningwaarde'); pg.wait_for_timeout(300)
+    pg.click('#presNieuw'); pg.wait_for_timeout(200)
+    check('eigen dia toegevoegd', len(pg.query_selector_all('#presLijst li[data-i]')) == 8 and 'WOZ' in pg.input_value('#presLijst li[data-i="7"] .pres-titel'))
+    pg.fill('#presLijst li[data-i="7"] .pres-titel', 'Mijn dia'); check('titel bewaard', pg.evaluate("JSON.parse(localStorage.getItem('regiokaart-presentatie-v1'))[7].titel") == 'Mijn dia')
+    pg.click('#presLijst li[data-i="7"] [data-a=op]'); pg.wait_for_timeout(100)
+    check('dia omhoog', pg.evaluate('presDias[6].titel') == 'Mijn dia')
+    pg.click('#presLijst li[data-i="6"] [data-a=weg]'); check('dia verwijderd', pg.evaluate('presDias.length') == 7)
+    pg.click('#presStart'); pg.wait_for_timeout(1500)
+    check('presenteren: paneel weg, kaart schermvullend', pg.evaluate("document.body.classList.contains('presenteren')") and not pg.is_visible('#panel') and pg.evaluate("document.getElementById('map').getBoundingClientRect().width") == 1440)
+    check('titel dia 1', 'één oogopslag' in pg.inner_text('#presTitel') and pg.inner_text('#presTeller') == '1 / 7')
+    check('dia 1: overzichtskaart aan', pg.evaluate("document.getElementById('lyrSnap').checked"))
+    pg.screenshot(path=os.path.join(UIT, 'presentatie-1.png'))
+    pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(1500)
+    check('dia 2: trendthema, overzicht uit', pg.evaluate("document.getElementById('theme').value") == 'tr_aantal_inwoners' and not pg.evaluate("document.getElementById('lyrSnap').checked"))
+    pg.screenshot(path=os.path.join(UIT, 'presentatie-2.png'))
+    pg.keyboard.press('ArrowRight'); pg.keyboard.press('ArrowRight'); pg.keyboard.press('ArrowRight'); pg.wait_for_timeout(1500)
+    check('dia 5: netcongestie zonder thema', pg.evaluate("document.getElementById('theme').value") == '' and pg.evaluate("document.getElementById('lyrNet').checked"))
+    pg.screenshot(path=os.path.join(UIT, 'presentatie-5.png'))
+    # tekenen tijdens de presentatie hoort bij de dia
+    pg.click('#presPen'); pg.wait_for_timeout(300)
+    pg.mouse.move(600, 400); pg.mouse.down(); pg.mouse.move(700, 450, steps=8); pg.mouse.up(); pg.wait_for_timeout(200)
+    check('tekening in dia 5', len(pg.evaluate('presDias[4].tk')) == 1)
+    check('eigen tekeningen ongemoeid', pg.evaluate("JSON.parse(localStorage.getItem('regiokaart-tekeningen-v1')||'[]').length") == 0)
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(200)   # tekengereedschap neerleggen
+    pg.click('#presPen'); pg.wait_for_timeout(200)          # balk dicht
+    pg.keyboard.press('ArrowLeft'); pg.wait_for_timeout(1200); check('terug: dia 4', pg.inner_text('#presTeller') == '4 / 7' and pg.evaluate('tkItems.length') == 0)
+    pg.keyboard.press('Escape'); pg.wait_for_timeout(800)
+    check('Esc stopt, paneel terug, thema van voor de presentatie', not pg.evaluate("document.body.classList.contains('presenteren')") and pg.is_visible('#panel') and pg.evaluate("document.getElementById('theme').value") == 'gemiddelde_woningwaarde')
+    check('geen JS-fouten', not fout, fout)
+    # mobiel: knoppen verborgen
+    m = b.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True); mp = m.new_page(); mp.goto(U); mp.wait_for_timeout(1500)
+    check('mobiel: geen knoppen Vergelijken/Presenteren', not mp.is_visible('#btnPresenteren') and not mp.is_visible('#btnVergelijken'))
+    b.close()
+print(f'{len(ok)} goed, {len(mis)} fout'); print('fouten:', mis)
