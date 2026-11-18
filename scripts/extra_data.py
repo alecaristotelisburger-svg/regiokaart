@@ -144,7 +144,9 @@ def sociaal():
                 'soc_inkomen_inw': w('soc_inkomen_inw', 'soc_inw23')}
     gm_rij = {c: rij(g24.get(c), g23.get(c)) for c in g24 if c.startswith('GM')}
     ref = {'zh': agg([v for c, v in gm_rij.items() if c in zh]), 'nl': agg(gm_rij.values())}
-    schrijf('sociaal', {'bron': f'CBS Kerncijfers wijken en buurten 2024 ({SOC24}); inkomen 2023 ({SOC23})', 'opgehaald': d['opgehaald'], 'buurt': buurt, 'ref': ref,
+    GEB = ['GM0513', 'GM1892', 'GM1901', 'GM1931', 'GM0627']
+    gebied = {**{c: agg([gm_rij[c]]) for c in GEB if c in gm_rij}, 'regio': agg([gm_rij[c] for c in GEB if c in gm_rij])}
+    schrijf('sociaal', {'gebied': gebied, 'bron': f'CBS Kerncijfers wijken en buurten 2024 ({SOC24}); inkomen 2023 ({SOC23})', 'opgehaald': d['opgehaald'], 'buurt': buurt, 'ref': ref,
                         'aantal_zh_gemeenten': len(zh)})
     print('   buurten met Wmo:', sum('soc_wmo_per_1000' in b for b in buurt.values()), '| ZH-gemeenten', len(zh), '| ref', {k: round(v, 1) for k, v in ref['nl'].items() if v})
 
@@ -278,6 +280,8 @@ def agg_rijen(rijen, regels):
 def met_ref(naam, buurt, gm, regels, extra):
     zh = zh_gemeenten()
     ref = {'zh': agg_rijen([v for c, v in gm.items() if c in zh], regels), 'nl': agg_rijen(list(gm.values()), regels)}
+    GEB = ['GM0513', 'GM1892', 'GM1901', 'GM1931', 'GM0627']   # de vijf gemeenten en de regio uit de officiële gemeentecijfers (zelfde regels als ZH en NL)
+    extra = dict(extra, gebied={**{c: agg_rijen([gm[c]], regels) for c in GEB if c in gm}, 'regio': agg_rijen([gm[c] for c in GEB if c in gm], regels)})
     buurt = {c: {k: v for k, v in x.items() if v is not None} for c, x in buurt.items() if c in BP}
     schrijf(naam, dict(extra, buurt=buurt, ref=ref))
     return ref

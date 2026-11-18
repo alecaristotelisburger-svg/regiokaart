@@ -119,9 +119,9 @@ PCT = {'percentage_personen_0_tot_15_jaar': ('0 tot 15 jaar', 'Aantal inwoners')
        'percentage_met_herkomstland_nederland': ('Nederland', 'Aantal inwoners'), 'percentage_met_herkomstland_uit_europa_excl_nl': ('Europa (exclusief Nederland)', 'Aantal inwoners'),
        'percentage_met_herkomstland_buiten_europa': ('Buiten Europa', 'Aantal inwoners'),
        'percentage_eenpersoonshuishoudens': ('Eenpersoonshuishoudens', 'Huishoudens totaal'), 'percentage_huishoudens_met_kinderen': ('Huishoudens met kinderen', 'Huishoudens totaal')}
-def pct(rij, titels_sleutel, k):
+def pct(rij, titels_sleutel, k, afronden=True):
     a, b = (getal(rij.get(titels_sleutel.get(x))) for x in PCT[k])
-    return round(a / b * 100) if a is not None and b else None
+    return (round(a / b * 100) if afronden else a / b * 100) if a is not None and b else None
 pct_ok = {}
 for k in PCT:
     pv = {c: getal(f['properties'].get(k)) for c, f in zip(codes_v, pdok_vorig)}
@@ -203,12 +203,18 @@ json.dump({'nieuw': NIEUW[0], 'vorig': VORIG[0], 'tabellen': {NIEUW[0]: NIEUW[1]
           open(os.path.join(DATA, 'kwb_jaar.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 
 # ---------- 5. gemeenten (voor Zuid-Holland en Nederland) ----------
+# titels komen in de CBS-tabel soms twee keer voor (bijv. 'Buiten Europa' bij herkomst én bij geboorteland): neem de eerste
+eerste_nieuw, eerste_vorig = ({v: k for k, v in reversed(list(t.items()))} for t in (t_nieuw, t_vorig))
 gm_nieuw = {q['gemeentecode']: q for q in pdok_gemeenten(NIEUW[0])['props'] if q.get('water') in (None, 'NEE')}
 gem = json.load(open(os.path.join(BRON, 'cbs-gemeenten-2024-nederland.geojson')))
 for f in gem['features']:
     p = f['properties']; c = p['gemeentecode']
     for k in cijfers:
-        if k in pdok_ok:
+        rij_j, sl_j = (r_nieuw, eerste_nieuw) if jaar.get(k) == NIEUW[0] else (r_vorig, eerste_vorig)
+        if k in PCT and rij_j.get(c) and pct(rij_j[c], sl_j, k, afronden=False) is not None:
+            # percentages per gemeente uit de CBS-aantallen, niet afgerond: PDOK rondt ze per gemeente af (herkomst zelfs op vijftallen)
+            p[k] = pct(rij_j[c], sl_j, k, afronden=False)
+        elif k in pdok_ok:
             p[k] = getal((gm_nieuw.get(c) or {}).get(k))
         elif k in bronkey:
             p[k] = waarde(bronkey[k][0].get(c), k)

@@ -159,6 +159,9 @@
   .klap-in{position:relative;overflow:hidden;transition:max-height .3s ease}
   .klap-in::after{content:'';position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(rgba(255,255,255,0),var(--bg) 95%);pointer-events:none;transition:opacity .2s}
   .klap.open .klap-in::after{opacity:0}
+  .popklein{margin:6px 0 4px;padding:6px 8px;background:#fff4e5;border-left:3px solid #fc7c00;border-radius:4px;font-size:11.5px;line-height:1.35;color:#5a3b00}
+  .kl-n{font-size:10.5px;line-height:1.3;color:#7a6f78;margin-top:5px;max-width:190px}
+  .bronkwal{margin:0 0 8px;line-height:1.45}
   .klapmeer{margin-top:8px;font-size:12.5px;padding:6px 11px;border-radius:7px}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   /* ---------- Dataweergave (alleen computer): kaart over de hele breedte, databalk onderaan ---------- */
@@ -620,6 +623,7 @@
     <section class="klap" id="klapBron">
       <h2><button class="klapkop" aria-expanded="false" aria-controls="klapBronIn">Bronnen <span class="pijl" aria-hidden="true">▾</span></button></h2>
       <div class="klap-in" id="klapBronIn">
+      <p class="note bronkwal"><b>Kloppen de cijfers?</b> De gemeentecijfers zijn gecontroleerd tegen wat het CBS, de GGD en de politie zelf per gemeente publiceren: 79 van de 80 controleerbare thema’s zijn gelijk (op de afronding na). Gemeente, regio, Zuid-Holland en Nederland zijn op dezelfde manier berekend, dus onderling vergelijkbaar. Let op: de jaren verschillen per thema (zie de toelichting), heel kleine buurten geven onzekere percentages, en de buurtkleuren zijn relatief binnen de regio. Data uit OpenStreetMap is niet volledig.</p>
       <ul class="src">
         <li>Buurtcijfers en grenzen: CBS Kerncijfers Wijken en Buurten <span class="kwbjaren"></span> (CBS StatLine en PDOK, CC BY 4.0); per thema staat het jaar in de toelichting</li>
         <li>Hoogte: AHN, Rijkswaterstaat, via PDOK (CC0)</li>
@@ -811,7 +815,7 @@ const rtNote = (wat,hoe) => `${wat} over de weg, vanaf het midden van de buurt (
 const EXTRA = {
   bijstand_per_1000: [
     {g:'Sociaal', key:'soc_wmo_per_1000', label:'Wmo-cliënten', fmt:v=>nl0.format(v)+' per 1.000', agg:{type:'ratio',num:'soc_wmo_n',den:'soc_inw24',mult:1000}, note:'Inwoners met een maatwerkvoorziening uit de Wet maatschappelijke ondersteuning (Wmo), per 1.000 inwoners (CBS, 2024). Voor kleine buurten geheim.'},
-    {g:'Sociaal', key:'soc_jeugdzorg_pct', label:'Jongeren met jeugdzorg', fmt:pct1, agg:{type:'w',w:'soc_jeugd_w'}, note:'Aandeel jongeren tot 18 jaar met jeugdzorg in natura (CBS, 2024). Per gemeente gewogen naar het aantal kinderen tot 15 jaar (een benadering). Voor kleine buurten geheim.'},
+    {g:'Sociaal', key:'soc_jeugdzorg_pct', label:'Jongeren met jeugdzorg', fmt:pct1, agg:{type:'w',w:'soc_jeugd_w'}, note:'Aandeel jongeren tot 18 jaar met jeugdzorg in natura (CBS, 2024). Regio, Zuid-Holland en Nederland gewogen naar het aantal kinderen tot 15 jaar (een benadering). Voor kleine buurten geheim.'},
     {g:'Sociaal', key:'soc_armoede_pct', label:'Personen in armoede', fmt:pct1, agg:{type:'w',w:'soc_inw24'}, note:'Aandeel personen in een huishouden met een inkomen onder de armoedegrens (CBS, 2024). Voor kleine buurten geheim.'},
     {g:'Sociaal', key:'soc_laag_inkomen_pct', label:'Huishoudens met laag inkomen', fmt:pct1, agg:{type:'w',w:'soc_hh23'}, note:'Aandeel huishoudens met een laag inkomen (CBS, 2023; voor 2024 nog niet per buurt gepubliceerd). Voor kleine buurten geheim.'},
     {g:'Sociaal', key:'soc_inkomen_inw', label:'Gemiddeld inkomen per inwoner', fmt:v=>'€ '+nl0.format(Math.round(v*10)*100), agg:{type:'w',w:'soc_inw23'}, note:'Gemiddeld persoonlijk inkomen per inwoner per jaar (CBS, 2023; voor 2024 nog niet per buurt gepubliceerd). Voor kleine buurten geheim.'},
@@ -840,15 +844,15 @@ for(const d of [DATA.gezondheid.buurt, DATA.politie.buurt, DATA.statline.buurt])
 }
 const POL_J = DATA.politie.jaar;
 const ggdT = (key,label,wat) => ({g:'Gezondheid (GGD/RIVM 2024)', key, label, fmt:pct1, agg:{type:'w',w:'ggd_w'},
-  note:`${wat} Schatting voor inwoners van 18 jaar en ouder, op basis van de Gezondheidsmonitor Volwassenen en Ouderen 2024 van de GGD’en en het RIVM (geen telling: het RIVM rekent met een model per buurt). Per gemeente gewogen naar het aantal volwassenen (een benadering).`});
+  note:`${wat} Schatting voor inwoners van 18 jaar en ouder, op basis van de Gezondheidsmonitor Volwassenen en Ouderen 2024 van de GGD’en en het RIVM (geen telling: het RIVM rekent met een model per buurt). Regio, Zuid-Holland en Nederland gewogen naar het aantal volwassenen (een benadering).`});
 const polT = (key,label,wat) => ({g:`Veiligheid (politie ${POL_J})`, key, label, fmt:v=>nl1.format(v)+' per 1.000', agg:{type:'ratio',num:key+'_n',den:'pol_inw',mult:1000},
   note:`${wat} per 1.000 inwoners in ${POL_J} (politie, via CBS). Buurten onder 200 inwoners krijgen geen cijfer (bedrijventerreinen en winkelgebieden geven anders extreme waarden), maar tellen wel mee in de gemeente. Het gaat om geregistreerde feiten: niet alles wordt gemeld.`});
 const EXTRA2 = {
   ww_per_1000: [
     {g:'Economie en werk', key:'sl_hoog', label:'Hoogopgeleiden', fmt:pct1, agg:{type:'w',w:'sl_1575'}, note:'Aandeel inwoners van 15 tot 75 jaar met hbo of wo als hoogst behaalde opleiding (CBS, 2024).'},
     {g:'Economie en werk', key:'sl_laag', label:'Laagopgeleiden', fmt:pct1, agg:{type:'w',w:'sl_1575'}, note:'Aandeel inwoners van 15 tot 75 jaar met hooguit basisonderwijs, vmbo of mbo-1 (CBS, 2024).'},
-    {g:'Economie en werk', key:'sl_arbeid', label:'Nettoarbeidsparticipatie', fmt:pct1, agg:{type:'w',w:'sl_inw'}, note:'Aandeel van de bevolking van 15 tot 75 jaar dat betaald werk heeft (CBS, 2024). Per gemeente gewogen naar inwoners (een benadering).'},
-    {g:'Economie en werk', key:'sl_zzp', label:'Zelfstandigen', fmt:pct1, agg:{type:'w',w:'sl_inw'}, note:'Aandeel zelfstandigen in de werkzame beroepsbevolking (CBS, 2024). Per gemeente gewogen naar inwoners (een benadering).'},
+    {g:'Economie en werk', key:'sl_arbeid', label:'Nettoarbeidsparticipatie', fmt:pct1, agg:{type:'w',w:'sl_inw'}, note:'Aandeel van de bevolking van 15 tot 75 jaar dat betaald werk heeft (CBS, 2024). Regio, Zuid-Holland en Nederland gewogen naar inwoners (een benadering).'},
+    {g:'Economie en werk', key:'sl_zzp', label:'Zelfstandigen', fmt:pct1, agg:{type:'w',w:'sl_inw'}, note:'Aandeel zelfstandigen in de werkzame beroepsbevolking (CBS, 2024). Regio, Zuid-Holland en Nederland gewogen naar inwoners (een benadering).'},
   ],
   soc_inkomen_inw: [
     ggdT('ggd_gezond','Goed ervaren gezondheid','Aandeel volwassenen dat de eigen gezondheid goed of zeer goed vindt.'),
@@ -1057,7 +1061,9 @@ function popupHtml(f){
     const sect = SECTORS.map(x=>({l:x.label,v:clean(p[x.key])})).filter(x=>x.v).sort((a,b)=>b.v-a.v).slice(0,3);
     if(sect.length) rows += `<tr><td colspan="2" style="padding-top:8px;color:#7a8291;font-size:11.5px">GROOTSTE BEDRIJFSSECTOREN</td></tr>` + sect.map(x=>`<tr><td>${x.l}</td><td>${nl0.format(x.v)}</td></tr>`).join('');
   }
-  return `<div class="pop"><h3>${nameOf(f)}</h3><div class="sub">${gmOf(f)}${p.wijknaam?' · wijk '+p.wijknaam:''}</div><table>${rows}</table></div>`;
+  const inw = clean(p.aantal_inwoners);
+  const klein = live && inw!==null && inw<100 ? `<div class="popklein">Kleine buurt (${nl0.format(inw)} inwoners): percentages en gemiddelden zijn hier onzeker. Het CBS rondt aantallen af op vijftallen; één huishouden of één verzorgingshuis maakt al veel verschil.</div>` : '';
+  return `<div class="pop"><h3>${nameOf(f)}</h3><div class="sub">${gmOf(f)}${p.wijknaam?' · wijk '+p.wijknaam:''}</div>${klein}<table>${rows}</table></div>`;
 }
 
 function drawBuurten(){
@@ -1597,7 +1603,8 @@ function updateMapLegend(){
   if(themed() && klassen.length){ const t=currentTheme();
     h+=`<div class="kl-t">${t.label}${t.trend?' ('+TJ+'–'+KJ+')':''}</div>`;
     for(const k of klassenHoogLaag()) h+=`<div class="kl-r"><i style="background:${k.c}"></i>${klasLabel(t,k)}</div>`;
-    h+=`<div class="kl-r"><i style="background:${NODATA}"></i>geen gegevens</div>`; }
+    h+=`<div class="kl-r"><i style="background:${NODATA}"></i>geen gegevens</div>`;
+    if(!t.trend && !t.div) h+=`<div class="kl-n">Vijf even grote groepen buurten binnen de regio: de kleur zegt hoe een buurt zich verhoudt tot de andere buurten, niet of het veel of weinig is.</div>`; }
   if($('lyrNet').checked){ h+=`<div class="kl-t">Netcongestie: ${netMode()==='af'?'verbruik':'teruglevering'}</div>`;
     for(const v of [0,1,2,3]) h+=`<div class="kl-r"><i style="background:${NET_C[v]}"></i>${NET_L[v]}</div>`; }
   if($('lyrBag').checked){ h+=`<div class="kl-t">Bouwjaar</div>`;
@@ -1650,6 +1657,17 @@ function refVal(level, t, forCompare){
   const k = (forCompare && t.cmp) ? t.key+'__cmp' : t.key;
   const v = DATA.ref[level][k]; return (v===undefined) ? null : v;
 }
+// Gemeenten en regio: de officiële gemeentecijfers van de bron, op dezelfde manier berekend als Zuid-Holland en Nederland
+// (scripts/ref.py en extra_data.py, 'gebied'). Alleen als de bron geen gemeentecijfer heeft (eigen data, reistijd,
+// Leefbaarometer, ongevallen) wordt opgeteld uit de buurten. Controle: scripts/valideer.py.
+const GEBIED = {};
+for(const d of [DATA.ref, DATA.sociaal, DATA.gezondheid, DATA.politie, DATA.statline]) if(d && d.gebied)
+  for(const [g,v] of Object.entries(d.gebied)){ GEBIED[g]=GEBIED[g]||{}; for(const [k,w] of Object.entries(v)) if(w!==null && w!==undefined) GEBIED[g][k]=w; }
+function gebiedWaarde(g, t, forCompare){   // g = 'GM0513' (gemeente) of 'regio'
+  const o=GEBIED[g], k=(forCompare && t.cmp) ? t.key+'__cmp' : t.key;
+  if(o && !t.eigen && !t.trend && k in o) return o[k];
+  return themeValue(g==='regio' ? buurten.features : gmFeats(g), t, forCompare);
+}
 
 /* ---------- Vergelijkingsgrafiek ---------- */
 function renderCmpChart(){
@@ -1665,21 +1683,22 @@ function renderCmpChart(){
   }
   const comparable = t.cmp!==null;
   $('cmpTitle').textContent = 'Vergelijking: ' + t.label.toLowerCase() + (t.cmp ? ' '+t.cmp.label : '');
-  const rows = Object.entries(GM).map(([c,n])=>({l:n, v:themeValue(gmFeats(c), t, true), cls:''}));
-  rows.push({l:'Regio', v:themeValue(buurten.features, t, true), cls:'reg', sep:true});
+  const rows = Object.entries(GM).map(([c,n])=>({l:n, v:gebiedWaarde(c, t, true), cls:''}));
+  rows.push({l:'Regio', v:gebiedWaarde('regio', t, true), cls:'reg', sep:true});
   if(comparable && DATA.ref){
     rows.push({l:'Zuid-Holland', v:refVal('zh',t,true), cls:'ref'});
     rows.push({l:'Nederland', v:refVal('nl',t,true), cls:'ref'});
   }
   const max = Math.max(...rows.map(r=>r.v||0)) || 1;
   $('cmpChart').innerHTML = rows.map(r=>`${r.sep?'<div class="sep"></div>':''}<div class="crow ${r.cls}"><div class="cl" title="${r.l}">${r.l}</div><div class="cb"><span style="width:${r.v?(r.v/max*100).toFixed(1):0}%"></span></div><div class="cv">${fmtCmp(t,r.v)}</div></div>`).join('');
-  let note = 'Per gemeente berekend uit de CBS-buurtcijfers '+(t.jaar||KJ);
+  const offic = GEBIED.GM0513 && !t.eigen && ((t.cmp ? t.key+'__cmp' : t.key) in GEBIED.GM0513);
+  let note = offic ? 'Per gemeente het officiële cijfer van de bron ('+(t.jaar||KJ)+'); de regio daaruit berekend' : 'Per gemeente opgeteld uit de buurten (de bron heeft geen gemeentecijfer)';
   if(t.agg.type==='w') note += ', gewogen naar ' + ({aantal_inwoners:'inwoners',woningvoorraad:'woningen',aantal_huishoudens:'huishoudens'}[t.agg.w]||'') ;
   note += '.';
   if(t.eigen) note = 'Eigen gegevens, per gemeente: '+EIGEN_AGG_L[t.eigen.agg]+'. Geen vergelijking met Zuid-Holland en Nederland.';
   else if(!comparable) note += ' Totalen zijn niet zinvol te vergelijken met Zuid-Holland en Nederland.';
   else if(!DATA.ref) note += ' Zuid-Holland en Nederland volgen zodra het landelijke CBS-bestand is toegevoegd.';
-  else note += ' Zuid-Holland en Nederland zijn op dezelfde manier berekend uit de CBS-cijfers van alle gemeenten.';
+  else note += ' Zuid-Holland en Nederland op dezelfde manier uit de cijfers van alle gemeenten.';
   $('cmpNote').textContent = note;
 }
 
@@ -1937,7 +1956,7 @@ async function exportProfilePdf(){
     const { jsPDF } = window.jspdf;
     const doc=new jsPDF({unit:'mm',format:'a4'}); const W=210; let y;
     const fs=gmFeats(code), all=buurten.features, t=currentTheme();
-    const val=(feats,k)=>aggregateFeats(feats,{type:'sum',key:k});
+    const val=(feats,k)=> GEBIED[code] && GEBIED[code][k]!=null ? GEBIED[code][k] : aggregateFeats(feats,{type:'sum',key:k});
     pdfHeader(doc, W, 'Gemeenteprofiel '+naam, `Regio Midden-Holland · CBS Kerncijfers Wijken en Buurten ${KWB_JAREN} · ${today()}`);
     // kerncijfertegels
     y=34; const tiles=[['Inwoners',nl0.format(val(fs,'aantal_inwoners'))],['Huishoudens',nl0.format(val(fs,'aantal_huishoudens'))],['Woningen',nl0.format(val(fs,'woningvoorraad'))],['Bedrijfsvestigingen',nl0.format(val(fs,'aantal_bedrijfsvestigingen'))]];
@@ -1967,7 +1986,7 @@ async function exportProfilePdf(){
       if(y>278){ doc.addPage(); y=20; tableHead(); }
       if(th.g!==g){ g=th.g; doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.text(g.toUpperCase(), 12, y+1); y+=4.6; }
       const cmpLbl = th.cmp ? ' ('+th.cmp.label+')' : '';
-      const vals=[themeValue(fs,th,true), themeValue(all,th,true), th.cmp===null?null:refVal('zh',th,true), th.cmp===null?null:refVal('nl',th,true)];
+      const vals=[gebiedWaarde(code,th,true), gebiedWaarde('regio',th,true), th.cmp===null?null:refVal('zh',th,true), th.cmp===null?null:refVal('nl',th,true)];
       if(th.cmp===null){ vals[2]=DATA.ref&&DATA.ref.zh?DATA.ref.zh[th.key]:null; vals[3]=DATA.ref&&DATA.ref.nl?DATA.ref.nl[th.key]:null; }
       doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
       doc.text(pdfText(th.label+cmpLbl), 12, y);
@@ -2031,7 +2050,7 @@ async function exportProfilePdf(){
     for(const [l,v] of vzl){ if(y>278){ doc.addPage(); y=20; } doc.text(pdfText(l),12,y); doc.text(String(v),200,y,{align:'right'}); doc.setDrawColor(236,228,234); doc.line(10,y+1.8,200,y+1.8); y+=5.6; }
     const afst=['huisartsenpraktijk_gemiddelde_afstand_in_km','basisonderwijs_gemiddelde_afstand_in_km','grote_supermarkt_gemiddelde_afstand_in_km','ziekenhuis_incl_buitenpolikliniek_gem_afst_in_km'].map(k=>THEMES.find(x=>x.key===k));
     doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED));
-    doc.text(pdfText('Gemiddelde afstand: '+afst.map(a=>a.label.replace('Afstand tot ','')+' '+fmtCmp(a,themeValue(fs,a,true))).join(' · ')),12,y+1); y+=9;
+    doc.text(pdfText('Gemiddelde afstand: '+afst.map(a=>a.label.replace('Afstand tot ','')+' '+fmtCmp(a,gebiedWaarde(code,a,true))).join(' · ')),12,y+1); y+=9;
     h2('Openbaar vervoer en wegen', 36);
     const sts=DATA.stations.features.filter(f=>f.properties.gm===naam);
     const lines=DATA.buslines.features.filter(f=>(f.properties.gms||'').split(', ').includes(naam));
@@ -2050,7 +2069,7 @@ async function exportProfilePdf(){
     // voetnoot op alle pagina's
     const pages=doc.getNumberOfPages();
     for(let i=1;i<=pages;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(6.8); doc.setTextColor(...hex(MUTED));
-      doc.text(doc.splitTextToSize(pdfText(`Bronnen: CBS Kerncijfers Wijken en Buurten ${KWB_JAREN} (CBS en PDOK), per gemeente berekend uit buurtcijfers; percentages gewogen naar inwoners, woningen of huishoudens; geheime buurtwaarden tellen niet mee. Voorzieningen, OV en wegen: OpenStreetMap-bijdragers. Natuur: Provincie Zuid-Holland, RVO. Regio Midden-Holland - prototype.`),170), 10, 287);
+      doc.text(doc.splitTextToSize(pdfText(`Bronnen: CBS Kerncijfers Wijken en Buurten ${KWB_JAREN} (CBS en PDOK), gemeentecijfers zoals het CBS ze publiceert; regio, Zuid-Holland en Nederland daaruit berekend (percentages gewogen naar inwoners, woningen of huishoudens). Voorzieningen, OV en wegen: OpenStreetMap-bijdragers. Natuur: Provincie Zuid-Holland, RVO. Regio Midden-Holland - prototype.`),170), 10, 287);
       doc.text(`${i}/${pages}`, 200, 291, {align:'right'}); }
     await saveFile(`gemeenteprofiel-${slug(naam)}-${stamp()}.pdf`, doc.output('blob'));
   }catch(e){ console.error(e); dlStatus('Het maken van het profiel is mislukt: '+(e.message||e)); }
@@ -2288,7 +2307,7 @@ function dvKpi(){
   if(!hasTheme()){ $('mKpi').innerHTML='<div><b>Kies een thema</b>om de buurten te kleuren</div>'; return; }
   const r=buurten.features.map(f=>({n:f.properties.buurtnaam,v:cleanK(f.properties,t.key)})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v);
   if(!r.length){ $('mKpi').innerHTML='<div><b>–</b>geen gegevens</div>'; return; }
-  const reg = t.trend ? trendWaarde(null,t.trend.key) : themeValue(buurten.features,t,false);
+  const reg = t.trend ? trendWaarde(null,t.trend.key) : gebiedWaarde('regio',t,false);
   const rf = t.trend ? trFmtGm(t.trend.soort) : t.fmt;
   $('mKpi').innerHTML=`<div><b>${reg==null?'–':rf(reg)}</b>Regio${t.trend?' ('+TJ+'–'+KJ+')':''}</div><div title="${esc(r[0].n)}"><b>${t.fmt(r[0].v)}</b>Hoogste: ${esc(r[0].n)}</div><div title="${esc(r[r.length-1].n)}"><b>${t.fmt(r[r.length-1].v)}</b>Laagste: ${esc(r[r.length-1].n)}</div><div><b>${r.length}</b>buurten met gegevens</div>`;
 }
@@ -2325,10 +2344,10 @@ function dvGemeenten(){
     if(t.g!==g){ g=t.g; rows+=`<tr class="grp"><td colspan="9">${esc(g)}</td></tr>`; }
     const lbl = t.label + (t.cmp ? ' ('+t.cmp.label+')' : '');
     const zh = t.cmp===null ? (DATA.ref&&DATA.ref.zh?DATA.ref.zh[t.key]:null) : refVal('zh',t,true), nl = t.cmp===null ? (DATA.ref&&DATA.ref.nl?DATA.ref.nl[t.key]:null) : refVal('nl',t,true);
-    rows+=`<tr><td class="tl">${esc(lbl)}</td>${Object.keys(GM).map(c=>`<td>${fmtCmp(t,themeValue(gmFeats(c),t,true))}</td>`).join('')}<td class="hl">${fmtCmp(t,themeValue(buurten.features,t,true))}</td><td>${t.eigen?'–':fmtCmp(t,zh)}</td><td>${t.eigen?'–':fmtCmp(t,nl)}</td></tr>`;
+    rows+=`<tr><td class="tl">${esc(lbl)}</td>${Object.keys(GM).map(c=>`<td>${fmtCmp(t,gebiedWaarde(c,t,true))}</td>`).join('')}<td class="hl">${fmtCmp(t,gebiedWaarde('regio',t,true))}</td><td>${t.eigen?'–':fmtCmp(t,zh)}</td><td>${t.eigen?'–':fmtCmp(t,nl)}</td></tr>`;
   }
   return `<table class="dt statisch"><caption class="sr">Kerncijfers per gemeente</caption><thead>${head}</thead><tbody>${rows}</tbody></table>
-    <p class="tabnoot">Per gemeente berekend uit de CBS-buurtcijfers ${KWB_JAREN}: percentages gewogen naar inwoners, woningen of huishoudens; geheime buurtwaarden tellen niet mee. Zuid-Holland en Nederland op dezelfde manier uit alle gemeenten.</p>`;
+    <p class="tabnoot">Per gemeente het officiële gemeentecijfer van de bron (CBS ${KWB_JAREN}, GGD, politie). Regio, Zuid-Holland en Nederland daaruit berekend: percentages gewogen naar inwoners, woningen of huishoudens. Reistijd, Leefbaarometer en ongevallen: opgeteld uit de buurten.</p>`;
 }
 function dvTrend(){
   const fv=(i,v)=> v==null ? '–' : (i.soort==='pp' ? nl1v.format(v)+'%' : (thema(i.key)||{fmt:x=>nl0.format(x)}).fmt(v));
@@ -2421,7 +2440,7 @@ function dvCsv(){
   if(dvTab==='gemeenten'){
     regels=[sepj(['Kerncijfer',...Object.values(GM),'Regio','Zuid-Holland','Nederland'])];
     for(const t of THEMES){ if(t.trend) continue; const zh=t.cmp===null?(DATA.ref&&DATA.ref.zh?DATA.ref.zh[t.key]:null):refVal('zh',t,true), nl=t.cmp===null?(DATA.ref&&DATA.ref.nl?DATA.ref.nl[t.key]:null):refVal('nl',t,true);
-      regels.push(sepj([t.label+(t.cmp?' ('+t.cmp.label+')':''), ...Object.keys(GM).map(c=>getal(themeValue(gmFeats(c),t,true))), getal(themeValue(buurten.features,t,true)), t.eigen?'':getal(zh), t.eigen?'':getal(nl)])); }
+      regels.push(sepj([t.label+(t.cmp?' ('+t.cmp.label+')':''), ...Object.keys(GM).map(c=>getal(gebiedWaarde(c,t,true))), getal(gebiedWaarde('regio',t,true)), t.eigen?'':getal(zh), t.eigen?'':getal(nl)])); }
     naam='gemeenten-vergeleken';
   } else if(dvTab==='trend'){
     regels=[sepj([`Verandering ${TJ}-${KJ}`,'Eenheid',...Object.values(GM),'Regio'])];
@@ -2894,8 +2913,8 @@ function presNieuweDia(){
 }
 function presVoorbeeld(){
   const R=REGIO_GRENS, g=[[+R.getSouth().toFixed(5),+R.getWest().toFixed(5)],[+R.getNorth().toFixed(5),+R.getEast().toFixed(5)]];
-  const inw = nl0.format(themeValue(buurten.features, THEMES.find(t=>t.key==='aantal_inwoners'), false));
-  const groei = trendWaarde(null,'aantal_inwoners'), w65=themeValue(buurten.features, THEMES.find(t=>t.key==='percentage_personen_65_jaar_en_ouder'), false);
+  const inw = nl0.format(gebiedWaarde('regio', THEMES.find(t=>t.key==='aantal_inwoners'), false));
+  const groei = trendWaarde(null,'aantal_inwoners'), w65=gebiedWaarde('regio', THEMES.find(t=>t.key==='percentage_personen_65_jaar_en_ouder'), false);
   const dia=(titel,tekst,h)=>({titel, tekst, h, grenzen:g, tk:[]});
   presDias = [
     dia('Regio Midden-Holland in één oogopslag', `Vijf gemeenten, ${inw} inwoners, in het hart van het Groene Hart.`, 'lagen=overzicht&achtergrond=geen'),
@@ -3021,11 +3040,11 @@ const vglInfo = k => VGL_GEBIEDEN.find(g=>g.k===k);
 function vglWaarde(g, t){
   if(g==='zh'||g==='nl'){ if(t.eigen || !DATA.ref || !DATA.ref[g]) return null;
     if(t.cmp===null){ const v=DATA.ref[g][t.key]; return v===undefined?null:v; } return refVal(g,t,true); }
-  return themeValue(g==='regio' ? buurten.features : gmFeats(g), t, true);
+  return gebiedWaarde(g, t, true);
 }
 const vglRuw = (g, key) => { const t=THEMES.find(x=>x.key===key); if(!t) return null;
   if(g==='zh'||g==='nl') return DATA.ref&&DATA.ref[g] ? (DATA.ref[g][key] ?? null) : null;
-  return themeValue(g==='regio' ? buurten.features : gmFeats(g), t, false); };
+  return gebiedWaarde(g, t, false); };
 const vglProg = g => g==='regio' ? PROG.regio : g==='zh' ? PROG.zh : g==='nl' ? PROG.nl : PROG.gm[g];
 const vglTrend = (g, k) => (g==='zh'||g==='nl') ? null : trendWaarde(g==='regio'?null:g, k);
 const isPctFmt = (t, v) => /%$/.test(fmtCmp(t, v));
@@ -3146,7 +3165,7 @@ function renderVgl(){
       <button type="button" class="btn licht" id="vgCsv">Tabel als CSV</button><button type="button" class="btn licht" id="vgPrint">Afdrukken of PDF</button></div>
     <div class="vg-nav">${tab.groepen.map((g,i)=>`<a href="#vg-g-${i+1}" data-i="${i+1}">${esc(g)}</a>`).join('')}</div>
     <table class="vg-tabel"><thead><tr><th class="vg-l">Kerncijfer</th><th class="vg-a" style="color:${VGL_A}">${esc(A.naam)}</th><th></th><th class="vg-b" style="color:${VGL_B}">${esc(B.naam)}</th><th class="vg-v">Verschil</th></tr></thead><tbody>${tab.html}</tbody></table>
-    <p class="vg-noot">Gemeenten en regio berekend uit de CBS-buurtcijfers (${KWB_JAREN}) en andere bronnen per thema; Zuid-Holland en Nederland op dezelfde manier uit alle gemeenten. Verschil = ${esc(A.naam)} ten opzichte van ${esc(B.naam)}: bij percentages in procentpunten, anders in procenten. Bij absolute aantallen geen verschil (gebieden zijn verschillend groot).</p>`;
+    <p class="vg-noot">Gemeenten: de officiële gemeentecijfers van de bron (CBS ${KWB_JAREN}, GGD, politie); regio, Zuid-Holland en Nederland op dezelfde manier uit de gemeentecijfers. Alleen reistijd, Leefbaarometer en ongevallen zijn opgeteld uit de buurten. Verschil = ${esc(A.naam)} ten opzichte van ${esc(B.naam)}: bij percentages in procentpunten, anders in procenten. Bij absolute aantallen geen verschil (gebieden zijn verschillend groot).</p>`;
   const I=$('vglInhoud');
   I.querySelectorAll('.vg-kies').forEach(s=>s.onchange=()=>{ if(s.dataset.kant==='L') vglL=s.value; else vglR=s.value; renderVgl(); schrijfHash(); });
   $('vgWissel').onclick=()=>{ [vglL,vglR]=[vglR,vglL]; renderVgl(); schrijfHash(); };

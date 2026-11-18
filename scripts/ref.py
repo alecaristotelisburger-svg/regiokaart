@@ -33,6 +33,15 @@ for lvl,fs in [('nl',F),('zh',zhF)]:
         r[k]=agg(fs,s['agg'],k)
         if s.get('cmp'): r[k+'__cmp']=agg(fs,s['cmp'],k)
     out[lvl]=r
+# de vijf gemeenten en de regio uit hun eigen gemeentecijfers (zelfde regels): zo zijn gemeente, regio, ZH en NL vergelijkbaar
+GEB=['GM0513','GM1892','GM1901','GM1931','GM0627']
+out['gebied']={}
+for lvl,fs in [(c,[f for f in F if f['properties'].get('gemeentecode')==c]) for c in GEB]+[('regio',[f for f in F if f['properties'].get('gemeentecode') in GEB])]:
+    r={}
+    for k,s in spec.items():
+        r[k]=agg(fs,s['agg'],k)
+        if s.get('cmp'): r[k+'__cmp']=agg(fs,s['cmp'],k)
+    out['gebied'][lvl]=r
 out['n']={'nl':len(F),'zh':len(zhF)}
 json.dump(out,open('ref.json','w'),indent=1)
 print(out['n']); print({k:round(v,1) if v else v for k,v in out['zh'].items()})
