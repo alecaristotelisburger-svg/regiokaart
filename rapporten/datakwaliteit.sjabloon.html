@@ -1,0 +1,127 @@
+<title>Kloppen de cijfers?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&display=swap">
+<style>
+  /* Rapport in de huisstijl van de Regiokaart: smalle leeskolom, tabellen breder; paars voor koppen, oranje alleen voor 'oud' */
+  :root{
+    --bg:#ffffff; --vlak:#fbf2ee; --lijn:#eadde6; --tekst:#24112a; --zacht:#6d5c6b;
+    --paars:#5b0065; --magenta:#c2349f; --oranje:#b85a00; --ok:#1f7a4d; --okvlak:#e6f4ec; --let:#9a5b00; --letvlak:#fff1dc;
+    --kop:"Barlow Semi Condensed", "Arial Narrow", Arial, sans-serif; --romp:Barlow, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#170b1a; --vlak:#24142a; --lijn:#3b2840; --tekst:#f3e9f1; --zacht:#bfa9bc;
+    --paars:#e7a6e0; --magenta:#f07fd0; --oranje:#ffad5c; --ok:#7fd8a8; --okvlak:#173326; --let:#ffc56b; --letvlak:#3a2a10; color-scheme:dark } }
+  :root[data-theme="dark"]{
+    --bg:#170b1a; --vlak:#24142a; --lijn:#3b2840; --tekst:#f3e9f1; --zacht:#bfa9bc;
+    --paars:#e7a6e0; --magenta:#f07fd0; --oranje:#ffad5c; --ok:#7fd8a8; --okvlak:#173326; --let:#ffc56b; --letvlak:#3a2a10; color-scheme:dark }
+  body{background:var(--bg);color:var(--tekst);font:16px/1.55 var(--romp);margin:0}
+  .pagina{max-width:920px;margin:0 auto;padding-block:40px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  .lees{max-width:680px}
+  .kicker{font:600 12px var(--romp);letter-spacing:.12em;text-transform:uppercase;color:var(--magenta);margin:0 0 6px}
+  h1{font:700 clamp(30px,5vw,42px)/1.1 var(--kop);color:var(--paars);margin:0 0 12px;text-wrap:balance}
+  h2{font:700 24px/1.2 var(--kop);color:var(--paars);margin:44px 0 10px;text-wrap:balance}
+  h3{font:700 17px/1.3 var(--kop);margin:22px 0 6px}
+  p{margin:0 0 12px} .intro{font-size:18px;color:var(--zacht)}
+  a{color:var(--paars)} a:focus-visible,summary:focus-visible{outline:2px solid var(--magenta);outline-offset:2px}
+  .antwoorden{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:28px 0 8px}
+  .antwoord{background:var(--vlak);border-radius:10px;padding:16px 18px;min-width:0}
+  .antwoord .v{font:600 13px var(--romp);color:var(--zacht);margin:0 0 4px}
+  .antwoord .a{font:700 21px/1.2 var(--kop);color:var(--paars);margin:0 0 6px}
+  .antwoord p{font-size:14.5px;margin:0}
+  .groot{font:700 44px/1 var(--kop);color:var(--paars);font-variant-numeric:tabular-nums}
+  .vergelijk{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;margin:16px 0 18px}
+  .vergelijk div{min-width:0} .vergelijk .l{font-size:13.5px;color:var(--zacht)}
+  .vergelijk .oudgetal{color:var(--oranje)}
+  .tabelvak{overflow-x:auto;margin:10px 0 6px}
+  table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+  th{font:600 12px var(--romp);letter-spacing:.06em;text-transform:uppercase;color:var(--zacht);text-align:left;padding:8px 10px;border-bottom:2px solid var(--lijn)}
+  td{padding:7px 10px;border-bottom:1px solid var(--lijn);vertical-align:top}
+  td.num,th.num{text-align:right;white-space:nowrap} td.oud{color:var(--oranje)} td.nu{color:var(--paars);font-weight:600}
+  tr.grp td{font:600 12px var(--romp);letter-spacing:.08em;text-transform:uppercase;color:var(--paars);background:var(--vlak);padding:8px 10px}
+  td.bron{color:var(--zacht);font-size:13px} .jaar{display:inline-block;margin-left:6px;font-size:11.5px;color:var(--zacht);border:1px solid var(--lijn);border-radius:8px;padding:0 6px}
+  .chip{display:inline-block;font:600 12px var(--romp);border-radius:10px;padding:1px 8px;white-space:nowrap}
+  .chip.ok{background:var(--okvlak);color:var(--ok)} .chip.let{background:var(--letvlak);color:var(--let)}
+  .fijn{font-size:12.5px;color:var(--zacht);white-space:nowrap}
+  details{border:1px solid var(--lijn);border-radius:10px;padding:4px 14px;margin:14px 0}
+  summary{cursor:pointer;font:600 15px var(--romp);color:var(--paars);padding:8px 0}
+  .valkuilen{display:grid;gap:10px;margin:14px 0;padding:0;list-style:none}
+  .valkuilen li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:12px 14px;border:1px solid var(--lijn);border-radius:10px}
+  .valkuilen .st{grid-row:span 2;font:600 11.5px var(--romp);text-transform:uppercase;letter-spacing:.06em;border-radius:8px;padding:3px 8px;white-space:nowrap}
+  .st.opgelost{background:var(--okvlak);color:var(--ok)} .st.uitleg{background:var(--vlak);color:var(--paars)} .st.letop{background:var(--letvlak);color:var(--let)}
+  .valkuilen b{font-family:var(--kop);font-size:16.5px} .valkuilen span.t{font-size:14.5px;color:var(--tekst);min-width:0}
+  ol.stappen{padding-left:22px} ol.stappen li{margin-bottom:6px}
+  .voet{margin-top:48px;padding-top:14px;border-top:1px solid var(--lijn);font-size:13px;color:var(--zacht)}
+  @media (max-width:700px){ .antwoorden{grid-template-columns:1fr} .groot{font-size:36px} }
+</style>
+<main class="pagina">
+  <div class="lees">
+    <p class="kicker">Regiokaart Midden-Holland · datakwaliteit</p>
+    <h1>Kloppen de cijfers?</h1>
+    <p class="intro">Collega’s vragen het steeds: kloppen de cijfers op de kaart, kun je gemeenten echt met elkaar vergelijken, en is er iets misleidend? Hier staat wat er is gecontroleerd, wat er is verbeterd en waar je op moet letten.</p>
+  </div>
+
+  <div class="antwoorden">
+    <div class="antwoord"><p class="v">Klopt de data?</p><p class="a">Ja, {{GELIJK}} van {{N}} gelijk</p><p>Per gemeente staat nu hetzelfde cijfer op de kaart als wat het CBS, de GGD en de politie zelf publiceren. De enige afwijking is klein en wordt hieronder uitgelegd.</p></div>
+    <div class="antwoord"><p class="v">Kun je het vergelijken?</p><p class="a">Ja, met één kanttekening</p><p>Gemeenten, regio, Zuid-Holland en Nederland zijn op precies dezelfde manier berekend. Let wel op het jaar: dat verschilt per thema (2023 tot 2025).</p></div>
+    <div class="antwoord"><p class="v">Is er iets misleidend?</p><p class="a">Een paar valkuilen</p><p>Vooral bij heel kleine buurten en bij de kleuren op de kaart. De kaart waarschuwt daar nu zelf voor. Zie de lijst hieronder.</p></div>
+  </div>
+
+  <div class="lees">
+    <h2>Wat we hebben gecontroleerd</h2>
+    <p>Voor elk thema waarvoor de bron zelf een gemeentecijfer publiceert, is het getal op de kaart naast het officiële getal gelegd. Het gaat om de CBS Kerncijfers Wijken en Buurten (2024 en 2025), CBS-cijfers over sociaal domein, opleiding en energie, de Gezondheidsmonitor van GGD en RIVM, en de geregistreerde misdrijven en overlast van de politie. Dat zijn {{N}} thema’s, voor alle vijf gemeenten en, waar het CBS een landelijk cijfer heeft, ook voor Nederland.</p>
+    <p>Een getal telt als gelijk als het verschil binnen de afronding van het officiële cijfer valt. Een voorbeeld: het CBS publiceert ‘21%’, de kaart rekent met 20,7%.</p>
+
+    <h2>Wat we vonden en hebben verbeterd</h2>
+    <p>Eerst rekende de kaart de gemeentecijfers zelf uit, door alle buurten van een gemeente op te tellen. Dat lijkt logisch, maar het CBS rondt buurtcijfers af op vijftallen en houdt kleine buurten geheim. Opgeteld wijkt dat soms enkele procenten af van het echte gemeentecijfer.</p>
+    <div class="vergelijk" aria-label="Thema's gelijk aan de bron, voor en na">
+      <div><div class="groot oudgetal">{{OUD_GELIJK}}<span style="font-size:.5em"> / {{N}}</span></div><div class="l">thema’s gelijk met de oude rekenwijze</div></div>
+      <div><div class="groot">{{GELIJK}}<span style="font-size:.5em"> / {{N}}</span></div><div class="l">thema’s gelijk nu</div></div>
+    </div>
+    <p>De kaart gebruikt nu voor elke gemeente het officiële gemeentecijfer van de bron. De regio wordt daaruit berekend, op dezelfde manier als Zuid-Holland en Nederland. De grootste verschillen met de oude rekenwijze:</p>
+  </div>
+  <div class="tabelvak"><table>
+    <thead><tr><th>Thema</th><th>Gemeente</th><th class="num">Oud (opgeteld)</th><th class="num">Officieel</th><th class="num">Nu op de kaart</th></tr></thead>
+    <tbody>{{VOORBEELDEN}}</tbody>
+  </table></div>
+  <div class="lees">
+    <p>Er is ook een fout in Zuid-Holland en Nederland hersteld. PDOK rondt het aandeel inwoners per herkomst per gemeente af op vijftallen (70%, 75%, 80%). De provincie- en landcijfers werden daaruit berekend. Nu komen ze uit de echte CBS-aantallen. Een voorbeeld: Europese herkomst in Zuid-Holland stond op 11,4% en is nu 10,7%.</p>
+    <p>De enige overgebleven afwijking is de adressendichtheid van Nederland: 2.117 op de kaart tegen 2.082 bij het CBS. Dit cijfer kun je niet optellen, omdat het CBS het per adres berekent. Het verschil is 1,7%.</p>
+
+    <details>
+      <summary>Alle {{N}} gecontroleerde thema’s</summary>
+      <div class="tabelvak"><table>
+        <thead><tr><th>Thema</th><th>Vergeleken met</th><th>Resultaat</th></tr></thead>
+        <tbody>{{TABEL}}</tbody>
+      </table></div>
+    </details>
+
+    <h3>Niet automatisch te controleren ({{NIET_N}} thema’s)</h3>
+    <ul>{{NIET}}</ul>
+
+    <h2>Waar je op moet letten</h2>
+  </div>
+  <ul class="valkuilen lees">
+    <li><span class="st opgelost">Opgelost</span><b>Gemeenten opgeteld uit buurten</b><span class="t">Gaf afwijkingen tot 8% (jeugdzorg, zelfstandigen, Wmo). Nu staan de officiële gemeentecijfers op de kaart.</span></li>
+    <li><span class="st opgelost">In de kaart</span><b>Heel kleine buurten</b><span class="t">21 buurten hebben minder dan 50 inwoners. Een percentage zegt daar weinig: Zaag (Krimpenerwaard) heeft 30 inwoners en kleurt daardoor donker bij ‘65-plussers’. De pop-up waarschuwt nu bij buurten onder 100 inwoners.</span></li>
+    <li><span class="st opgelost">In de kaart</span><b>Kleuren zijn relatief</b><span class="t">De buurten zijn verdeeld in vijf even grote groepen binnen de regio. Donker betekent ‘hoger dan de andere buurten’, niet ‘hoog’. De legenda zegt dat nu.</span></li>
+    <li><span class="st uitleg">Toelichting</span><b>Jaren verschillen per thema</b><span class="t">Bevolking en wonen zijn van 2025. De meeste afstanden, auto’s, Wmo en jeugdzorg zijn van 2024. Inkomen is van 2023, gezondheid van 2024 en politie van 2025. Het jaar staat bij elk thema en in Vergelijken.</span></li>
+    <li><span class="st uitleg">Toelichting</span><b>Absolute aantallen</b><span class="t">Een grote buurt heeft vanzelf meer inwoners, woningen en bedrijven. Gebruik voor vergelijken de varianten ‘per 1.000’. Vergelijken toont bij aantallen bewust geen verschil.</span></li>
+    <li><span class="st uitleg">Toelichting</span><b>Gezondheid is een schatting</b><span class="t">De GGD-cijfers per buurt zijn modelschattingen op basis van een enquête, geen tellingen. Gebruik ze voor het patroon, niet voor één buurt.</span></li>
+    <li><span class="st letop">Let op</span><b>Regio-gewicht soms een benadering</b><span class="t">Voor jeugdzorg, arbeidsparticipatie en zelfstandigen weegt de kaart de regio, Zuid-Holland en Nederland naar een benaderde groep, bijvoorbeeld kinderen tot 15 jaar in plaats van jongeren tot 18 jaar. Per gemeente is het cijfer exact. Voor de regio kan het een paar tienden afwijken.</span></li>
+    <li><span class="st letop">Let op</span><b>OpenStreetMap is niet volledig</b><span class="t">Voorzieningen, buslijnen, wind en zon komen uit OpenStreetMap, dat door vrijwilligers wordt bijgehouden. Er staan bijvoorbeeld 7 ‘gemeentehuizen’ voor 5 gemeenten. Gebruik voor officiële aantallen DUO (scholen), LRZa (huisartsen) of de vervoerder.</span></li>
+    <li><span class="st letop">Let op</span><b>Trend en nieuwe buurten</b><span class="t">Bij de verandering in vijf jaar zijn 59 van de 251 buurten grijs, omdat hun grens is veranderd. De drie nieuwe buurten in Gouda (Westergouwe e.o.) hebben nog geen cijfers van de GGD, de politie en de Leefbaarometer.</span></li>
+    <li><span class="st letop">Let op</span><b>Netcongestie is een momentopname</b><span class="t">De capaciteitskaart verandert elk kwartaal en is indicatief. Vraag voor een concreet project de netbeheerder.</span></li>
+  </ul>
+
+  <div class="lees">
+    <h2>Zelf nakijken</h2>
+    <ol class="stappen">
+      <li>Open in de kaart <b>Vergelijken</b> en kies een gemeente.</li>
+      <li>Zoek hetzelfde cijfer op in <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86165NED/table" rel="noopener">CBS StatLine, Kerncijfers wijken en buurten 2025</a> of op <a href="https://www.waarstaatjegemeente.nl" rel="noopener">waarstaatjegemeente.nl</a>.</li>
+      <li>Kijk naar het jaar: dat staat bij elk thema in de kaart.</li>
+    </ol>
+    <p>De controle is een script in het project (<code>scripts/valideer.py</code>). Het draait opnieuw na elke verversing van de data, zodat een fout niet ongemerkt op de website komt.</p>
+    <p class="voet">Regiokaart Midden-Holland · controle van {{DATUM}} · <a href="https://alecaristotelisburger-svg.github.io/regiokaart/" rel="noopener">naar de kaart</a></p>
+  </div>
+</main>
