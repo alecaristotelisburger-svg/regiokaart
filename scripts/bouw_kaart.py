@@ -24,6 +24,9 @@ s = s.replace('<!--LEAFLET_JS-->', '<script>' + js + '</script>\n<script>' + pdf
 names = ['buurten', 'gemeenten', 'nnn', 'n2k', 'roads', 'rail', 'stations', 'buslines', 'busstops', 'voorz', 'locaties', 'net', 'erfgoed', 'trend', 'prognose', 'klimaat', 'sociaal', 'leefbaarometer', 'reistijd', 'ongevallen', 'gezondheid', 'politie', 'statline', 'keringen', 'indelingen', 'bedrijventerreinen', 'energie', 'bodem', 'kwb_jaar']
 data = {k: json.load(open(P('data', k + '.json'))) for k in names}
 data['natuur'] = json.load(open(P('data', 'natuur_gm.json')))
+# provinciegrenzen (CBS 2024) voor de kaartjes bij Vergelijken; alleen de naam is nodig
+prv = json.load(open(P('data', 'provincie_2024.geojson')))
+data['provincies'] = {'type': 'FeatureCollection', 'features': [{'type': 'Feature', 'properties': {'statnaam': f['properties']['statnaam']}, 'geometry': f['geometry']} for f in prv['features']]}
 data['spec'] = json.load(open(P('data', 'spec.json')))
 data['ref'] = json.load(open(P('data', 'ref.json'))) if os.path.exists(P('data', 'ref.json')) else None
 data['logo'] = 'data:image/jpeg;base64,' + base64.b64encode(open(P('src', 'logo.jpg'), 'rb').read()).decode()
