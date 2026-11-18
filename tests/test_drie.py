@@ -15,6 +15,7 @@ with sync_playwright() as p:
 
     # ---------- Kaart voor nota ----------
     pg.select_option('#theme', 'percentage_personen_65_jaar_en_ouder'); pg.wait_for_timeout(500)
+    check('ander formaat zit dicht', not pg.is_visible('#nkFormaat')); pg.click('.notakaart summary'); pg.wait_for_timeout(200)
     for f, (w, h) in {'nota': (1000, 625), 'dia': (1280, 720), 'vierkant': (900, 900), 'smal': (1200, 400)}.items():
         pg.select_option('#nkFormaat', f); z0 = pg.evaluate('map.getZoom()')
         with pg.expect_download() as d: pg.click('#btnNota')
@@ -69,7 +70,6 @@ with sync_playwright() as p:
     pg.goto('about:blank'); pg.goto(U + '#vergelijk=GM0627~zh'); pg.wait_for_timeout(1500)
     check('link opent vergelijken met Waddinxveen tegen ZH', pg.is_visible('#vgl') and pg.evaluate("[...document.querySelectorAll('.vg-kies')].map(s=>s.value).join()") == 'GM0627,zh')
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
-    pg.click('#btnVglPaneel') if pg.is_visible('#btnVglPaneel') else None
 
     # ---------- Presentatie ----------
     pg.goto(U); pg.wait_for_timeout(1500); pg.keyboard.press('Escape')
