@@ -18,6 +18,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235b0065'/%3E%3Cpath d='M14 46 L26 22 L34 36 L40 28 L50 46 Z' fill='%23fbf2ee'/%3E%3Ccircle cx='46' cy='18' r='6' fill='%23fc7c00'/%3E%3C/svg%3E">
 <!--FONTS-->
 <!--LEAFLET_CSS-->
+<!--MAPLIBRE-->
 <!--LEAFLET_JS-->
 <style>
   :root{
@@ -397,6 +398,32 @@
   body.presenteren #presBalk{display:flex;position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:1300;align-items:center;gap:8px;background:rgba(255,255,255,.96);border-radius:12px;box-shadow:0 4px 18px rgba(40,0,50,.2);padding:8px 10px;font-family:Barlow,sans-serif}
   #presBalk .tk-knop{width:38px;height:38px;font-size:18px}
   #presTeller{font:600 14px Barlow,sans-serif;color:var(--accent);min-width:56px;text-align:center}
+  /* ---------- 3D ---------- */
+  #d3{position:fixed;inset:0;z-index:1500;background:#f3eef2;display:flex;flex-direction:column;font-family:Barlow,system-ui,sans-serif;color:var(--ink)}
+  #d3[hidden]{display:none}
+  .d3-balk{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 22px;background:#fff;border-bottom:1px solid var(--line);position:relative;z-index:2}
+  .d3-balk h2{margin:0;font:700 20px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--accent)}
+  .d3-balk select{font:600 14px Barlow,sans-serif;color:var(--accent);border:1.5px solid #e4d9e2;border-radius:8px;padding:6px 9px;max-width:300px}
+  .d3-balk label{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink2)}
+  .d3-balk input[type=range]{accent-color:var(--accent);width:120px}
+  .d3-balk input[type=checkbox]{accent-color:var(--accent)}
+  #d3HoogteW{font-weight:600;color:var(--accent);min-width:28px}
+  .d3-knop{font:600 13px Barlow,sans-serif;color:var(--accent);background:#fff;border:1px solid #e4d9e2;border-radius:16px;padding:5px 12px;cursor:pointer}
+  .d3-knop:hover,.d3-knop.aan{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .d3-balk .tk-knop{margin-left:auto;font-size:20px;width:36px;height:36px}
+  #d3Kaart{flex:1;position:relative}
+  #d3Leg{position:absolute;left:20px;bottom:24px;z-index:3;background:rgba(255,255,255,.95);border-radius:10px;box-shadow:0 2px 10px rgba(40,0,50,.15);padding:10px 12px;font-size:12px;max-width:250px}
+  .d3-lt{font:700 13px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--accent);margin-bottom:5px}
+  .d3-lr{display:flex;align-items:center;gap:7px;line-height:1.65}
+  .d3-lr i{width:13px;height:11px;border-radius:2px;flex:none}
+  .d3-ln{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.35}
+  .d3-tip{position:absolute;right:20px;bottom:26px;z-index:3;font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.85);border-radius:8px;padding:5px 9px;margin-right:150px}
+  #d3Melding{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:4;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 10px rgba(40,0,50,.15);font-weight:600;color:var(--accent)}
+  .d3-gmlabel{font:700 15px "Barlow Semi Condensed",Barlow,sans-serif;color:#3b0042;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 6px #fff;pointer-events:none;white-space:nowrap;letter-spacing:.02em}
+  .d3-pop .maplibregl-popup-content{font:12.5px Barlow,sans-serif;padding:8px 10px;border-radius:8px;box-shadow:0 2px 10px rgba(40,0,50,.2)}
+  .d3-pop span{display:block;color:var(--muted);font-size:11.5px;margin-bottom:3px}
+  .d3-pop em{display:block;color:#9a5b00;font-size:11px;margin-top:3px}
+  body.presenteren #btn3D{display:none !important}
   /* ---------- vergelijken ---------- */
   #vgl{position:fixed;inset:0;z-index:1500;background:var(--soft);display:flex;flex-direction:column;font-family:Barlow,system-ui,sans-serif;color:var(--ink)}
   #vgl[hidden]{display:none}
@@ -658,7 +685,7 @@
   </aside>
   <div id="map"></div>
   <div id="wissel" hidden><div class="merk"><small>Databank · prototype</small>Regiokaart Midden-Holland</div>
-    <button type="button" class="tourknop btnTour" title="Rondleiding" aria-label="Rondleiding">?</button><div class="seg2" role="group" aria-label="Weergave"><button type="button" data-w="paneel" class="aan" aria-pressed="true">Paneel</button><button type="button" data-w="data" aria-pressed="false">Data</button></div><button type="button" id="btnTekenen" class="tekenknop" aria-pressed="false" title="Tekenen op de kaart: pen, tekst, rechthoek, cirkel en pijl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>Tekenen</button><button type="button" id="btnVergelijken" class="tekenknop" title="Twee gebieden naast elkaar vergelijken, met grafieken"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/></svg>Vergelijken</button><button type="button" id="btnPresenteren" class="tekenknop" title="Presentatie maken en schermvullend tonen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8M10 8l4 2-4 2z"/></svg>Presenteren</button><div id="tekenBalk" class="tekenbalk" role="toolbar" aria-label="Tekengereedschap" aria-hidden="true"></div></div>
+    <button type="button" class="tourknop btnTour" title="Rondleiding" aria-label="Rondleiding">?</button><div class="seg2" role="group" aria-label="Weergave"><button type="button" data-w="paneel" class="aan" aria-pressed="true">Paneel</button><button type="button" data-w="data" aria-pressed="false">Data</button></div><button type="button" id="btnTekenen" class="tekenknop" aria-pressed="false" title="Tekenen op de kaart: pen, tekst, rechthoek, cirkel en pijl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>Tekenen</button><button type="button" id="btnVergelijken" class="tekenknop" title="Twee gebieden naast elkaar vergelijken, met grafieken"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/></svg>Vergelijken</button><button type="button" id="btn3D" class="tekenknop" title="De buurten als blokken in 3D: hoogte = waarde van het thema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>3D</button><button type="button" id="btnPresenteren" class="tekenknop" title="Presentatie maken en schermvullend tonen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8M10 8l4 2-4 2z"/></svg>Presenteren</button><div id="tekenBalk" class="tekenbalk" role="toolbar" aria-label="Tekengereedschap" aria-hidden="true"></div></div>
   <div id="presPaneel" role="dialog" aria-labelledby="presKopTitel" hidden>
     <div class="pres-kop"><h3 id="presKopTitel">Presentatie</h3><button type="button" class="tk-knop" id="presSluit" aria-label="Sluiten">✕</button></div>
     <p class="pres-uitleg">Zet de kaart zoals je hem wilt laten zien (thema, lagen, uitsnede, tekeningen) en voeg hem toe als dia. Geef elke dia een titel. Met ▶ toon je ze schermvullend; blader met de pijltjestoetsen, stop met Esc.</p>
@@ -673,6 +700,16 @@
     <div class="vg-balk"><h2 id="vglTitel">Vergelijken</h2><span class="vg-sub">Kies links en rechts een gemeente, de regio, Zuid-Holland of Nederland</span><p id="vglDl" class="note" aria-live="polite"></p><button type="button" class="tk-knop" id="vglSluit" title="Sluiten (Esc)" aria-label="Vergelijken sluiten">✕</button></div>
     <div id="vglThemas" class="vg-themas" aria-label="Thema’s in de vergelijking"></div>
     <div id="vglInhoud"></div>
+  </div>
+  <div id="d3" role="dialog" aria-labelledby="d3Titel" hidden>
+    <div class="d3-balk"><h2 id="d3Titel">3D</h2>
+      <select id="d3Thema" aria-label="Thema"></select>
+      <label for="d3Hoogte">Hoogte <input type="range" id="d3Hoogte" min="0.25" max="4" step="0.25" value="1"><span id="d3HoogteW">1×</span></label>
+      <button type="button" class="d3-knop" id="d3Draai" aria-pressed="false">Langzaam draaien</button>
+      <button type="button" class="d3-knop" id="d3Schuin">Schuin</button><button type="button" class="d3-knop" id="d3Boven">Van boven</button>
+      <label><input type="checkbox" id="d3Bg" checked>Achtergrondkaart</label>
+      <button type="button" class="tk-knop" id="d3Sluit" title="Sluiten (Esc)" aria-label="3D sluiten">✕</button></div>
+    <div id="d3Kaart"><div id="d3Leg"></div><div class="d3-tip">Slepen = schuiven · rechtermuisknop of Ctrl + slepen = draaien en kantelen · scrollen = zoomen</div><div id="d3Melding" hidden></div></div>
   </div>
   <div id="nkBezig" hidden>Kaart wordt gemaakt…</div>
   <div id="tour" role="dialog" aria-labelledby="tourT" aria-live="polite" hidden>
@@ -3183,6 +3220,109 @@ function sluitVgl(){ $('vgl').hidden=true; document.body.classList.remove('vgl-o
 $('btnVergelijken').addEventListener('click', openVgl);
 $('vglSluit').addEventListener('click', sluitVgl);
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('vgl').hidden && !window.presActief) sluitVgl(); });
+
+/* ---------- 3D: buurten als blokken (MapLibre GL, alleen computer) ----------
+   Hoogte = waarde van het gekozen thema, vanaf nul (veranderingen en Leefbaarometer: de grootte van de afwijking,
+   de kleur zegt de richting). Kleur = dezelfde klassen als de 2D-kaart. MapLibre zit als tekst in de pagina
+   (#mlCode, #mlCss) en wordt pas geladen bij de eerste keer openen. */
+let d3Kaart=null, d3Hoogte=1, d3Draai=false, d3Raf=0, d3Popup=null, d3Labels=[];
+const D3_HMAX = 2600;   // meter voor het hoogste blok bij schuif 1×
+const D3_START = 'bevolkingsdichtheid_inwoners_per_km2';
+function d3Laad(){
+  if(window.maplibregl) return Promise.resolve();
+  const css=document.createElement('style'); css.textContent=$('mlCss').textContent; document.head.appendChild(css);
+  const s=document.createElement('script'); s.textContent=$('mlCode').textContent; document.head.appendChild(s);
+  return window.maplibregl ? Promise.resolve() : Promise.reject(new Error('3D-onderdeel kon niet worden geladen'));
+}
+function d3Data(){
+  const t=currentTheme(), ok=hasTheme();
+  const waarden=buurten.features.map(f=>ok?cleanK(f.properties,t.key):null);
+  const max=d3Max(waarden);
+  return {type:'FeatureCollection', features:buurten.features.map((f,i)=>{ const v=waarden[i];
+    return {type:'Feature', geometry:f.geometry, properties:{naam:nameOf(f), gm:gmOf(f), kleur:colorFor(v),
+      h: v===null ? 0 : Math.min(1, Math.abs(v)/max.top)*D3_HMAX, w: v===null ? '–' : t.fmt(v), inw: clean(f.properties.aantal_inwoners)}}; })};
+}
+// hoogste blok: de grootste waarde, of (bij een paar uitschieters) het 98e percentiel; daarboven afgetopt
+function d3Max(waarden){
+  const a=waarden.filter(v=>v!==null).map(Math.abs).sort((x,y)=>x-y); if(!a.length) return {top:1, echt:1, n:0};
+  const echt=a[a.length-1], p98=a[Math.floor(0.98*(a.length-1))];
+  return echt>1.5*p98 && p98>0 ? {top:p98, echt, n:a.filter(v=>v>p98).length} : {top:echt||1, echt, n:0};
+}
+function d3Legenda(){
+  const t=currentTheme();
+  if(!hasTheme()){ $('d3Leg').innerHTML='<b>Kies een thema</b>'; return; }
+  const vals=buurten.features.map(f=>cleanK(f.properties,t.key)).filter(v=>v!==null), m=d3Max(vals), maxv=vals.find(v=>Math.abs(v)===m.echt);
+  $('d3Leg').innerHTML=`<div class="d3-lt">${esc(t.label)}${t.trend?` (${TJ}–${KJ})`:''}</div>`
+    + klassenHoogLaag().map(k=>`<div class="d3-lr"><i style="background:${k.c}"></i>${klasLabel(t,k)}</div>`).join('')
+    + `<div class="d3-lr"><i style="background:${NODATA}"></i>geen gegevens</div>`
+    + `<p class="d3-ln">Hoogte = ${(t.trend||t.div)?'grootte van de verandering of afwijking':'de waarde'}, vanaf nul. ${m.n ? `${m.n} uitschieter${m.n>1?'s':''} (tot ${t.fmt(maxv)}) afgetopt op ${t.fmt(Math.sign(maxv)*m.top)}, anders worden de andere blokken plat.` : `Hoogste blok: ${t.fmt(maxv)}.`}${t.agg&&t.agg.type==='sum'&&t.cmp!==null?' Let op: dit is een aantal, grote buurten zijn vanzelf hoger.':''}</p>`;
+}
+function d3Ververs(){
+  if(!d3Kaart || !d3Kaart.getSource('b')) return;
+  d3Kaart.getSource('b').setData(d3Data()); d3Legenda();
+  $('d3Thema').value=$('theme').value;
+}
+function d3Camera(soort, animeer=true){
+  const R=REGIO_GRENS, b=[[R.getWest(),R.getSouth()],[R.getEast(),R.getNorth()]];
+  const opts={padding:{top:90,bottom:60,left:60,right:60}, pitch: soort==='boven'?0:58, bearing: soort==='boven'?0:-18, duration: animeer?1200:0};
+  const cam=d3Kaart.cameraForBounds(b, {padding:opts.padding, bearing:opts.bearing});
+  d3Kaart.easeTo({center:cam.center, zoom:cam.zoom + (soort==='boven'?0:0.55), pitch:opts.pitch, bearing:opts.bearing, duration:opts.duration});
+}
+function d3ZetDraai(aan){
+  d3Draai=aan; $('d3Draai').setAttribute('aria-pressed', aan); $('d3Draai').classList.toggle('aan', aan);
+  cancelAnimationFrame(d3Raf);
+  if(aan){ const stap=()=>{ if(!d3Draai||!d3Kaart) return; d3Kaart.setBearing(d3Kaart.getBearing()+0.12); d3Raf=requestAnimationFrame(stap); }; d3Raf=requestAnimationFrame(stap); }
+}
+function d3Achtergrond(aan){
+  if(!d3Kaart) return; d3Kaart.setLayoutProperty('brt','visibility', aan?'visible':'none');
+}
+async function open3D(){
+  $('d3').hidden=false; document.body.classList.add('d3-open');
+  if(!hasTheme()){ $('theme').value=D3_START; $('theme').dispatchEvent(new Event('change')); }
+  $('d3Thema').innerHTML=$('theme').innerHTML; $('d3Thema').value=$('theme').value;
+  if(d3Kaart){ d3Kaart.resize(); d3Ververs(); return; }
+  try{ await d3Laad(); }catch(e){ $('d3Melding').textContent='3D kan in deze browser niet worden geladen.'; $('d3Melding').hidden=false; return; }
+  const gl=document.createElement('canvas'); if(!(gl.getContext('webgl2')||gl.getContext('webgl'))){ $('d3Melding').textContent='Deze browser of computer ondersteunt geen 3D (WebGL).'; $('d3Melding').hidden=false; return; }
+  d3Kaart = new maplibregl.Map({container:'d3Kaart', attributionControl:false, maxPitch:75, preserveDrawingBuffer:false,
+    style:{version:8, sources:{
+      brt:{type:'raster', tiles:['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png'], tileSize:256, maxzoom:19},
+      b:{type:'geojson', data:d3Data()}, gm:{type:'geojson', data:gemeenten}},
+      layers:[
+        {id:'grond', type:'background', paint:{'background-color':'#f3eef2'}},
+        {id:'brt', type:'raster', source:'brt', paint:{'raster-opacity':0.55, 'raster-saturation':-0.6}},
+        {id:'gmvlak', type:'line', source:'gm', paint:{'line-color':'#3b0042','line-width':2.2,'line-opacity':.8}},
+        {id:'blok', type:'fill-extrusion', source:'b', paint:{'fill-extrusion-color':['get','kleur'], 'fill-extrusion-height':['*',['get','h'],['literal',1]], 'fill-extrusion-base':0, 'fill-extrusion-opacity':0.92, 'fill-extrusion-vertical-gradient':true}},
+      ]}});
+  d3Kaart.addControl(new maplibregl.NavigationControl({visualizePitch:true}), 'top-right');
+  d3Kaart.addControl(new maplibregl.AttributionControl({compact:true, customAttribution:'Kaart: Kadaster / PDOK · Data: CBS en andere bronnen'}), 'bottom-right');
+  d3Kaart.on('load', ()=>{
+    d3Kaart.setLight({anchor:'viewport', position:[1.4, 200, 35], intensity:0.45, color:'#ffffff'});
+    d3ZetHoogte(d3Hoogte); d3Camera('schuin', false); d3Legenda();
+    // gemeentenamen als gewone HTML-labels (geen lettertypeserver nodig)
+    d3Labels = gemeenten.features.map(f=>{ const c=L.geoJSON(f).getBounds().getCenter(), el=document.createElement('div'); el.className='d3-gmlabel'; el.textContent=f.properties.gemeentenaam||GM[f.properties.gemeentecode]||'';
+      return new maplibregl.Marker({element:el}).setLngLat([c.lng,c.lat]).addTo(d3Kaart); });
+  });
+  d3Popup = new maplibregl.Popup({closeButton:false, closeOnClick:false, className:'d3-pop', offset:8});
+  d3Kaart.on('mousemove','blok', e=>{ const p=e.features[0].properties; d3Kaart.getCanvas().style.cursor='pointer';
+    d3Popup.setLngLat(e.lngLat).setHTML(`<b>${esc(p.naam)}</b><span>${esc(p.gm)}</span><div>${esc(currentTheme().label)}: <b>${esc(p.w)}</b></div>${p.inw!=null && p.inw<100 ? '<em>Kleine buurt: waarde onzeker</em>':''}`).addTo(d3Kaart); });
+  d3Kaart.on('mouseleave','blok', ()=>{ d3Kaart.getCanvas().style.cursor=''; d3Popup.remove(); });
+  for(const ev of ['mousedown','touchstart','wheel']) d3Kaart.getCanvasContainer().addEventListener(ev, ()=>{ if(d3Draai) d3ZetDraai(false); }, {passive:true});
+  d3Kaart.on('error', ()=>{});   // ontbrekende tegels (bijv. in de claude.ai-artifact) niet als fout tonen
+}
+function d3ZetHoogte(f){ d3Hoogte=f; $('d3HoogteW').textContent=nl1.format(f).replace(',0','')+'×';
+  if(d3Kaart && d3Kaart.getLayer('blok')) d3Kaart.setPaintProperty('blok','fill-extrusion-height',['*',['get','h'],f]); }
+function sluit3D(){ $('d3').hidden=true; document.body.classList.remove('d3-open'); d3ZetDraai(false); if(d3Popup) d3Popup.remove(); }
+$('btn3D').addEventListener('click', open3D);
+$('d3Sluit').addEventListener('click', sluit3D);
+$('d3Thema').addEventListener('change', e=>{ $('theme').value=e.target.value; $('theme').dispatchEvent(new Event('change')); });
+$('theme').addEventListener('change', ()=>{ if(!$('d3').hidden) setTimeout(d3Ververs,0); });
+$('d3Hoogte').addEventListener('input', e=>d3ZetHoogte(+e.target.value));
+$('d3Draai').addEventListener('click', ()=>d3ZetDraai(!d3Draai));
+$('d3Schuin').addEventListener('click', ()=>{ d3ZetDraai(false); d3Camera('schuin'); });
+$('d3Boven').addEventListener('click', ()=>{ d3ZetDraai(false); d3Camera('boven'); });
+$('d3Bg').addEventListener('change', e=>d3Achtergrond(e.target.checked));
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('d3').hidden && !window.presActief) sluit3D(); });
+if(MOBIEL) $('btn3D').hidden=true;
 
 $('presLogo').src=DATA.logo;
 /* ---------- Deelbare link: thema, lagen, achtergrond en uitsnede staan in het webadres (#...) ---------- */

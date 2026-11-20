@@ -11,6 +11,10 @@ css = open(P('node_modules', 'leaflet', 'dist', 'leaflet.css')).read()
 js = open(P('node_modules', 'leaflet', 'dist', 'leaflet.js')).read().replace('</script>', '<\\/script>')
 pdf = open(P('node_modules', 'jspdf', 'dist', 'jspdf.umd.min.js')).read().replace('</script>', '<\\/script>')
 s = s.replace('<!--LEAFLET_CSS-->', '<style>' + css + '</style>')
+# MapLibre (3D) als tekst in de pagina: pas bij het openen van 3D uitgevoerd, dus geen vertraging bij het laden
+ml_js = open(P('node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.js')).read().replace('</script>', '<\\/script>')
+ml_css = open(P('node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.css')).read().replace('</script>', '<\\/script>')
+s = s.replace('<!--MAPLIBRE-->', '<script type="text/plain" id="mlCss">' + ml_css + '</script>\n<script type="text/plain" id="mlCode">' + ml_js + '</script>')
 # lettertypen in de pagina zelf (geen verbinding met Google nodig); licentie: src/fonts/OFL.txt
 ff = ''
 for fn in sorted(os.listdir(P('src', 'fonts'))):
