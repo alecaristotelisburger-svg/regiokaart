@@ -12,7 +12,7 @@ js = open(P('node_modules', 'leaflet', 'dist', 'leaflet.js')).read().replace('</
 pdf = open(P('node_modules', 'jspdf', 'dist', 'jspdf.umd.min.js')).read().replace('</script>', '<\\/script>')
 s = s.replace('<!--LEAFLET_CSS-->', '<style>' + css + '</style>')
 # MapLibre (3D) als tekst in de pagina: pas bij het openen van 3D uitgevoerd, dus geen vertraging bij het laden
-ml_js = open(P('node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.js')).read().replace('</script>', '<\\/script>')
+ml_js = (open(P('node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.js')).read() + '\n' + open(P('node_modules', 'maplibre-gl-leaflet', 'leaflet-maplibre-gl.js')).read()).replace('</script>', '<\\/script>')   # + de Leaflet-koppeling (Regiostijl)
 ml_css = open(P('node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.css')).read().replace('</script>', '<\\/script>')
 s = s.replace('<!--MAPLIBRE-->', '<script type="text/plain" id="mlCss">' + ml_css + '</script>\n<script type="text/plain" id="mlCode">' + ml_js + '</script>')
 # lettertypen in de pagina zelf (geen verbinding met Google nodig); licentie: src/fonts/OFL.txt
@@ -25,7 +25,7 @@ for fn in sorted(os.listdir(P('src', 'fonts'))):
         ff += f"@font-face{{font-family:'{fam}';font-style:normal;font-weight:{w};font-display:swap;src:url(data:font/woff2;base64,{b64}) format('woff2')}}\n"
 s = s.replace('<!--FONTS-->', '<style>' + ff + '</style>')
 s = s.replace('<!--LEAFLET_JS-->', '<script>' + js + '</script>\n<script>' + pdf + '</script>')
-names = ['buurten', 'gemeenten', 'nnn', 'n2k', 'roads', 'rail', 'stations', 'buslines', 'busstops', 'voorz', 'locaties', 'net', 'erfgoed', 'trend', 'prognose', 'klimaat', 'sociaal', 'leefbaarometer', 'reistijd', 'ongevallen', 'gezondheid', 'politie', 'statline', 'keringen', 'bedrijventerreinen', 'energie', 'bodem', 'kwb_jaar', 'bwextra', 'bw', 'thermostaat']
+names = ['buurten', 'gemeenten', 'nnn', 'n2k', 'roads', 'rail', 'stations', 'buslines', 'busstops', 'voorz', 'locaties', 'net', 'erfgoed', 'trend', 'prognose', 'klimaat', 'sociaal', 'leefbaarometer', 'reistijd', 'ongevallen', 'gezondheid', 'politie', 'statline', 'keringen', 'bedrijventerreinen', 'energie', 'bodem', 'kwb_jaar', 'bwextra', 'bw', 'thermostaat', 'regiostijl']
 data = {k: json.load(open(P('data', k + '.json'))) for k in names}
 data['natuur'] = json.load(open(P('data', 'natuur_gm.json')))
 # provinciegrenzen (CBS 2024) voor de kaartjes bij Vergelijken; alleen de naam is nodig

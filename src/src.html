@@ -638,7 +638,7 @@
     <section id="secAchtergrond">
       <h2>Achtergrond</h2>
       <div class="seg" role="radiogroup">
-        <button data-bm="kaart" class="on">Kaart</button><button data-bm="sat">Satelliet</button><button data-bm="geen">Geen</button>
+        <button data-bm="kaart" class="on">Kaart</button><button data-bm="regio" title="Eigen kaartstijl in de kleuren van de regio">Regiostijl</button><button data-bm="sat">Satelliet</button><button data-bm="geen">Geen</button>
       </div>
       <p id="bmNote" class="note" hidden></p>
     </section>
@@ -1081,12 +1081,34 @@ for(const t of [brt, photo]){
 function setBasemap(bm){
   basemap = bm;
   for(const t of [brt, photo, photoLabels]) map.removeLayer(t);
+  if(regioBg && map.hasLayer(regioBg)) map.removeLayer(regioBg);
   if(bm==='kaart') brt.addTo(map).bringToBack();
+  if(bm==='regio') regioBgMaak().then(l=>{ if(basemap==='regio' && !map.hasLayer(l)) l.addTo(map); })
+    .catch(()=>{ $('bmNote').textContent='De regiostijl kan in deze browser niet worden geladen (WebGL nodig). Kies Kaart.'; $('bmNote').hidden=false; });
   if(bm==='sat'){ photo.addTo(map).bringToBack(); photoLabels.addTo(map); }
   document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on', b.dataset.bm===bm));
   if(buurtLayer) buurtLayer.setStyle(styleBuurt);
   if(gmLayer) gmLayer.setStyle(gmStyle());
   if(window.snapRestyle) snapRestyle();
+}
+// ---- Regiostijl: eigen achtergrondkaart = vectortegels van de BRT (Kadaster/PDOK) met eigen kleuren (data/regiostijl.json,
+// scripts/regiostijl.py), getekend door MapLibre als laag in Leaflet (@maplibre/maplibre-gl-leaflet). MapLibre wordt pas bij
+// het eerste gebruik geladen (d3Laad). preserveDrawingBuffer: anders is het kaartbeeld leeg in de PDF/PNG.
+let regioBg = null, regioBgLaadt = null, regioTegelOk = false;
+const achtergrondOk = () => basemap==='regio' ? regioTegelOk : tileOk>0;
+function regioBgMaak(){
+  if(regioBg) return Promise.resolve(regioBg);
+  if(!regioBgLaadt) regioBgLaadt = d3Laad().then(()=>{
+    if(!L.maplibreGL) throw new Error('MapLibre-laag ontbreekt');
+    const gl=document.createElement('canvas'); if(!(gl.getContext('webgl2')||gl.getContext('webgl'))) throw new Error('geen WebGL');
+    regioBg = L.maplibreGL({style:DATA.regiostijl, interactive:false, preserveDrawingBuffer:true, attributionControl:false, pane:'tilePane',
+      attribution:'Kaart: <a href="https://www.pdok.nl">Kadaster / PDOK</a>, eigen stijl · Data: CBS, RWS (AHN), © OpenStreetMap'});
+    regioBg.getAttribution = () => regioBg.options.attribution;   // de plug-in geeft de bronvermelding niet door aan Leaflet
+    regioBg.once('add', ()=>{ const m=regioBg.getMaplibreMap();
+      m.on('data', e=>{ if(e.dataType==='source' && e.tile) regioTegelOk=true; });
+      m.on('error', ()=>{ if(!regioTegelOk && basemap==='regio'){ $('bmNote').textContent='De regiostijl kan in deze weergave niet laden (deze omgeving blokkeert externe kaartgegevens). Open de kaart in een gewone browser.'; $('bmNote').hidden=false; } }); });
+    return regioBg; });
+  return regioBgLaadt;
 }
 const ahn = L.tileLayer.wms('https://service.pdok.nl/rws/ahn/wms/v1_0',
   {layers:'dtm_05m', format:'image/png', transparent:true, opacity:0.75, crossOrigin:'anonymous', attribution:'AHN · RWS'});
@@ -1972,7 +1994,7 @@ async function exportMapPng(){
     const s=2, t=currentTheme(); let tilesNote='';
     let kaart=mapToCanvas(s,true);
     try{ kaart.toDataURL('image/png').length; }catch(e){ kaart=mapToCanvas(s,false); tilesNote=' De achtergrondkaart kon niet worden meegenomen.'; }
-    if(!tilesNote && tileOk===0 && basemap!=='geen') tilesNote=' Achtergrondkaart niet beschikbaar in deze weergave.';
+    if(!tilesNote && !achtergrondOk() && basemap!=='geen') tilesNote=' Achtergrondkaart niet beschikbaar in deze weergave.';
     const W=kaart.width, KOP=64*s, MW=kaart.height;
     // bronnen: regels afbreken op de breedte
     const tmp=document.createElement('canvas').getContext('2d'); const vf=`${10.5*s}px Barlow, Helvetica, Arial, sans-serif`; tmp.font=vf;
@@ -2023,7 +2045,7 @@ async function exportMapPdf(){
     let tilesNote='';
     let img = canvasToJpeg(mapToCanvas(2,true));
     if(!img){ img = canvasToJpeg(mapToCanvas(2,false)); tilesNote=' De achtergrondkaart kon niet worden meegenomen.'; }
-    else if(tileOk===0 && basemap!=='geen') tilesNote=' Achtergrondkaart niet beschikbaar in deze weergave.';
+    else if(!achtergrondOk() && basemap!=='geen') tilesNote=' Achtergrondkaart niet beschikbaar in deze weergave.';
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
     const W=297, H=210, t=currentTheme();
@@ -2945,9 +2967,10 @@ async function tegelsGeladen(max=5000){   // wachten tot de achtergrond- en kaar
   const t0=performance.now(); await wacht(350);
   while(performance.now()-t0<max){
     const open=[...map.getContainer().querySelectorAll('img.leaflet-tile')].filter(i=>!i.classList.contains('leaflet-tile-loaded') && i.style.visibility!=='hidden');
-    if(!open.length) break; await wacht(150);
+    const gl = basemap==='regio' && regioBg && regioBg.getMaplibreMap ? regioBg.getMaplibreMap() : null;
+    if(!open.length && (!gl || gl.loaded())) break; await wacht(150);
   }
-  await wacht(150);
+  await wacht(250);
 }
 // de kaart tijdelijk op een vast formaat zetten, tekenen, en daarna terugzetten
 async function kaartOpFormaat(w, h, regio, teken){
@@ -2992,7 +3015,7 @@ async function maakNotaKaart(){
   const kaart = await kaartOpFormaat(F.w, F.h, $('nkRegio').checked, ()=>{
     let k=mapToCanvas(s,true); try{ k.toDataURL('image/png').length; }catch(e){ k=mapToCanvas(s,false); tilesNote=' De achtergrondkaart kon niet worden meegenomen.'; }
     return k; });
-  if(!tilesNote && tileOk===0 && basemap!=='geen') tilesNote=' Achtergrondkaart niet beschikbaar in deze weergave.';
+  if(!tilesNote && !achtergrondOk() && basemap!=='geen') tilesNote=' Achtergrondkaart niet beschikbaar in deze weergave.';
   const M=22*s, KOP=62*s, W=kaart.width+2*M;
   const tmp=document.createElement('canvas').getContext('2d'); tmp.font=`${10*s}px Barlow, Helvetica, Arial, sans-serif`;
   const bron=breekTekst(tmp, kaartBronnen()+tilesNote, W-2*M), VOET=(bron.length*13+22)*s;
