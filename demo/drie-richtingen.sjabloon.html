@@ -1,0 +1,354 @@
+<meta charset="utf-8">
+<title>Regiokaart: drie richtingen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&display=swap">
+<style>/*LEAFLETCSS*/</style>
+<style>
+  /* Eén lichte huisstijlwereld (zoals de echte kaart): crème ondergrond, paars voor structuur, oranje/magenta als accent.
+     Bovenaan de bevindingen, daaronder drie demo's als werkende schermen in een venster. */
+  :root{
+    --paars:#5b0065; --paars2:#8a2486; --magenta:#ed56c2; --oranje:#fc7c00; --creme:#fbf2ee;
+    --bg:#f6f1f3; --vlak:#ffffff; --lijn:#e7dde4; --tekst:#24112a; --zacht:#6f5f6c; --land:#f7f3f1;
+    --kop:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif; --romp:Barlow,"Helvetica Neue",Arial,sans-serif;
+    color-scheme:light;
+  }
+  body{background:var(--bg);color:var(--tekst);font:15px/1.5 var(--romp);margin:0}
+  .wrap{max-width:1240px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  header.kop{background:var(--paars);color:var(--creme);padding-block:28px 22px}
+  .kop .eyebrow{font:600 12px var(--romp);letter-spacing:.12em;text-transform:uppercase;color:var(--magenta);margin:0 0 6px}
+  .kop h1{font:700 clamp(28px,4vw,40px)/1.1 var(--kop);margin:0 0 10px;color:#fff;text-wrap:balance}
+  .kop p{max-width:760px;margin:0;color:#f3dfee}
+  .bevindingen{padding-block:22px 6px}
+  .bevindingen h2,.uitleg h2{font:700 20px var(--kop);color:var(--paars);margin:0 0 10px}
+  .bev-lijst{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px;list-style:none;margin:0;padding:0}
+  .bev-lijst li{background:var(--vlak);border:1px solid var(--lijn);border-radius:10px;padding:12px 14px;min-width:0}
+  .bev-lijst b{display:block;font:700 15.5px/1.25 var(--kop);margin-bottom:3px}
+  .bev-lijst span{font-size:13.5px;color:var(--zacht)}
+  .ernst{display:inline-block;font:600 10.5px var(--romp);letter-spacing:.08em;text-transform:uppercase;border-radius:8px;padding:1px 7px;margin-bottom:6px}
+  .ernst.hoog{background:#fde4dc;color:#a3361b} .ernst.mid{background:#fdf0d8;color:#8a5a00} .ernst.laag{background:#efe7f0;color:var(--paars)}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;padding-block:22px 12px}
+  .tabs a{display:flex;flex-direction:column;gap:1px;text-decoration:none;color:var(--paars);background:var(--vlak);border:1.5px solid var(--lijn);border-radius:12px;padding:10px 16px;min-width:200px;flex:1}
+  .tabs a small{color:var(--zacht);font-size:12.5px}
+  .tabs a b{font:700 17px var(--kop)}
+  .tabs a[aria-current="true"]{border-color:var(--paars);box-shadow:inset 0 -3px 0 var(--paars)}
+  .tabs a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--magenta);outline-offset:2px}
+  .demo{display:grid;grid-template-columns:300px minmax(0,1fr);gap:22px;padding-block:6px 40px}
+  .uitleg{min-width:0} .uitleg p{margin:0 0 10px;font-size:14px}
+  .uitleg ul{margin:0 0 12px;padding-left:18px;font-size:14px} .uitleg li{margin-bottom:4px}
+  .uitleg .label{font:600 11.5px var(--romp);letter-spacing:.1em;text-transform:uppercase;color:var(--magenta);margin:14px 0 4px}
+  .venster{background:var(--vlak);border:1px solid var(--lijn);border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(60,0,70,.12);min-width:0}
+  .balk{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#efe8ec;border-bottom:1px solid var(--lijn)}
+  .balk i{width:10px;height:10px;border-radius:50%;background:#d6c8d2}
+  .balk span{flex:1;background:#fff;border-radius:6px;padding:3px 10px;font-size:12px;color:var(--zacht);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .scherm{position:relative;height:640px;overflow:hidden;background:var(--land)}
+  .leaflet-container{background:var(--land);font-family:var(--romp)}
+  /* ---------- Demo A: kaart centraal ---------- */
+  .a-rail{position:absolute;left:0;top:0;bottom:0;width:72px;background:#fff;border-right:1px solid var(--lijn);display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:10px;z-index:500}
+  .a-logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--paars),var(--magenta) 70%,var(--oranje));color:#fff;font:700 13px/1 var(--kop);display:grid;place-items:center;margin-bottom:8px}
+  .a-rail button{all:unset;cursor:pointer;width:62px;padding:8px 0;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:3px;font:600 11px var(--romp);color:var(--zacht)}
+  .a-rail button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .a-rail button[aria-pressed="true"],.a-rail button:hover{background:#f4eaf3;color:var(--paars)}
+  .a-kaart{position:absolute;left:72px;right:0;top:0;bottom:0}
+  .a-zoek{position:absolute;left:88px;top:14px;z-index:450;display:flex;gap:8px;align-items:center}
+  .a-zoek label{display:flex;align-items:center;gap:8px;background:#fff;border-radius:24px;box-shadow:0 2px 10px rgba(60,0,70,.15);padding:9px 14px;width:300px;max-width:calc(100vw - 140px)}
+  .a-zoek input{all:unset;flex:1;font:14px var(--romp);color:var(--tekst)}
+  .a-chip{background:var(--paars);color:#fff;border-radius:20px;padding:8px 14px;font:600 13px var(--romp);box-shadow:0 2px 10px rgba(60,0,70,.2);white-space:nowrap;cursor:pointer;border:0}
+  .a-paneel{box-sizing:border-box;position:absolute;left:72px;top:0;bottom:0;width:300px;background:#fff;border-right:1px solid var(--lijn);z-index:480;padding:70px 16px 16px;overflow:auto;box-shadow:6px 0 20px rgba(60,0,70,.08)}
+  .a-paneel h3{font:700 18px var(--kop);color:var(--paars);margin:0 0 10px}
+  .a-paneel .groep{font:600 11px var(--romp);letter-spacing:.1em;text-transform:uppercase;color:var(--zacht);margin:14px 0 6px}
+  .thema-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .thema-chips button{all:unset;cursor:pointer;font:500 13px var(--romp);border:1px solid var(--lijn);border-radius:16px;padding:5px 11px;color:var(--tekst)}
+  .thema-chips button[aria-pressed="true"]{background:var(--paars);border-color:var(--paars);color:#fff}
+  .schakel{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--lijn);font-size:14px}
+  .schakel input{accent-color:var(--paars);width:18px;height:18px}
+  #schermA:has(.a-paneel:not([hidden])) .a-zoek, #schermA:has(.a-paneel:not([hidden])) .a-buurt{left:388px}
+  #schermA:has(.a-paneel:not([hidden])) .a-zoek label{width:220px}
+  .a-buurt{position:absolute;left:88px;bottom:16px;width:330px;max-width:calc(100% - 104px);background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(60,0,70,.2);z-index:470;padding:14px 16px}
+  .a-buurt h4{margin:0;font:700 19px var(--kop);color:var(--paars)} .a-buurt .sub{font-size:12.5px;color:var(--zacht);margin-bottom:8px}
+  .groot{font:700 30px/1 var(--kop);color:var(--tekst)} .groot small{font:500 13px var(--romp);color:var(--zacht);margin-left:6px}
+  .vgl{display:grid;grid-template-columns:86px 1fr 62px;gap:4px 8px;align-items:center;font-size:12.5px;margin:10px 0 8px}
+  .vgl .bar{height:7px;background:#f1e8ef;border-radius:4px;overflow:hidden} .vgl .bar i{display:block;height:100%;background:var(--paars2)}
+  .vgl .bar.hier i{background:var(--oranje)} .vgl .w{text-align:right;font-variant-numeric:tabular-nums}
+  .knoppen{display:flex;gap:6px;flex-wrap:wrap}
+  .knop{all:unset;cursor:pointer;font:600 12.5px var(--romp);padding:6px 11px;border-radius:8px;background:#f4eaf3;color:var(--paars)}
+  .knop.vol{background:var(--paars);color:#fff}
+  .legenda{position:absolute;right:14px;bottom:14px;z-index:460;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(60,0,70,.15);padding:8px 12px;font-size:12px}
+  .legenda .ramp{display:flex;height:9px;width:170px;border-radius:4px;overflow:hidden;margin:4px 0 2px} .legenda .ramp i{flex:1}
+  .legenda .uiteinden{display:flex;justify-content:space-between;color:var(--zacht);font-variant-numeric:tabular-nums}
+  .legenda b{font:600 12.5px var(--romp)}
+  /* ---------- Demo B: regioportaal ---------- */
+  .b-nav{display:flex;align-items:center;gap:18px;padding:0 22px;height:56px;background:#fff;border-bottom:1px solid var(--lijn);position:sticky;top:0;z-index:600}
+  .b-merk{font:700 17px var(--kop);color:var(--paars);white-space:nowrap} .b-merk small{display:block;font:600 10px var(--romp);letter-spacing:.12em;color:var(--magenta);text-transform:uppercase}
+  .b-nav nav{display:flex;gap:4px;overflow-x:auto} .b-nav nav a{font:600 13.5px var(--romp);color:var(--zacht);text-decoration:none;padding:6px 10px;border-radius:8px;white-space:nowrap}
+  .b-nav nav a.aan{color:var(--paars);background:#f4eaf3}
+  .b-scroll{position:absolute;inset:0;overflow:auto;background:var(--bg)}
+  .b-hero{background:var(--paars);color:var(--creme);padding:30px 28px 26px}
+  .b-hero h3{font:700 30px/1.1 var(--kop);color:#fff;margin:0 0 6px;text-wrap:balance} .b-hero p{margin:0 0 18px;max-width:620px;color:#f3dfee}
+  .b-cijfers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .b-cijfers div{background:rgba(255,255,255,.09);border-radius:10px;padding:12px 14px;min-width:0}
+  .b-cijfers b{display:block;font:700 26px/1.1 var(--kop);color:#fff;font-variant-numeric:tabular-nums} .b-cijfers span{font-size:12.5px;color:#f0d7ea}
+  .b-sectie{padding:22px 28px} .b-sectie h4{font:700 20px var(--kop);color:var(--paars);margin:0 0 12px}
+  .b-vragen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .b-vragen button{all:unset;cursor:pointer;background:#fff;border:1px solid var(--lijn);border-radius:12px;padding:14px 16px;min-width:0}
+  .b-vragen button:hover{border-color:var(--paars)} .b-vragen b{display:block;font:700 16px/1.25 var(--kop);color:var(--paars);margin-bottom:4px} .b-vragen span{font-size:13px;color:var(--zacht)}
+  .b-gm{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  .b-gm article{background:#fff;border:1px solid var(--lijn);border-radius:12px;padding:12px;min-width:0}
+  .b-gm h5{margin:6px 0 2px;font:700 15px var(--kop);color:var(--paars)} .b-gm .inw{font-size:12px;color:var(--zacht)}
+  .b-gm svg.mini{width:100%;height:70px;display:block}
+  .b-therm{display:grid;grid-template-columns:repeat(11,1fr);gap:2px;margin-top:8px} .b-therm i{height:18px;border-radius:2px}
+  .b-themas{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .b-kaartvak{position:relative;height:360px;border-radius:12px;overflow:hidden;border:1px solid var(--lijn)}
+  /* ---------- Demo C: kaartverhaal ---------- */
+  .c-grid{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr)}
+  .c-tekst{overflow:auto;background:#fff;border-right:1px solid var(--lijn);scroll-behavior:smooth}
+  .c-intro{padding:26px 26px 10px} .c-intro p{color:var(--zacht);font-size:14px}
+  .c-intro h3{font:700 28px/1.1 var(--kop);color:var(--paars);margin:4px 0 8px;text-wrap:balance}
+  .c-hfst{padding:26px 26px 140px;border-top:1px solid var(--lijn);opacity:.45;transition:opacity .3s}
+  .c-hfst.actief{opacity:1}
+  .c-hfst .nr{font:600 11.5px var(--romp);letter-spacing:.12em;text-transform:uppercase;color:var(--magenta)}
+  .c-hfst h4{font:700 23px/1.15 var(--kop);color:var(--paars);margin:4px 0 8px;text-wrap:balance}
+  .c-hfst .groot{color:var(--paars2);margin:6px 0 8px} .c-hfst p{font-size:14.5px;margin:0 0 8px}
+  .c-kaart{position:relative}
+  .c-stip{position:absolute;right:14px;top:50%;transform:translateY(-50%);z-index:460;display:flex;flex-direction:column;gap:8px}
+  .c-stip i{width:9px;height:9px;border-radius:50%;background:#d9cbd5} .c-stip i.aan{background:var(--paars)}
+  .c-titel{position:absolute;left:14px;top:14px;z-index:460;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(60,0,70,.15);padding:8px 12px;font:700 15px var(--kop);color:var(--paars)}
+  .tip{font:13px var(--romp)}
+  @media (prefers-reduced-motion: reduce){ .c-tekst{scroll-behavior:auto} .c-hfst{transition:none} }
+  @media (max-width:980px){ .demo{grid-template-columns:1fr} .b-gm{grid-template-columns:repeat(2,minmax(0,1fr))} .b-cijfers{grid-template-columns:repeat(2,minmax(0,1fr))} .b-vragen{grid-template-columns:1fr} }
+  @media (max-width:640px){
+    .scherm{height:600px}
+    .a-rail{top:auto;right:0;width:auto;height:62px;flex-direction:row;justify-content:space-around;border-right:0;border-top:1px solid var(--lijn);padding:0}
+    .a-logo{display:none} .a-kaart{left:0;bottom:62px} .a-zoek{left:12px} .a-zoek label{width:auto;flex:1} .a-zoek{right:12px}
+    .a-paneel{left:0;width:auto;right:0;top:auto;bottom:62px;height:55%;padding-top:16px;border-right:0;border-top:1px solid var(--lijn)}
+    .a-buurt{left:12px;bottom:76px;max-width:calc(100% - 24px)} .legenda{display:none}
+    .c-grid{grid-template-columns:1fr;grid-template-rows:42% 58%} .c-kaart{grid-row:1} .c-tekst{grid-row:2;border-right:0}
+    .b-nav nav{display:none}
+  }
+</style>
+
+<header class="kop"><div class="wrap">
+  <p class="eyebrow">Regiokaart Midden-Holland · ontwerpvoorstel</p>
+  <h1>Drie richtingen voor de volgende versie</h1>
+  <p>De kaart kan veel, maar je moet het wel weten te vinden. Hieronder wat er beter kan, en drie werkende demo's op echte cijfers. Kies er één, of combineer: de demo's zijn ook los van elkaar te gebruiken.</p>
+</div></header>
+
+<section class="bevindingen"><div class="wrap">
+  <h2>Wat er beter kan</h2>
+  <ul class="bev-lijst">
+    <li><span class="ernst hoog">Groot</span><b>Alles staat in één lang paneel</b><span>Programma's, thema's, lagen, downloads, gemeenteprofiel en bronnen: ruim 4.000 pixels scrollen. Nieuwe gebruikers zien niet wat er is.</span></li>
+    <li><span class="ernst hoog">Groot</span><b>112 thema's in één keuzelijst</b><span>Een uitklaplijst is goed voor tien opties, niet voor honderd. Wat je niet ziet, gebruik je niet.</span></li>
+    <li><span class="ernst hoog">Groot</span><b>De buurt-pop-up is een lange lijst</b><span>Klik je op een buurt, dan komen alle cijfers tegelijk, zonder vergelijking, en het venster valt deels buiten beeld.</span></li>
+    <li><span class="ernst mid">Middel</span><b>Zeven knoppen bovenaan, van drie soorten</b><span>Weergaven (Paneel/Data), vensters (Brede welvaart, Vergelijken) en gereedschap (Tekenen, 3D, Presenteren) staan door elkaar.</span></li>
+    <li><span class="ernst mid">Middel</span><b>Geen startpunt voor bestuurders</b><span>Je begint met een lege kaart en een keuzelijst. Er is geen antwoord op de vraag "hoe staan we ervoor?".</span></li>
+    <li><span class="ernst mid">Middel</span><b>Telefoon krijgt minder</b><span>Op de telefoon zijn Brede welvaart, Vergelijken en de dataweergave niet bereikbaar.</span></li>
+    <li><span class="ernst laag">Klein</span><b>Ruimte en herhaling</b><span>Het grote logo kost een vijfde van het paneel; de legenda staat twee keer (paneel en kaart).</span></li>
+    <li><span class="ernst laag">Klein</span><b>Leesbaarheid</b><span>Veel tekst op 11 en 12 pixels, en kleur is vaak de enige drager van betekenis.</span></li>
+  </ul>
+</div></section>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" aria-label="Demo's">
+    <a href="#kaart-centraal" role="tab" data-demo="a"><small>Demo A · voor dagelijks gebruik</small><b>Kaart centraal</b></a>
+    <a href="#regioportaal" role="tab" data-demo="b"><small>Demo B · voor bestuurders</small><b>Regioportaal</b></a>
+    <a href="#kaartverhaal" role="tab" data-demo="c"><small>Demo C · voor communicatie</small><b>Kaartverhaal</b></a>
+  </div>
+
+  <section class="demo" data-demo="a">
+    <div class="uitleg">
+      <h2>Kaart centraal</h2>
+      <p>De kaart vult het scherm. Links een smalle balk met vaste plekken, zoals in Google Maps of Figma. Er is maar één paneel tegelijk open.</p>
+      <p class="label">Probeer</p>
+      <ul><li>Klik op een buurt: een compacte kaart met de vergelijking met gemeente, regio en Nederland.</li><li>Open <b>Thema's</b>: zoeken en bladeren per onderwerp in plaats van een lange lijst.</li></ul>
+      <p class="label">Lost op</p>
+      <ul><li>Het lange paneel</li><li>De themalijst</li><li>De buurt-pop-up</li><li>De volle bovenbalk</li></ul>
+      <p class="label">Kost</p>
+      <p>Middel. De kaartmotor blijft; het paneel wordt opgeknipt.</p>
+    </div>
+    <div class="venster"><div class="balk"><i></i><i></i><i></i><span>regiokaart-midden-holland.nl/kaart</span></div>
+      <div class="scherm" id="schermA">
+        <div class="a-rail" role="toolbar" aria-label="Hoofdmenu">
+          <div class="a-logo" aria-hidden="true">RMH</div>
+          <button data-p="themas" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Thema's</button>
+          <button data-p="lagen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>Lagen</button>
+          <button data-p="vergelijk" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/></svg>Vergelijk</button>
+          <button data-p="welvaart" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M10 4a2 2 0 014 0v9.5a4 4 0 11-4 0z"/></svg>Welvaart</button>
+          <button data-p="delen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 14v6h14v-6"/></svg>Delen</button>
+        </div>
+        <div class="a-kaart" id="kaartA"></div>
+        <div class="a-zoek"><label><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="zoekA" placeholder="Zoek buurt of thema" aria-label="Zoek buurt of thema"></label><button class="a-chip" id="chipA"></button></div>
+        <aside class="a-paneel" id="paneelA" hidden></aside>
+        <div class="a-buurt" id="buurtA" hidden></div>
+        <div class="legenda" id="legA"></div>
+      </div></div>
+  </section>
+
+  <section class="demo" data-demo="b" hidden>
+    <div class="uitleg">
+      <h2>Regioportaal</h2>
+      <p>Een echte website met een voorpagina. Bestuurders beginnen bij "hoe staan we ervoor?": kerncijfers, de vijf gemeenten en de thermometer. Daarna pas de kaart.</p>
+      <p class="label">Probeer</p>
+      <ul><li>Klik op een vraag of een gemeente: de kaart onderaan springt mee.</li><li>Scroll door de pagina zoals een gewone website.</li></ul>
+      <p class="label">Lost op</p>
+      <ul><li>Geen startpunt</li><li>Telefoon (een gewone pagina schaalt mee)</li><li>Brede welvaart en vergelijken worden vaste pagina's</li></ul>
+      <p class="label">Kost</p>
+      <p>Groter. Een nieuwe voorpagina en gemeentepagina's. De kaart zelf (A) kan als pagina 'Kaart' blijven.</p>
+    </div>
+    <div class="venster"><div class="balk"><i></i><i></i><i></i><span>regiokaart-midden-holland.nl</span></div>
+      <div class="scherm"><div class="b-scroll" id="scrollB">
+        <div class="b-nav"><div class="b-merk"><small>Regio Midden-Holland</small>Regiokaart</div>
+          <nav aria-label="Hoofdmenu"><a class="aan" href="#regioportaal">Overzicht</a><a href="#regioportaal">Kaart</a><a href="#regioportaal">Gemeenten</a><a href="#regioportaal">Brede welvaart</a><a href="#regioportaal">Data</a><a href="#regioportaal">Over de cijfers</a></nav></div>
+        <div class="b-hero"><h3>Midden-Holland in cijfers</h3><p>Vijf gemeenten in het Groene Hart, tussen de vier grote steden. Alle cijfers zijn officieel en gecontroleerd.</p><div class="b-cijfers" id="cijfersB"></div></div>
+        <div class="b-sectie"><h4>Waar bent u naar op zoek?</h4><div class="b-vragen" id="vragenB"></div></div>
+        <div class="b-sectie"><h4>De vijf gemeenten</h4><div class="b-gm" id="gmB"></div><p class="tip" style="color:var(--zacht);margin:8px 0 0">Het balkje onder elke gemeente is de thermometer: elf dimensies van brede welvaart, van rood (basis) tot paars (excellent).</p></div>
+        <div class="b-sectie" id="kaartsectieB"><h4 id="kaarttitelB">Op de kaart</h4><div class="b-themas thema-chips" id="themasB"></div><div class="b-kaartvak"><div id="kaartB" style="position:absolute;inset:0"></div><div class="legenda" id="legB"></div></div></div>
+      </div></div></div>
+  </section>
+
+  <section class="demo" data-demo="c" hidden>
+    <div class="uitleg">
+      <h2>Kaartverhaal</h2>
+      <p>Een verhaal dat je leest door te scrollen; de kaart verandert mee. Voor raadsleden, inwoners en de jaarlijkse rapportage: vijf hoofdstukken, één boodschap per hoofdstuk.</p>
+      <p class="label">Probeer</p>
+      <ul><li>Scroll in de tekst links: elk hoofdstuk zet een ander thema op de kaart.</li></ul>
+      <p class="label">Lost op</p>
+      <ul><li>Geen verhaal voor communicatie</li><li>Cijfers zonder uitleg</li></ul>
+      <p class="label">Kost</p>
+      <p>Klein tot middel. Hergebruikt de kaart; de teksten schrijft de regio, en die kunnen elk jaar mee met de cijfers.</p>
+    </div>
+    <div class="venster"><div class="balk"><i></i><i></i><i></i><span>regiokaart-midden-holland.nl/verhaal</span></div>
+      <div class="scherm"><div class="c-grid">
+        <div class="c-tekst" id="tekstC"></div>
+        <div class="c-kaart"><div id="kaartC" style="position:absolute;inset:0"></div><div class="c-titel" id="titelC"></div><div class="c-stip" id="stipC"></div><div class="legenda" id="legC"></div></div>
+      </div></div></div>
+  </section>
+  <p class="tip" style="color:var(--zacht);padding-bottom:30px">Demo's met echte cijfers (CBS 2025, deels 2024; GGD/RIVM 2024; inkomen CBS 2023), zonder achtergrondkaart. Het zijn schetsen om te kiezen, geen af product.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const nl0 = new Intl.NumberFormat('nl-NL',{maximumFractionDigits:0}), nl1 = new Intl.NumberFormat('nl-NL',{maximumFractionDigits:1});
+const GMN = {GM0513:'Gouda',GM0627:'Waddinxveen',GM1892:'Zuidplas',GM1901:'Bodegraven-Reeuwijk',GM1931:'Krimpenerwaard'};
+const RAMP = ['#f1d4ec','#d995ce','#bb55ae','#8a2486','#5b0065'], DIV = ['#c8553d','#ecb7a6','#f1e9e4','#c9a1c8','#5b0065'];
+const T = {
+  woz:{l:'Gemiddelde WOZ-waarde', g:'Wonen', f:v=>'€ '+nl0.format(v*1000)},
+  p65:{l:'65-plussers', g:'Bevolking', f:v=>nl0.format(v)+'%'},
+  groei:{l:'Groei inwoners 2020–2025', g:'Bevolking', f:v=>(v>0?'+':'')+nl1.format(v)+'%', div:true},
+  inkomen:{l:'Inkomen per inwoner', g:'Inkomen', f:v=>'€ '+nl0.format(v*1000)},
+  gezond:{l:'Goed ervaren gezondheid', g:'Welzijn', f:v=>nl1.format(v)+'%'},
+  eenzaam:{l:'Eenzaamheid', g:'Welzijn', f:v=>nl1.format(v)+'%'},
+};
+let D;
+function klassen(k){ const v=D.buurten.features.map(f=>f.properties[k]).filter(x=>x!=null).sort((a,b)=>a-b);
+  if(T[k].div){ const m=Math.max(...v.map(Math.abs)); return {kleur:x=>x==null?'#e9e5e8':DIV[x<-3?0:x<-1?1:x<=1?2:x<=6?3:4], lo:v[0], hi:v[v.length-1]}; }
+  const q=[.2,.4,.6,.8].map(p=>v[Math.floor(p*(v.length-1))]);
+  return {kleur:x=>x==null?'#e9e5e8':RAMP[q.filter(c=>x>c).length], lo:v[0], hi:v[v.length-1]}; }
+function legenda(el, k){ const kl=klassen(k), r=T[k].div?DIV:RAMP;
+  el.innerHTML=`<b>${T[k].l}</b><div class="ramp">${r.map(c=>`<i style="background:${c}"></i>`).join('')}</div><div class="uiteinden"><span>${T[k].f(kl.lo)}</span><span>${T[k].f(kl.hi)}</span></div>`; }
+function maakKaart(el, opts={}){
+  const map=L.map(el,{zoomControl:false, attributionControl:false, preferCanvas:true, zoomSnap:.25, scrollWheelZoom:opts.wiel!==false});
+  if(opts.zoomknop) L.control.zoom({position:'topright'}).addTo(map);
+  let thema='woz', kl=klassen(thema), sel=null;
+  const laag=L.geoJSON(D.buurten,{style:f=>({fillColor:kl.kleur(f.properties[thema]), fillOpacity:.9, color:'#fff', weight:.7}),
+    onEachFeature:(f,l)=>{ l.on('click',()=>{ if(opts.klik) opts.klik(f, l); }); l.on('mouseover',()=>l.setStyle({weight:2.5,color:'#fc7c00'})); l.on('mouseout',()=>laag.resetStyle(l)); }}).addTo(map);
+  L.geoJSON(D.gemeenten,{interactive:false, style:{fill:false,color:'#3b0042',weight:1.8,opacity:.85}}).addTo(map);
+  const grens=laag.getBounds(); map.fitBounds(grens,{padding:[16,16]});
+  return {map, grens, zet(k){ thema=k; kl=klassen(k); laag.setStyle(f=>({fillColor:kl.kleur(f.properties[k]), fillOpacity:.9, color:'#fff', weight:.7})); }, get thema(){ return thema; }, laag};
+}
+const waarde=(g,k)=>(D.gebied[g]||{})[k];
+
+// ---------- Demo A ----------
+function demoA(){
+  const A=maakKaart('kaartA',{zoomknop:true, klik:buurtkaart});
+  const chip=document.getElementById('chipA'), paneel=document.getElementById('paneelA');
+  const zet=k=>{ A.zet(k); chip.textContent=T[k].l+' ▾'; legenda(document.getElementById('legA'),k); if(open==='themas') toonPaneel('themas'); };
+  let open=null;
+  function toonPaneel(p){
+    open=p; document.querySelectorAll('#schermA .a-rail button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.p===p));
+    if(!p){ paneel.hidden=true; return; } paneel.hidden=false;
+    if(p==='themas'){ const groepen=[...new Set(Object.values(T).map(t=>t.g))];
+      paneel.innerHTML=`<h3>Thema's</h3><p class="tip" style="color:var(--zacht);margin:0">In de echte kaart: 112 thema's in 12 onderwerpen, met zoeken.</p>`+groepen.map(g=>`<div class="groep">${g}</div><div class="thema-chips">${Object.entries(T).filter(([k,t])=>t.g===g).map(([k,t])=>`<button data-k="${k}" aria-pressed="${k===A.thema}">${t.l}</button>`).join('')}</div>`).join('');
+      paneel.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>zet(b.dataset.k)); }
+    else if(p==='lagen'){ paneel.innerHTML=`<h3>Lagen</h3>`+['Regio in één oogopslag','Treinverbindingen','Buslijnen en haltes','Voorzieningen','Netcongestie','Klimaat','Dijken en waterkeringen','Erfgoed'].map((n,i)=>`<label class="schakel">${n}<input type="checkbox" ${i===0?'':''}></label>`).join('')+`<p class="tip" style="color:var(--zacht)">Korte namen, uitleg pas als je erop klikt. Achtergrond: Kaart · Satelliet · Geen.</p>`; }
+    else if(p==='vergelijk'){ paneel.innerHTML=`<h3>Vergelijk</h3><p class="tip">Twee gebieden naast elkaar, met grafieken. Dit wordt een vaste pagina in plaats van een los venster.</p>`+Object.entries(GMN).map(([g,n])=>`<div class="vgl" style="grid-template-columns:120px 1fr 70px"><span>${n}</span><div class="bar"><i style="width:${waarde(g,'woz')/7}%"></i></div><span class="w">${T.woz.f(waarde(g,'woz'))}</span></div>`).join(''); }
+    else if(p==='welvaart'){ paneel.innerHTML=`<h3>Brede welvaart</h3><p class="tip">Thermometer van de regio, per dimensie.</p>`+D.bw.map(d=>{ const s=d.s.regio; return `<div class="vgl" style="grid-template-columns:150px 1fr 30px"><span>${d.naam}</span><div class="bar"><i style="width:${s/5*100}%;background:${s<2?'#c8553d':s<4?'#e8c87a':'#5b0065'}"></i></div><span class="w">${nl1.format(s)}</span></div>`; }).join(''); }
+    else if(p==='delen'){ paneel.innerHTML=`<h3>Delen en downloaden</h3><div class="knoppen" style="flex-direction:column;align-items:flex-start"><span class="knop">Link kopiëren</span><span class="knop">Kaart als PDF</span><span class="knop">Kaart als PNG</span><span class="knop">Kaart voor nota</span><span class="knop">Presenteren</span><span class="knop">Gemeenteprofiel</span></div><p class="tip" style="color:var(--zacht)">Alles wat iets naar buiten brengt, op één plek.</p>`; }
+  }
+  document.querySelectorAll('#schermA .a-rail button').forEach(b=>b.onclick=()=>toonPaneel(open===b.dataset.p?null:b.dataset.p));
+  chip.onclick=()=>toonPaneel(open==='themas'?null:'themas');
+  function buurtkaart(f){
+    const p=f.properties, k=A.thema, el=document.getElementById('buurtA'), max=Math.max(p[k]||0, waarde(p.g,k)||0, waarde('regio',k)||0, waarde('nl',k)||0)||1;
+    const rij=(n,v,hier)=>`<span>${n}</span><div class="bar ${hier?'hier':''}"><i style="width:${v==null?0:Math.abs(v)/max*100}%"></i></div><span class="w">${v==null?'–':T[k].f(v)}</span>`;
+    el.hidden=false;
+    el.innerHTML=`<h4>${p.n}</h4><div class="sub">${GMN[p.g]} · ${p.i==null?'–':nl0.format(p.i)} inwoners</div>
+      <div class="groot">${p[k]==null?'–':T[k].f(p[k])}<small>${T[k].l}</small></div>
+      <div class="vgl">${rij('Deze buurt',p[k],true)}${T[k].div?'':rij(GMN[p.g],waarde(p.g,k))+rij('Regio',waarde('regio',k))+rij('Nederland',waarde('nl',k))}</div>
+      <div class="knoppen"><span class="knop vol">Alle cijfers van deze buurt</span><span class="knop">Vergelijk</span><button class="knop" id="sluitA" aria-label="Sluiten">✕</button></div>`;
+    document.getElementById('sluitA').onclick=()=>{ el.hidden=true; };
+  }
+  document.getElementById('zoekA').addEventListener('input', e=>{ const q=e.target.value.toLowerCase(); if(q.length<3) return;
+    const f=D.buurten.features.find(f=>f.properties.n.toLowerCase().includes(q)); if(f){ const l=A.laag.getLayers().find(l=>l.feature===f); A.map.fitBounds(l.getBounds(),{maxZoom:14}); buurtkaart(f); } });
+  zet('woz'); const start=D.buurten.features.find(f=>f.properties.n==='Binnenstad' && f.properties.g==='GM0513')||D.buurten.features[0]; buurtkaart(start);
+  return A;
+}
+// ---------- Demo B ----------
+function demoB(){
+  const reg=D.gebied.regio, nl=D.gebied.nl, groei=(()=>{ const v=D.buurten.features.map(f=>[f.properties.groei,f.properties.i]).filter(x=>x[0]!=null&&x[1]); return v.reduce((a,x)=>a+x[0]*x[1],0)/v.reduce((a,x)=>a+x[1],0); })();
+  document.getElementById('cijfersB').innerHTML=[[nl0.format(reg.inw),'inwoners in vijf gemeenten'],[T.woz.f(reg.woz),`gemiddelde WOZ-waarde (NL ${T.woz.f(nl.woz)})`],[T.p65.f(reg.p65),`is 65 jaar of ouder (NL ${T.p65.f(nl.p65)})`],[nl1.format(reg.eenzaam)+'%',`voelt zich eenzaam (NL ${nl1.format(nl.eenzaam)}%)`]].map(([b,s])=>`<div><b>${b}</b><span>${s}</span></div>`).join('');
+  let B;
+  const naarKaart=(k,g)=>{ B.zet(k); legenda(document.getElementById('legB'),k); kiesThema(k); document.getElementById('kaarttitelB').textContent=g?`${GMN[g]} op de kaart`:'Op de kaart';
+    if(g){ const ls=B.laag.getLayers().filter(l=>l.feature.properties.g===g); B.map.fitBounds(L.featureGroup(ls).getBounds(),{padding:[10,10]}); } else B.map.fitBounds(B.grens,{padding:[16,16]});
+    document.getElementById('kaartsectieB').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth', block:'start'}); };
+  document.getElementById('vragenB').innerHTML=[['woz','Hoe staan onze buurten ervoor?','Woningwaarde, inkomen, gezondheid per buurt op de kaart.'],['p65','Waar vergrijst de regio?','Het aandeel 65-plussers per buurt, en de prognose tot 2050.'],['eenzaam','Hoe gaat het met de inwoners?','Brede welvaart: elf dimensies, per gemeente vergeleken met heel Nederland.']]
+    .map(([k,b,s])=>`<button data-k="${k}"><b>${b}</b><span>${s}</span></button>`).join('');
+  document.querySelectorAll('#vragenB button').forEach(b=>b.onclick=()=>naarKaart(b.dataset.k));
+  // mini-kaartjes van de gemeenten
+  const bb=L.geoJSON(D.gemeenten).getBounds(), kx=Math.cos(52*Math.PI/180), W=160, H=W*(bb.getNorth()-bb.getSouth())/((bb.getEast()-bb.getWest())*kx);
+  const pad=g=>{ const ring=c=>'M'+c.map(([x,y])=>(((x-bb.getWest())*kx)/((bb.getEast()-bb.getWest())*kx)*W).toFixed(1)+','+((bb.getNorth()-y)/(bb.getNorth()-bb.getSouth())*H).toFixed(1)).join('L')+'Z';
+    return (g.type==='Polygon'?[g.coordinates]:g.coordinates).map(p=>ring(p[0])).join(''); };
+  document.getElementById('gmB').innerHTML=Object.entries(GMN).map(([g,n])=>`<article><svg class="mini" viewBox="0 0 ${W} ${H.toFixed(0)}" role="img" aria-label="Ligging van ${n}">${D.gemeenten.features.map(f=>`<path d="${pad(f.geometry)}" fill="${f.properties.g===g?'#5b0065':'#eadfe7'}" stroke="#fff" stroke-width="1"/>`).join('')}</svg>
+     <h5>${n}</h5><div class="inw">${nl0.format(waarde(g,'inw'))} inwoners · WOZ ${T.woz.f(waarde(g,'woz'))}</div>
+     <div class="b-therm" aria-label="Thermometer">${D.bw.map(d=>{ const s=d.s[g]; return `<i title="${d.naam}: ${nl1.format(s)}" style="background:${s<2?'#c8553d':s<4?'#e8c87a':'#5b0065'}"></i>`; }).join('')}</div>
+     <div class="knoppen" style="margin-top:8px"><button class="knop" data-g="${g}">Bekijk op de kaart</button></div></article>`).join('');
+  document.querySelectorAll('#gmB [data-g]').forEach(b=>b.onclick=()=>naarKaart(B.thema,b.dataset.g));
+  const kiesThema=k=>{ document.getElementById('themasB').innerHTML=Object.entries(T).map(([kk,t])=>`<button data-k="${kk}" aria-pressed="${kk===k}">${t.l}</button>`).join('');
+    document.querySelectorAll('#themasB button').forEach(b=>b.onclick=()=>{ B.zet(b.dataset.k); legenda(document.getElementById('legB'),b.dataset.k); kiesThema(b.dataset.k); }); };
+  B=maakKaart('kaartB',{wiel:false, zoomknop:true}); B.zet('woz'); legenda(document.getElementById('legB'),'woz'); kiesThema('woz');
+  return B;
+}
+// ---------- Demo C ----------
+function demoC(){
+  const F=D.buurten.features.map(f=>f.properties), top=(k,r=1)=>F.filter(p=>p[k]!=null && p.i>=500).sort((a,b)=>r*(b[k]-a[k]))[0];
+  const reg=D.gebied.regio, nl=D.gebied.nl, zp=F.filter(p=>p.g==='GM1892'&&p.groei!=null).sort((a,b)=>b.groei-a.groei)[0];
+  const H=[
+    {k:'groei', t:'Een groeiregio', g:'GM1892', groot:'+33%', tekst:`Zuidplas groeit het hardst: volgens de prognose een derde meer inwoners in 2040. In ${zp.n} kwamen er tussen 2020 en 2025 ${T.groei.f(zp.groei)} inwoners bij.`},
+    {k:'woz', t:'Wonen is duur, ook hier', groot:T.woz.f(reg.woz), tekst:`De gemiddelde woning in de regio is ${T.woz.f(reg.woz)} waard, iets boven het Nederlandse gemiddelde van ${T.woz.f(nl.woz)}. Het duurst: ${top('woz').n} (${T.woz.f(top('woz').woz)}).`},
+    {k:'p65', t:'Iedereen wordt ouder', groot:T.p65.f(reg.p65), tekst:`Eén op de vijf inwoners is 65 of ouder. In ${top('p65').n} is dat ${T.p65.f(top('p65').p65)}: daar is de vraag naar zorg en aangepaste woningen het grootst.`},
+    {k:'eenzaam', t:'Minder eenzaam dan gemiddeld', groot:nl1.format(reg.eenzaam)+'%', tekst:`${nl1.format(reg.eenzaam)}% van de volwassenen voelt zich eenzaam, tegen ${nl1.format(nl.eenzaam)}% in Nederland. Maar het verschilt sterk per buurt: in ${top('eenzaam').n} is het ${nl1.format(top('eenzaam').eenzaam)}%.`},
+    {k:'gezond', t:'Gezond in het Groene Hart', groot:nl1.format(reg.gezond)+'%', tekst:`${nl1.format(reg.gezond)}% ervaart de eigen gezondheid als goed (Nederland ${nl1.format(nl.gezond)}%). Het gezondst voelen inwoners zich in ${top('gezond').n}.`},
+  ];
+  const tekst=document.getElementById('tekstC');
+  tekst.innerHTML=`<div class="c-intro"><span class="ernst laag">Kaartverhaal 2026</span><h3>Midden-Holland in vijf kaarten</h3><p>Scroll naar beneden. De kaart rechts verandert met het verhaal mee.</p></div>`+H.map((h,i)=>`<section class="c-hfst" data-i="${i}"><span class="nr">Hoofdstuk ${i+1}</span><h4>${h.t}</h4><div class="groot">${h.groot}</div><p>${h.tekst}</p></section>`).join('');
+  const C=maakKaart('kaartC',{wiel:false});
+  document.getElementById('stipC').innerHTML=H.map(()=>'<i></i>').join('');
+  let nu=-1;
+  const toon=i=>{ if(i===nu) return; nu=i; const h=H[i]; C.zet(h.k); legenda(document.getElementById('legC'),h.k); document.getElementById('titelC').textContent=T[h.k].l;
+    tekst.querySelectorAll('.c-hfst').forEach(s=>s.classList.toggle('actief', +s.dataset.i===i)); document.querySelectorAll('#stipC i').forEach((s,j)=>s.classList.toggle('aan', j===i));
+    const anim=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(h.g){ const ls=C.laag.getLayers().filter(l=>l.feature.properties.g===h.g); C.map.flyToBounds(L.featureGroup(ls).getBounds(),{padding:[20,20],animate:anim,duration:.8}); } else C.map.flyToBounds(C.grens,{padding:[16,16],animate:anim,duration:.8}); };
+  const io=new IntersectionObserver(es=>{ es.filter(e=>e.isIntersecting).forEach(e=>toon(+e.target.dataset.i)); },{root:tekst, rootMargin:'-35% 0px -55% 0px'});
+  tekst.querySelectorAll('.c-hfst').forEach(s=>io.observe(s)); toon(0);
+  return C;
+}
+// ---------- tabbladen ----------
+const KAARTEN={}, MAAK={a:demoA,b:demoB,c:demoC}, HASH={'kaart-centraal':'a','regioportaal':'b','kaartverhaal':'c'};
+function kies(d){
+  document.querySelectorAll('section.demo').forEach(s=>s.hidden=s.dataset.demo!==d);
+  document.querySelectorAll('.tabs a').forEach(a=>a.setAttribute('aria-current', a.dataset.demo===d));
+  if(D){ if(!KAARTEN[d]) KAARTEN[d]=MAAK[d](); else setTimeout(()=>KAARTEN[d].map.invalidateSize(),0); }
+}
+const vanHash=()=>HASH[location.hash.slice(1)]||'a';
+window.addEventListener('hashchange',()=>kies(vanHash()));
+fetch('demo-data.json').then(r=>r.json()).then(d=>{ D=d; kies(vanHash()); }).catch(()=>{ document.querySelectorAll('.scherm').forEach(s=>s.insertAdjacentHTML('beforeend','<p style="padding:20px">De demodata kon niet worden geladen.</p>')); });
+kies(vanHash());
+</script>
