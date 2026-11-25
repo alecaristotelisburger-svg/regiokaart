@@ -227,3 +227,11 @@ json.dump({f['properties']['gemeentecode']: {kk: f['properties'].get(kk) for kk 
           open(os.path.join(DATA, 'afgeleid', 'gemeenten_kwb.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ref.py'), 'gemeenten_kwb_mix.geojson'], cwd=DATA, check=True)
 os.remove(os.path.join(DATA, 'gemeenten_kwb_mix.geojson'))
+# Nederland: kenmerken die je niet kunt optellen over gemeenten (het CBS berekent ze per adres) uit de officiële NL-rij
+NIET_OPTELBAAR = {'omgevingsadressendichtheid': 'Omgevingsadressendichtheid'}
+ref = json.load(open(os.path.join(DATA, 'ref.json')))
+nl_rij = next((r for c, r in r_nieuw.items() if c.startswith('NL')), None)
+for k, titel in NIET_OPTELBAAR.items():
+    v = getal(nl_rij.get(eerste_nieuw.get(titel))) if nl_rij else None
+    if v is not None: ref['nl'][k] = v; print('Nederland officieel:', k, v)
+json.dump(ref, open(os.path.join(DATA, 'ref.json'), 'w'), indent=1)
