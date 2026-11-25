@@ -56,7 +56,9 @@ with sync_playwright() as p:
         z0=pg.evaluate('map.getZoom()'); pg.mouse.move(900,450)
         for i in range(20): pg.mouse.wheel(0,4); pg.wait_for_timeout(10)
         pg.wait_for_timeout(800); z1=pg.evaluate('map.getZoom()'); pg.evaluate('map.setZoom(%s,{animate:false}); 0'%z0); pg.wait_for_timeout(400); return z0-z1
+    pg.evaluate("setBasemap('geen'); 0")   # meten zonder achtergrond: de WebGL-kaart maakt de testbrowser trager en de zoomstapjes wisselend
     met=wiel(); pg.click('[data-tool=hand]'); zonder=wiel(); pg.click('[data-tool=selecteer]')
+    pg.evaluate("setBasemap('kaart'); 0")
     check(f'trackpad zoomt even rustig als zonder tekenen ({met} / {zonder})', abs(met-zonder)<=0.25)
     # gum en ongedaan maken
     pg.click('[data-tool=gum]'); a0=n(); pg.mouse.move(600,250); pg.mouse.down(); pg.mouse.move(1200,750,steps=25); pg.mouse.up(); check('gum veegt niet alles weg', n()==a0)
