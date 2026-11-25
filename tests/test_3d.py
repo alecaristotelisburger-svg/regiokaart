@@ -11,7 +11,7 @@ with sync_playwright() as p:
     ctx = b.new_context(viewport={'width': 1440, 'height': 900}); ctx.add_init_script("try{localStorage.setItem('regiokaart-rondleiding-v1','1')}catch(e){}")
     pg = ctx.new_page(); fout = []; pg.on('pageerror', lambda e: fout.append(str(e)))
     pg.goto(U); pg.wait_for_timeout(1500)
-    check('MapLibre niet geladen bij start', pg.evaluate('typeof maplibregl') == 'undefined')
+    check('MapLibre geladen (voor de achtergrondkaart)', pg.evaluate('typeof maplibregl') == 'object')
     pg.click('#btn3D'); pg.wait_for_timeout(8000)
     check('3D opent en kaart is geladen', pg.is_visible('#d3') and pg.evaluate('!!d3Kaart && d3Kaart.isStyleLoaded()'))
     check('zonder thema: bevolkingsdichtheid gekozen', pg.evaluate("$('theme').value") == 'bevolkingsdichtheid_inwoners_per_km2')

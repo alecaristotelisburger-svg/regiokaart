@@ -12,7 +12,11 @@ js = open(P('node_modules', 'leaflet', 'dist', 'leaflet.js')).read().replace('</
 pdf = open(P('node_modules', 'jspdf', 'dist', 'jspdf.umd.min.js')).read().replace('</script>', '<\\/script>')
 s = s.replace('<!--LEAFLET_CSS-->', '<style>' + css + '</style>')
 # MapLibre (3D) als tekst in de pagina: pas bij het openen van 3D uitgevoerd, dus geen vertraging bij het laden
-ml_js = (open(P('node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.js')).read() + '\n' + open(P('node_modules', 'maplibre-gl-leaflet', 'leaflet-maplibre-gl.js')).read()).replace('</script>', '<\\/script>')   # + de Leaflet-koppeling (Regiostijl)
+plugin = open(P('node_modules', 'maplibre-gl-leaflet', 'leaflet-maplibre-gl.js')).read()
+# reparatie: na een zoombeweging rekent de plug-in nog één keer door, ook als de laag net is weggehaald (this._map = null)
+plugin = plugin.replace('L.Util.requestAnimFrame(function() {\n\t\t\t\tvar zoom = this._map.getZoom();', 'L.Util.requestAnimFrame(function() {\n\t\t\t\tif (!this._map) return;\n\t\t\t\tvar zoom = this._map.getZoom();')
+assert 'if (!this._map) return;' in plugin, 'plug-in veranderd: reparatie in bouw_kaart.py nakijken'
+ml_js = (open(P('node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.js')).read() + '\n' + plugin).replace('</script>', '<\\/script>')   # + de Leaflet-koppeling (Regiostijl)
 ml_css = open(P('node_modules', 'maplibre-gl', 'dist', 'maplibre-gl.css')).read().replace('</script>', '<\\/script>')
 s = s.replace('<!--MAPLIBRE-->', '<script type="text/plain" id="mlCss">' + ml_css + '</script>\n<script type="text/plain" id="mlCode">' + ml_js + '</script>')
 # lettertypen in de pagina zelf (geen verbinding met Google nodig); licentie: src/fonts/OFL.txt

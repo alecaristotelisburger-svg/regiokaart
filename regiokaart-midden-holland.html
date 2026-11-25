@@ -949,6 +949,7 @@ return maplibregl$1;
 		},
 		_transitionEnd: function(e) {
 			L.Util.requestAnimFrame(function() {
+				if (!this._map) return;
 				var zoom = this._map.getZoom();
 				var center = this._map.getCenter();
 				var offset = this._map.latLngToContainerPoint(this._map.getBounds().getNorthWest());
@@ -2003,7 +2004,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     <section id="secAchtergrond">
       <h2>Achtergrond</h2>
       <div class="seg" role="radiogroup">
-        <button data-bm="kaart" class="on">Kaart</button><button data-bm="regio" title="Eigen kaartstijl in de kleuren van de regio">Regiostijl</button><button data-bm="sat">Satelliet</button><button data-bm="geen">Geen</button>
+        <button data-bm="kaart" class="on">Kaart</button><button data-bm="sat">Satelliet</button><button data-bm="geen">Geen</button>
       </div>
       <p id="bmNote" class="note" hidden></p>
     </section>
@@ -2012,19 +2013,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       <h2 class="kopmetknop">Kaartlagen <button type="button" id="btnAllesUit" class="allesuit" title="Zet alle kaartlagen in één keer uit">Alles uit</button></h2>
       <div class="layer"><input type="checkbox" id="lyrSnap"><label for="lyrSnap"><span class="t">Regio in één oogopslag</span><span class="d">Overzichtskaart: gemeenten, kernen, water, wegen en spoor, zonder cijfers.</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrAhn"><label for="lyrAhn"><span class="t">Hoogte t.o.v. NAP</span><span class="d">Actueel Hoogtebestand Nederland (AHN), maaiveld. Klik op de kaart voor de hoogte op dat punt.</span></label></div>
-      <div class="layer"><input type="checkbox" id="lyrRail"><label for="lyrRail"><span class="t"><span class="sw2" style="background:#fc7c00"></span>Treinverbindingen</span><span class="d">7 stations, 5 intercity- en 9 sprinterseries die in de regio stoppen, plus het Nachtnet. Dikte = aantal series op dat stuk spoor (OpenStreetMap).</span></label></div>
-      <div class="layer"><input type="checkbox" id="lyrOv"><label for="lyrOv"><span class="t"><span class="sw2" style="background:#f2b705"></span>Buslijnen en haltes</span><span class="d">23 buslijnen van Qbuzz en U-OV die in de regio stoppen, en ruim 300 haltes. Klik op een lijn of halte om te zien welke lijnen er rijden (OpenStreetMap).</span></label></div>
-      <div class="layer"><input type="checkbox" id="lyrRoads"><label for="lyrRoads"><span class="t"><span class="sw2" style="background:#a0522d"></span>Hoofdwegennet</span><span class="d">Snelwegen (A12, A20), autowegen en provinciale en lokale hoofdwegen, met wegnummer en beheerder (OpenStreetMap). Dikte = wegtype.</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrRail"><label for="lyrRail"><span class="t"><span class="sw2" style="background:#e8731c"></span>Treinverbindingen</span><span class="d">7 stations, 5 intercity- en 9 sprinterseries die in de regio stoppen, plus het Nachtnet. Dikte = aantal series op dat stuk spoor (OpenStreetMap).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrOv"><label for="lyrOv"><span class="t"><span class="sw2" style="background:#e3a923"></span>Buslijnen en haltes</span><span class="d">23 buslijnen van Qbuzz en U-OV die in de regio stoppen, en ruim 300 haltes. Klik op een lijn of halte om te zien welke lijnen er rijden (OpenStreetMap).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrRoads"><label for="lyrRoads"><span class="t"><span class="sw2" style="background:#94584a"></span>Hoofdwegennet</span><span class="d">Snelwegen (A12, A20), autowegen en provinciale en lokale hoofdwegen, met wegnummer en beheerder (OpenStreetMap). Dikte = wegtype.</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrVz"><label for="lyrVz"><span class="t">Voorzieningen</span><span class="d" id="vzD">Scholen, zorgpunten, sportaccommodaties en maatschappelijke voorzieningen (OpenStreetMap). Kies hieronder welke.</span></label></div>
       <div class="vzcats" id="vzcats">
-        <label><input type="checkbox" data-c="onderwijs" checked><span class="dot" style="background:#2a78d6"></span>Onderwijs</label>
-        <label><input type="checkbox" data-c="zorg" checked><span class="dot" style="background:#d6392f"></span>Zorg</label>
-        <label><input type="checkbox" data-c="sport" checked><span class="dot" style="background:#00968a"></span>Sport</label>
-        <label><input type="checkbox" data-c="maatsch" checked><span class="dot" style="background:#b07d00"></span>Maatschappelijk</label>
+        <label><input type="checkbox" data-c="onderwijs" checked><span class="dot" style="background:#3b72c4"></span>Onderwijs</label>
+        <label><input type="checkbox" data-c="zorg" checked><span class="dot" style="background:#c9473c"></span>Zorg</label>
+        <label><input type="checkbox" data-c="sport" checked><span class="dot" style="background:#14897f"></span>Sport</label>
+        <label><input type="checkbox" data-c="maatsch" checked><span class="dot" style="background:#a87a16"></span>Maatschappelijk</label>
       </div>
-      <div class="layer"><input type="checkbox" id="lyrBedr"><label for="lyrBedr"><span class="t"><span class="sw2" style="background:#5e60ce"></span>Bedrijventerreinen</span><span class="d" id="bedrD"></span></label></div>
-      <div class="layer"><input type="checkbox" id="lyrNnn"><label for="lyrNnn"><span class="t"><span class="sw2" style="background:#5fa36a"></span>Natuurnetwerk Nederland</span><span class="d">Ca. 7.500 ha beschermde natuur en ecologische verbindingen in de regio (Provincie Zuid-Holland).</span></label></div>
-      <div class="layer"><input type="checkbox" id="lyrN2k"><label for="lyrN2k"><span class="t"><span class="sw2" style="background:#1f5c35"></span>Natura 2000</span><span class="d">Broekvelden, Vettenbroek &amp; Polder Stein (ca. 700 ha, Vogel- en Habitatrichtlijn).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrBedr"><label for="lyrBedr"><span class="t"><span class="sw2" style="background:#6461c0"></span>Bedrijventerreinen</span><span class="d" id="bedrD"></span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrNnn"><label for="lyrNnn"><span class="t"><span class="sw2" style="background:#68a26e"></span>Natuurnetwerk Nederland</span><span class="d">Ca. 7.500 ha beschermde natuur en ecologische verbindingen in de regio (Provincie Zuid-Holland).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrN2k"><label for="lyrN2k"><span class="t"><span class="sw2" style="background:#285f3d"></span>Natura 2000</span><span class="d">Broekvelden, Vettenbroek &amp; Polder Stein (ca. 700 ha, Vogel- en Habitatrichtlijn).</span></label></div>
       <div class="layer"><input type="checkbox" id="lyrKer"><label for="lyrKer"><span class="t"><span class="sw2" style="background:#0b3d91"></span>Dijken en waterkeringen</span><span class="d" id="kerD"></span></label></div>
       <div class="layer"><input type="checkbox" id="lyrBod"><label for="lyrBod"><span class="t">Veenweide en bodem</span><span class="d">Grondsoort, gevoeligheid voor veenoxidatie, dikte van het kleidek en het veenweidegebied van de provincie. Kies hieronder één kaart. Werkt alleen in een gewone browser.</span></label></div>
       <div class="vzcats" id="bodmode"></div>
@@ -2035,12 +2036,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         <label><input type="radio" name="netmode" value="op">Teruglevering</label>
       </div>
       <div class="legend sub" id="netLegend" hidden></div>
-      <div class="layer"><input type="checkbox" id="lyrEn"><label for="lyrEn"><span class="t"><span class="sw2" style="background:#e3442b"></span>Energie: hoogspanning, zon en wind</span><span class="d" id="enD"></span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrEn"><label for="lyrEn"><span class="t"><span class="sw2" style="background:#d9503a"></span>Energie: hoogspanning, zon en wind</span><span class="d" id="enD"></span></label></div>
       <div class="layer"><input type="checkbox" id="lyrKlim"><label for="lyrKlim"><span class="t">Klimaat</span><span class="d">Hitte, wateroverlast, overstromingsdiepte of bodemdaling uit de Klimaateffectatlas. Kies hieronder één kaart. Werkt alleen in een gewone browser.</span></label></div>
       <div class="vzcats" id="klimmode"></div>
       <div class="legend sub" id="klimLegend" hidden></div>
-      <div class="layer"><input type="checkbox" id="lyrErf"><label for="lyrErf"><span class="t"><span class="sw2" style="background:#8a5a1f"></span>Erfgoed</span><span class="d" id="erfD">Rijksmonumenten en beschermde stads- en dorpsgezichten (Rijksdienst voor het Cultureel Erfgoed).</span></label></div>
-      <div class="layer"><input type="checkbox" id="lyrOng"><label for="lyrOng"><span class="t"><span class="sw2" style="background:#d1352b"></span>Verkeersongevallen</span><span class="d" id="ongD"></span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrErf"><label for="lyrErf"><span class="t"><span class="sw2" style="background:#8c6030"></span>Erfgoed</span><span class="d" id="erfD">Rijksmonumenten en beschermde stads- en dorpsgezichten (Rijksdienst voor het Cultureel Erfgoed).</span></label></div>
+      <div class="layer"><input type="checkbox" id="lyrOng"><label for="lyrOng"><span class="t"><span class="sw2" style="background:#c9413a"></span>Verkeersongevallen</span><span class="d" id="ongD"></span></label></div>
       <div class="layer"><input type="checkbox" id="lyrBag"><label for="lyrBag"><span class="t">Bouwjaar van gebouwen</span><span class="d">Elk pand met zijn bouwjaar (BAG, Kadaster). Wordt live opgehaald voor het stuk kaart in beeld; zoom daarvoor in tot wijkniveau.</span><span class="d st" id="bagStatus"></span></label></div>
       <div class="legend sub" id="bagLegend" hidden></div>
       <div class="layer"><input type="checkbox" id="lyrFill"><label for="lyrFill"><span class="t">Buurtkleuren tonen</span><span class="d">Toont alle buurten. Kies je hierboven een thema, dan krijgen ze de kleur van dat thema. Klik op een buurt voor de kerncijfers.</span></label></div>
@@ -2432,8 +2433,9 @@ overzichtKnop.onAdd = () => {
   return d;
 };
 overzichtKnop.addTo(map);
+// reserve-achtergrond: de grijze BRT-tegels, alleen als de eigen kaartstijl (Regiostijl, zie regioBgMaak) niet kan laden
 const brt = L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png',
-  {maxZoom:19, crossOrigin:'anonymous', attribution:'Kaart: <a href="https://www.pdok.nl">Kadaster / PDOK</a> · Data: CBS, RWS (AHN), © OpenStreetMap'}).addTo(map);
+  {maxZoom:19, crossOrigin:'anonymous', attribution:'Kaart: <a href="https://www.pdok.nl">Kadaster / PDOK</a> · Data: CBS, RWS (AHN), © OpenStreetMap'});
 const photo = L.tileLayer('https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_orthoHR/EPSG:3857/{z}/{x}/{y}.jpeg',
   {maxZoom:21, maxNativeZoom:19, crossOrigin:'anonymous', attribution:'Luchtfoto: Beeldmateriaal Nederland / PDOK'});
 const photoLabels = L.tileLayer('https://service.pdok.nl/bzk/luchtfotolabels/wmts/v1_0/lufolabels/EPSG:3857/{z}/{x}/{y}.png',
@@ -2444,12 +2446,11 @@ for(const t of [brt, photo]){
   t.on('tileload', ()=>{ tileOk++; });
 }
 function setBasemap(bm){
+  if(bm==='regio') bm='kaart';   // oude links (Regiostijl was even een aparte keuze)
   basemap = bm;
   for(const t of [brt, photo, photoLabels]) map.removeLayer(t);
-  if(regioBg && map.hasLayer(regioBg)) map.removeLayer(regioBg);
-  if(bm==='kaart') brt.addTo(map).bringToBack();
-  if(bm==='regio') regioBgMaak().then(l=>{ if(basemap==='regio' && !map.hasLayer(l)) l.addTo(map); })
-    .catch(()=>{ $('bmNote').textContent='De regiostijl kan in deze browser niet worden geladen (WebGL nodig). Kies Kaart.'; $('bmNote').hidden=false; });
+  if(regioBg && map.hasLayer(regioBg) && bm!=='kaart') map.removeLayer(regioBg);   // blijft staan als het Kaart blijft (weghalen tijdens een beweging geeft fouten in MapLibre)
+  if(bm==='kaart') kaartAan();
   if(bm==='sat'){ photo.addTo(map).bringToBack(); photoLabels.addTo(map); }
   document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on', b.dataset.bm===bm));
   if(buurtLayer) buurtLayer.setStyle(styleBuurt);
@@ -2460,7 +2461,12 @@ function setBasemap(bm){
 // scripts/regiostijl.py), getekend door MapLibre als laag in Leaflet (@maplibre/maplibre-gl-leaflet). MapLibre wordt pas bij
 // het eerste gebruik geladen (d3Laad). preserveDrawingBuffer: anders is het kaartbeeld leeg in de PDF/PNG.
 let regioBg = null, regioBgLaadt = null, regioTegelOk = false;
-const achtergrondOk = () => basemap==='regio' ? regioTegelOk : tileOk>0;
+const achtergrondOk = () => basemap==='kaart' ? (regioTegelOk || tileOk>0) : tileOk>0;
+// 'Kaart' = de eigen kaartstijl; lukt die niet (geen WebGL), dan de grijze BRT-tegels
+function kaartAan(){
+  regioBgMaak().then(l=>{ if(basemap==='kaart' && !map.hasLayer(l)){ map.removeLayer(brt); l.addTo(map); } })
+    .catch(()=>{ if(basemap==='kaart' && !map.hasLayer(brt)) brt.addTo(map).bringToBack(); });
+}
 function regioBgMaak(){
   if(regioBg) return Promise.resolve(regioBg);
   if(!regioBgLaadt) regioBgLaadt = d3Laad().then(()=>{
@@ -2471,10 +2477,11 @@ function regioBgMaak(){
     regioBg.getAttribution = () => regioBg.options.attribution;   // de plug-in geeft de bronvermelding niet door aan Leaflet
     regioBg.once('add', ()=>{ const m=regioBg.getMaplibreMap();
       m.on('data', e=>{ if(e.dataType==='source' && e.tile) regioTegelOk=true; });
-      m.on('error', ()=>{ if(!regioTegelOk && basemap==='regio'){ $('bmNote').textContent='De regiostijl kan in deze weergave niet laden (deze omgeving blokkeert externe kaartgegevens). Open de kaart in een gewone browser.'; $('bmNote').hidden=false; } }); });
+      m.on('error', ()=>{ if(!regioTegelOk && basemap==='kaart'){ $('bmNote').textContent='De achtergrondkaart kan in deze weergave niet laden (deze omgeving blokkeert externe kaartgegevens). Open de kaart in een gewone browser.'; $('bmNote').hidden=false; } }); });
     return regioBg; });
   return regioBgLaadt;
 }
+kaartAan();
 const ahn = L.tileLayer.wms('https://service.pdok.nl/rws/ahn/wms/v1_0',
   {layers:'dtm_05m', format:'image/png', transparent:true, opacity:0.75, crossOrigin:'anonymous', attribution:'AHN · RWS'});
 
@@ -2656,7 +2663,7 @@ async function loadOv(){
     const bus = ovData.filter(s=>!s.train), train = ovData.filter(s=>s.train);
     ovLayer = L.layerGroup([
       ...bus.map(s=>L.circleMarker([s.lat,s.lon],{pane:'ov',radius:4,color:'#fff',weight:1.5,fillColor:'#5b0065',fillOpacity:.9}).bindTooltip('Bushalte '+s.name,{className:'hover-tip'})),
-      ...train.map(s=>L.circleMarker([s.lat,s.lon],{pane:'ov',radius:8,color:'#fff',weight:2.5,fillColor:'#fc7c00',fillOpacity:1}).bindTooltip('Station '+s.name,{className:'hover-tip',permanent:false}))
+      ...train.map(s=>L.circleMarker([s.lat,s.lon],{pane:'ov',radius:8,color:'#fff',weight:2.5,fillColor:'#e8731c',fillOpacity:1}).bindTooltip('Station '+s.name,{className:'hover-tip',permanent:false}))
     ]).addTo(map);
     setStatus(`${train.length} ${train.length===1?'station':'stations'} en ${nl0.format(bus.length)} bushaltes in de regio geladen.`);
   }catch(err){
@@ -2702,7 +2709,7 @@ $('lyrAhn').addEventListener('change', e=>{
     if($('lyrFill').checked){ $('lyrFill').checked=false; buurtLayer && buurtLayer.setStyle(styleBuurt); }
   } else { map.removeLayer(ahn); if(ahnLegend) ahnLegend.remove(); }
 });
-const BUS='#f2b705', BUS_RAND='#8a6a00';   // buslijnen geel (valt beter op)
+const BUS='#e3a923', BUS_RAND='#7d5d12';   // buslijnen geel (valt beter op)
 const busLines = L.geoJSON(DATA.buslines, {pane:'rail', style:{color:BUS,weight:3,opacity:.9,lineCap:'round',lineJoin:'round'},
   onEachFeature:(f,l)=>{ const p=f.properties;
     l.on('mouseover',e=>{ l.setStyle({weight:6,opacity:1}); l.bringToFront(); l.bindTooltip(`Lijn ${p.ref} · ${p.route}`,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng); });
@@ -2726,33 +2733,34 @@ const busStops = L.geoJSON(DATA.busstops, {pane:'ov', pointToLayer:(f,ll)=>L.cir
     l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3>Bushalte</h3><div class="sub">${p.gm}</div><table><tr><td>Lijnen</td><td>${p.lijnen.join(', ')}</td></tr></table></div>`).openOn(map); }); }});
 const busLayer = L.layerGroup([busLines, busStops]);
 $('lyrOv').addEventListener('change', e=>{ if(e.target.checked) busLayer.addTo(map); else map.removeLayer(busLayer); });
-const NNN_COL = {'bestaande en nieuwe natuur':'#5fa36a','ecologische verbinding':'#9bcf6a','prioritaire nieuwe natuur':'#3d8b5a','waternatuurgebied':'#4fa3a0','blijvend agrarisch gebied binnen Natura2000-gebied':'#b9c77a'};
+const NNN_COL = {'bestaande en nieuwe natuur':'#68a26e','ecologische verbinding':'#9bcf6a','prioritaire nieuwe natuur':'#3d8b5a','waternatuurgebied':'#4fa3a0','blijvend agrarisch gebied binnen Natura2000-gebied':'#b9c77a'};
 const nnnType = p => (p.type||'').replace('NatuurNetwerk Nederland: ','');
-const nnnLayer = L.geoJSON(DATA.nnn, {pane:'nature', style:f=>({color:'#2f6b3b',weight:0.8,fillColor:NNN_COL[nnnType(f.properties)]||'#5fa36a',fillOpacity:.6}),
-  onEachFeature:(f,l)=>{ l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:#1f5c35">Natuurnetwerk Nederland</h3><div class="sub">${nnnType(f.properties)} · ${nl1.format(f.properties.ha)} ha</div></div>`).openOn(map); });
+const nnnLayer = L.geoJSON(DATA.nnn, {pane:'nature', style:f=>({color:'#2f6b3b',weight:0.8,fillColor:NNN_COL[nnnType(f.properties)]||'#68a26e',fillOpacity:.6}),
+  onEachFeature:(f,l)=>{ l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:#285f3d">Natuurnetwerk Nederland</h3><div class="sub">${nnnType(f.properties)} · ${nl1.format(f.properties.ha)} ha</div></div>`).openOn(map); });
     l.on('mouseover',e=>l.bindTooltip('NNN: '+nnnType(f.properties),{sticky:true,className:'hover-tip'}).openTooltip(e.latlng)); }});
-const n2kLayer = L.geoJSON(DATA.n2k, {pane:'nature', style:{color:'#123d22',weight:2,dashArray:'6 4',fillColor:'#1f5c35',fillOpacity:.35},
+const n2kLayer = L.geoJSON(DATA.n2k, {pane:'nature', style:{color:'#123d22',weight:2,dashArray:'6 4',fillColor:'#285f3d',fillOpacity:.35},
   onEachFeature:(f,l)=>{ const p=f.properties; const b={VR:'Vogelrichtlijn','VR+HR':'Vogel- en Habitatrichtlijn',HR:'Habitatrichtlijn'}[p.bescherming]||p.bescherming;
-    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:#1f5c35">${p.naam}</h3><div class="sub">Natura 2000 · ${b} · ${nl0.format(p.ha)} ha in de regio</div></div>`).openOn(map); });
+    l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3 style="color:#285f3d">${p.naam}</h3><div class="sub">Natura 2000 · ${b} · ${nl0.format(p.ha)} ha in de regio</div></div>`).openOn(map); });
     l.on('mouseover',e=>l.bindTooltip('Natura 2000: '+p.naam,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng)); }});
-const ROAD = {motorway:{w:5,c:'#8b4513',l:'Snelweg'},trunk:{w:4,c:'#a0522d',l:'Autoweg'},primary:{w:2.8,c:'#b5652e',l:'Hoofdweg'},secondary:{w:1.6,c:'#c8834f',l:'Overige hoofdweg'}};   // felbruin
+const ROAD = {motorway:{w:5,c:'#7e4a3a',l:'Snelweg'},trunk:{w:4,c:'#94584a',l:'Autoweg'},primary:{w:2.8,c:'#a86a58',l:'Hoofdweg'},secondary:{w:1.6,c:'#bd8a76',l:'Overige hoofdweg'}};   // felbruin
 const roadLayer = L.geoJSON(DATA.roads, {pane:'roads', style:f=>{const r=ROAD[f.properties.h]||ROAD.secondary; return {color:r.c,weight:r.w,opacity:.9,lineCap:'round'};},
   onEachFeature:(f,l)=>{ const p=f.properties, r=ROAD[p.h]||ROAD.secondary; const title=[p.ref,p.naam].filter(Boolean).join(' · ')||r.l;
     l.on('mouseover',e=>l.bindTooltip(title,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng));
     l.on('click',e=>{ e.originalEvent._buurt=true; L.popup().setLatLng(e.latlng).setContent(`<div class="pop"><h3>${title}</h3><div class="sub">${r.l}</div><table>${p.beheer?`<tr><td>Beheerder</td><td>${p.beheer}</td></tr>`:''}${p.max?`<tr><td>Maximumsnelheid</td><td>${p.max} km/u</td></tr>`:''}</table></div>`).openOn(map); }); }});
 $('lyrRoads').addEventListener('change', e=>{ if(e.target.checked) roadLayer.addTo(map); else map.removeLayer(roadLayer); });
 const svcList = s => s ? s.split(' | ') : [];
-const railLines = L.geoJSON(DATA.rail, {pane:'rail', style:f=>({color:'#fc7c00',weight:2+Math.min(f.properties.n,9)*0.8,opacity:.95,lineCap:'round'}),
+const RAIL_C='#e8731c';   // trein (iets dieper oranje dan het accent)
+const railLines = L.geoJSON(DATA.rail, {pane:'rail', style:f=>({color:RAIL_C,weight:2+Math.min(f.properties.n,9)*0.8,opacity:.95,lineCap:'round'}),
   onEachFeature:(f,l)=>{ const st=svcList(f.properties.stop);
     l.on('mouseover',e=>l.bindTooltip(`${st.length} treinseries op dit spoor`,{sticky:true,className:'hover-tip'}).openTooltip(e.latlng));
     l.on('click',e=>{ e.originalEvent._buurt=true; L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pop"><h3>Spoorlijn</h3><div class="sub">${st.length} treinseries rijden hier en stoppen in de regio</div><table>${st.map(x=>`<tr><td>${x}</td></tr>`).join('')}</table></div>`).openOn(map); }); }});
-const railStations = L.geoJSON(DATA.stations, {pane:'rail', pointToLayer:(f,ll)=>L.circleMarker(ll,{radius:7,color:'#fc7c00',weight:3,fillColor:'#fff',fillOpacity:1}),
+const railStations = L.geoJSON(DATA.stations, {pane:'rail', pointToLayer:(f,ll)=>L.circleMarker(ll,{radius:7,color:RAIL_C,weight:3,fillColor:'#fff',fillOpacity:1}),
   onEachFeature:(f,l)=>{ const p=f.properties, ic=p.diensten.filter(x=>x.startsWith('Intercity')).length, sp=p.diensten.filter(x=>x.startsWith('Sprinter')).length;
     l.bindTooltip(p.naam||'Station',{permanent:true,direction:'right',offset:[8,0],className:'stlabel'});
     l.on('click',e=>{ e.originalEvent._buurt=true; L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pop"><h3>Station ${p.naam||''}</h3><div class="sub">${p.gm} · ${ic} intercity- en ${sp} sprinterseries</div><table>${p.diensten.map(x=>`<tr><td>${x}</td></tr>`).join('')}</table></div>`).openOn(map); }); }});
 const railLayer = L.layerGroup([railLines, railStations]);
 $('lyrRail').addEventListener('change', e=>{ if(e.target.checked) railLayer.addTo(map); else map.removeLayer(railLayer); });
-const VZC={onderwijs:'#2a78d6',zorg:'#d6392f',sport:'#00968a',maatsch:'#b07d00'};
+const VZC={onderwijs:'#3b72c4',zorg:'#c9473c',sport:'#14897f',maatsch:'#a87a16'};
 const vzGroups={}; for(const c in VZC) vzGroups[c]=L.layerGroup();
 $('vzD').textContent = `${nl0.format(DATA.voorz.features.length)} scholen, zorgpunten, sportaccommodaties en maatschappelijke voorzieningen in de regio (OpenStreetMap). Kies hieronder welke.`;
 for(const f of DATA.voorz.features){
@@ -2842,7 +2850,7 @@ document.querySelectorAll('input[name=netmode]').forEach(i=>i.addEventListener('
   netLayer.setStyle(netStyle); renderNetLegend(); }));
 
 // ---- Erfgoed (data/erfgoed.json, scripts/erfgoed.py) ----
-const ERF = '#8a5a1f';
+const ERF = '#8c6030';
 const erfLink = (u,t)=> u ? `<tr><td colspan="2"><a href="${u}" target="_blank" rel="noopener">${t}</a></td></tr>` : '';
 const erfVlak = L.geoJSON(DATA.erfgoed.vlak, {pane:'nature',
   style:f=> f.properties.s.startsWith('Beschermd') ? {color:ERF,weight:2,dashArray:'5 4',fillColor:ERF,fillOpacity:.12} : {color:ERF,weight:1.5,fillColor:ERF,fillOpacity:.25},
@@ -2880,7 +2888,7 @@ $('lyrKlim').addEventListener('change', syncKlim);
 document.querySelectorAll('input[name=klimmode]').forEach(r=>r.addEventListener('change', ()=>{ if(!$('lyrKlim').checked) $('lyrKlim').checked=true; syncKlim(); }));
 
 // ---- Verkeersongevallen met letsel of doden (BRON, Rijkswaterstaat) ----
-const ONG='#d1352b';
+const ONG='#c9413a';
 const ongLayer = L.layerGroup(DATA.ongevallen.punten.map(([x,y,jaar,dood,aard,wie,straat,max])=>{
   const m=L.circleMarker([y,x],{pane:'ov',radius:dood?5.5:3.4,color:'#fff',weight:dood?1.5:1,fillColor:dood?'#1d1d1b':ONG,fillOpacity:.95});
   m.bindTooltip(`${dood?'Dodelijk ongeval':'Ongeval met letsel'} (${jaar})`,{className:'hover-tip'});
@@ -2892,7 +2900,7 @@ const ongLayer = L.layerGroup(DATA.ongevallen.punten.map(([x,y,jaar,dood,aard,wi
 $('lyrOng').addEventListener('change', e=>{ if(e.target.checked) ongLayer.addTo(map); else map.removeLayer(ongLayer); });
 
 // ---- Bedrijventerreinen (IBIS, Provincie Zuid-Holland) ----
-const BEDR_VOL='#8d8d9e', BEDR_RUIMTE='#5e60ce';
+const BEDR_VOL='#8d8d9e', BEDR_RUIMTE='#6461c0';
 const bedrKleur = p => p.uitg>0 ? BEDR_RUIMTE : BEDR_VOL;
 const ha = v => nl1.format(v)+' ha';
 const bedrLayer = L.geoJSON(DATA.bedrijventerreinen, {pane:'nature', style:f=>({color:bedrKleur(f.properties), weight:1.5, fillColor:bedrKleur(f.properties), fillOpacity:.38}),
@@ -2910,7 +2918,7 @@ const bedrLayer = L.geoJSON(DATA.bedrijventerreinen, {pane:'nature', style:f=>({
 $('lyrBedr').addEventListener('change', e=>{ if(e.target.checked) bedrLayer.addTo(map); else map.removeLayer(bedrLayer); });
 
 // ---- Energie: hoogspanning, stations, windturbines en zonneparken (OpenStreetMap) ----
-const EN = {380:{c:'#9e0b0f',w:3.6,l:'380 kV (TenneT)'}, 150:{c:'#e3442b',w:2.4,l:'150 kV (TenneT)'}}, EN_WIND='#0b9aa0', EN_ZON='#ffc61a';
+const EN = {380:{c:'#962a24',w:3.6,l:'380 kV (TenneT)'}, 150:{c:'#d9503a',w:2.4,l:'150 kV (TenneT)'}}, EN_WIND='#2493a0', EN_ZON='#ffc61a';
 const enInfo = kv => kv>=300 ? EN[380] : EN[150];
 const enLijnen = L.geoJSON(DATA.energie.lijnen, {pane:'rail', style:f=>{ const k=enInfo(f.properties.kv); return {color:k.c, weight:k.w, opacity:.9, dashArray:null}; },
   onEachFeature:(f,l)=>{ const p=f.properties; l.bindTooltip(`Hoogspanning ${p.kv} kV${p.n?' · '+p.n:''}`,{sticky:true,className:'hover-tip'}); }});
@@ -3320,12 +3328,12 @@ function activeLayers(){
   if(on('lyrErf')) L2.push({c:ERF, l:'Rijksmonumenten en beschermde gezichten (RCE)'});
   if(on('lyrBag')) L2.push({c:'#b2182b', l:'Bouwjaar (BAG): rood = oud, blauw = nieuw'});
   if(on('lyrAhn')) L2.push({c:'#4b8fd6', l:'Hoogte t.o.v. NAP (AHN)'});
-  if(on('lyrRail')) L2.push({c:'#fc7c00', l:'Treinverbindingen en stations'});
+  if(on('lyrRail')) L2.push({c:RAIL_C, l:'Treinverbindingen en stations'});
   if(on('lyrOv')) L2.push({c:BUS, l:'Buslijnen en haltes'});
   if(on('lyrRoads')) L2.push({c:ROAD.trunk.c, l:'Hoofdwegennet'});
   if(on('lyrVz')) document.querySelectorAll('#vzcats input').forEach(i=>{ if(i.checked) L2.push({c:VZC[i.dataset.c], l:'Voorzieningen: '+i.parentElement.textContent.trim()}); });
-  if(on('lyrNnn')) L2.push({c:'#5fa36a', l:'Natuurnetwerk Nederland'});
-  if(on('lyrN2k')) L2.push({c:'#1f5c35', l:'Natura 2000'});
+  if(on('lyrNnn')) L2.push({c:'#68a26e', l:'Natuurnetwerk Nederland'});
+  if(on('lyrN2k')) L2.push({c:'#285f3d', l:'Natura 2000'});
   if(on('lyrSnap')){ L2.push({c:SNAP_WATER, l:'Rivieren'}); L2.push({c:SNAP_WEG.motorway.c, l:'Snelweg'}); L2.push({c:SNAP_WEG.primary.c, l:'Provinciale weg'}); L2.push({c:SNAP_SPOOR, l:'Spoor'}); }
   return L2;
 }
@@ -3467,7 +3475,7 @@ function drawGemeenteMap(code, t, wpx, hpx){
   for(const f of gemeenten.features){ if(f.properties.gemeentecode===code) continue; path(f.geometry); ctx.fillStyle='#f1ecef'; ctx.fill('evenodd'); ctx.strokeStyle='#d9cfd6'; ctx.lineWidth=1; ctx.stroke(); }
   for(const f of fs){ path(f.geometry); ctx.fillStyle=colorFor(cleanK(f.properties,t.key)); ctx.fill('evenodd'); ctx.strokeStyle='#ffffff'; ctx.lineWidth=1.2; ctx.stroke(); }
   path(gmF.geometry); ctx.strokeStyle='#3b0042'; ctx.lineWidth=3; ctx.stroke();
-  for(const st of DATA.stations.features){ if(st.properties.gm!==GM[code]) continue; const q=P(st.geometry.coordinates); ctx.beginPath(); ctx.arc(q[0],q[1],7,0,7); ctx.fillStyle='#fff'; ctx.fill(); ctx.lineWidth=3.5; ctx.strokeStyle='#fc7c00'; ctx.stroke(); }
+  for(const st of DATA.stations.features){ if(st.properties.gm!==GM[code]) continue; const q=P(st.geometry.coordinates); ctx.beginPath(); ctx.arc(q[0],q[1],7,0,7); ctx.fillStyle='#fff'; ctx.fill(); ctx.lineWidth=3.5; ctx.strokeStyle='#e8731c'; ctx.stroke(); }
   return cv.toDataURL('image/png');
 }
 async function exportProfilePdf(){
@@ -3490,7 +3498,7 @@ async function exportProfilePdf(){
     doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
     for(const k of klassenHoogLaag()){ doc.setFillColor(...hex(k.c)); doc.rect(x2,y2-3,6,3.6,'F'); doc.text(pdfText(klasLabel(t,k)), x2+8, y2); y2+=4.8; }
     doc.setFillColor(...hex(NODATA)); doc.rect(x2,y2-3,6,3.6,'F'); doc.text('geen gegevens / geheim', x2+8, y2); y2+=5;
-    doc.setDrawColor(...hex('#fc7c00')); doc.setLineWidth(0.9); doc.circle(x2+3,y2-1.3,1.4); doc.setLineWidth(0.2); doc.text('treinstation', x2+8, y2); y2+=6;
+    doc.setDrawColor(...hex('#e8731c')); doc.setLineWidth(0.9); doc.circle(x2+3,y2-1.3,1.4); doc.setLineWidth(0.2); doc.text('treinstation', x2+8, y2); y2+=6;
     doc.setTextColor(...hex(MUTED)); doc.setFontSize(7.5);
     doc.text(doc.splitTextToSize(pdfText('Kleurklassen gelden voor de hele regio, zodat profielen van verschillende gemeenten vergelijkbaar zijn. Kies een ander thema op de kaart om het kaartje te veranderen.'),88), x2, y2);
     // tabel
@@ -4332,7 +4340,7 @@ async function tegelsGeladen(max=5000){   // wachten tot de achtergrond- en kaar
   const t0=performance.now(); await wacht(350);
   while(performance.now()-t0<max){
     const open=[...map.getContainer().querySelectorAll('img.leaflet-tile')].filter(i=>!i.classList.contains('leaflet-tile-loaded') && i.style.visibility!=='hidden');
-    const gl = basemap==='regio' && regioBg && regioBg.getMaplibreMap ? regioBg.getMaplibreMap() : null;
+    const gl = basemap==='kaart' && regioBg && regioBg.getMaplibreMap ? regioBg.getMaplibreMap() : null;
     if(!open.length && (!gl || gl.loaded())) break; await wacht(150);
   }
   await wacht(250);
@@ -4758,7 +4766,7 @@ function d3ZetDraai(aan){
   if(aan){ const stap=()=>{ if(!d3Draai||!d3Kaart) return; d3Kaart.setBearing(d3Kaart.getBearing()+0.12); d3Raf=requestAnimationFrame(stap); }; d3Raf=requestAnimationFrame(stap); }
 }
 function d3Achtergrond(aan){
-  if(!d3Kaart) return; d3Kaart.setLayoutProperty('brt','visibility', aan?'visible':'none');
+  if(!d3Kaart) return; for(const l of d3Kaart.getStyle().layers) if(l.id.startsWith('bg-') && l.id!=='bg-achtergrond') d3Kaart.setLayoutProperty(l.id,'visibility', aan?'visible':'none');
 }
 async function open3D(){
   $('d3').hidden=false; document.body.classList.add('d3-open');
@@ -4768,12 +4776,11 @@ async function open3D(){
   try{ await d3Laad(); }catch(e){ $('d3Melding').textContent='3D kan in deze browser niet worden geladen.'; $('d3Melding').hidden=false; return; }
   const gl=document.createElement('canvas'); if(!(gl.getContext('webgl2')||gl.getContext('webgl'))){ $('d3Melding').textContent='Deze browser of computer ondersteunt geen 3D (WebGL).'; $('d3Melding').hidden=false; return; }
   d3Kaart = new maplibregl.Map({container:'d3Kaart', attributionControl:false, maxPitch:75, preserveDrawingBuffer:false,
-    style:{version:8, sources:{
-      brt:{type:'raster', tiles:['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png'], tileSize:256, maxzoom:19},
+    // achtergrond: dezelfde eigen kaartstijl als de gewone kaart (zonder straatnamen), lagen met 'bg-' ervoor
+    style:{version:8, glyphs:DATA.regiostijl.glyphs, sources:{...DATA.regiostijl.sources,
       b:{type:'geojson', data:d3Data()}, gm:{type:'geojson', data:gemeenten}},
       layers:[
-        {id:'grond', type:'background', paint:{'background-color':'#f3eef2'}},
-        {id:'brt', type:'raster', source:'brt', paint:{'raster-opacity':0.55, 'raster-saturation':-0.6}},
+        ...DATA.regiostijl.layers.filter(l=>l.id!=='straatnamen').map(l=>({...l, id:'bg-'+l.id})),
         {id:'gmvlak', type:'line', source:'gm', paint:{'line-color':'#3b0042','line-width':2.2,'line-opacity':.8}},
         {id:'blok', type:'fill-extrusion', source:'b', paint:{'fill-extrusion-color':['get','kleur'], 'fill-extrusion-height':['*',['get','h'],['literal',1]], 'fill-extrusion-base':0, 'fill-extrusion-opacity':0.92, 'fill-extrusion-vertical-gradient':true}},
       ]}});
