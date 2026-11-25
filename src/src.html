@@ -441,6 +441,8 @@
   .bw-sc{display:inline-block;margin-left:6px;font-size:12px;color:var(--ink2);min-width:22px}
   .bw-trend{color:var(--muted);font-size:12px} .bw-dek{color:var(--ink2)}
   tr.bw-detail>td{background:#fbf5fa;padding:4px 10px 14px 34px;white-space:normal}
+  tr.bw-detail td td,tr.bw-detail p{white-space:normal}
+  .bw-ind .bw-w{white-space:nowrap;font-size:12px}
   .bw-ind{width:100%;border-collapse:collapse;font-size:12.5px}
   .bw-ind td,.bw-ind th{padding:6px 8px;border-bottom:1px solid #eee3ec;vertical-align:top;text-align:left}
   .bw-ind th{font:600 12px Barlow,sans-serif;color:var(--muted)}
@@ -955,7 +957,7 @@ for(const [na, items] of Object.entries(EXTRA)){ const i=THEMES.findIndex(t=>t.k
 if(DATA.ref){ Object.assign(DATA.ref.zh, DATA.sociaal.ref.zh); Object.assign(DATA.ref.nl, DATA.sociaal.ref.nl);
   for(const t of THEMES) if(t.div===LBM_DIV) DATA.ref.nl[t.key]=0; }
 /* ---------- Nog meer thema's (8-11-2026): gezondheid (RIVM/GGD), politie, StatLine ---------- */
-for(const d of [DATA.gezondheid.buurt, DATA.politie.buurt, DATA.statline.buurt]){
+for(const d of [DATA.gezondheid.buurt, DATA.politie.buurt, DATA.statline.buurt, DATA.bwextra.buurt]){
   for(const f of DATA.buurten.features){ const x=d[f.properties.buurtcode]; if(x) Object.assign(f.properties, x); }
 }
 const POL_J = DATA.politie.jaar;
@@ -1005,7 +1007,16 @@ const EXTRA2 = {
   ],
 };
 for(const [na, items] of Object.entries(EXTRA2)){ const i=THEMES.findIndex(t=>t.key===na); THEMES.splice(i+1, 0, ...items); }
-if(DATA.ref) for(const d of [DATA.gezondheid, DATA.politie, DATA.statline]){ Object.assign(DATA.ref.zh, d.ref.zh); Object.assign(DATA.ref.nl, d.ref.nl); }
+// extra voor de brede-welvaartsthermometer (25-11-2026, scripts/bw_extra.py)
+const EXTRA3 = {
+  soc_inkomen_inw: [
+    {g:'Sociaal', key:'soc_vermogen', label:'Mediaan vermogen van huishoudens', fmt:v=>'€ '+nl0.format(Math.round(v*10)*100), agg:{type:'w',w:'bw_hh24'}, jaar:2024, note:'Mediaan vermogen van particuliere huishoudens: bezittingen min schulden, inclusief de eigen woning (CBS, 2024). Regio, Zuid-Holland en Nederland: benadering, gewogen naar huishoudens (een mediaan kun je niet optellen).'},
+    {g:'Sociaal', key:'soc_ao_per_1000', label:'Arbeidsongeschiktheidsuitkeringen', fmt:v=>nl1.format(v)+' per 1.000', agg:{type:'ratio',num:'bw_ao_n',den:'bw_inw25',mult:1000}, jaar:2025, note:'Personen met een arbeidsongeschiktheidsuitkering (WAO, WIA, Wajong e.d.) per 1.000 inwoners (CBS, 2025). Buurten onder 100 inwoners: geen cijfer.'}],
+  ggd_langdurig: [
+    {g:'Gezondheid (GGD/RIVM 2024)', key:'ggd_broos65', label:'Broze gezondheid (65-plussers)', fmt:pct1, agg:{type:'w',w:'bw_65'}, jaar:2024, note:'Aandeel 65-plussers met een broze gezondheid: kwetsbaar op lichamelijk, psychisch of sociaal vlak (Gezondheidsmonitor 2024 van GGD’en en RIVM; schatting).'}],
+};
+for(const [na, items] of Object.entries(EXTRA3)){ const i=THEMES.findIndex(t=>t.key===na); THEMES.splice(i+1, 0, ...items); }
+if(DATA.ref) for(const d of [DATA.gezondheid, DATA.politie, DATA.statline, DATA.bwextra]){ Object.assign(DATA.ref.zh, d.ref.zh); Object.assign(DATA.ref.nl, d.ref.nl); }
 
 // verandering voor een gemeente (code 'GM0513') of de hele regio (null): huidig jaar uit de buurten, basisjaar uit trend.json
 function trendWaarde(code, k){
@@ -1783,7 +1794,7 @@ function refVal(level, t, forCompare){
 // (scripts/ref.py en extra_data.py, 'gebied'). Alleen als de bron geen gemeentecijfer heeft (eigen data, reistijd,
 // Leefbaarometer, ongevallen) wordt opgeteld uit de buurten. Controle: scripts/valideer.py.
 const GEBIED = {};
-for(const d of [DATA.ref, DATA.sociaal, DATA.gezondheid, DATA.politie, DATA.statline]) if(d && d.gebied)
+for(const d of [DATA.ref, DATA.sociaal, DATA.gezondheid, DATA.politie, DATA.statline, DATA.bwextra]) if(d && d.gebied)
   for(const [g,v] of Object.entries(d.gebied)){ GEBIED[g]=GEBIED[g]||{}; for(const [k,w] of Object.entries(v)) if(w!==null && w!==undefined) GEBIED[g][k]=w; }
 function gebiedWaarde(g, t, forCompare){   // g = 'GM0513' (gemeente) of 'regio'
   const o=GEBIED[g], k=(forCompare && t.cmp) ? t.key+'__cmp' : t.key;
@@ -3417,7 +3428,8 @@ const BW_NAAM = g => g==='regio' ? 'Regio' : g==='zh' ? 'Zuid-Holland' : g==='nl
 const BW_KLEUR = {basis:'#c8553d', functioneel:'#e8c87a', excellent:'#5b0065'};
 const BW_TREDEN = ['basis','functioneel','excellent'];
 const bwTrede = s => s==null ? null : s<2 ? 'basis' : s<4 ? 'functioneel' : 'excellent';
-const bwFmt = (key, v) => { if(v==null) return '–'; const t=THEMES.find(x=>x.key===key); return t ? t.fmt(v) : nl1.format(v); };
+const BW_EENHEID = {'%':v=>nl1.format(v)+'%', km:v=>nl1.format(v)+' km', 'm2':v=>nl0.format(v)+' m²'};
+const bwFmt = (key, v) => { if(v==null) return '–'; const t=THEMES.find(x=>x.key===key); if(t) return t.fmt(v); const i=BW.dimensies.flatMap(d=>d.indicatoren).find(x=>x.key===key); return i && BW_EENHEID[i.eenheid] ? BW_EENHEID[i.eenheid](v) : nl1.format(v); };
 const bwNum = s => s==null ? '–' : nl1.format(s);
 function bwVakjes(s, klein){
   const tr=bwTrede(s);
@@ -3471,9 +3483,10 @@ function bwThermometer(){
 function bwDetail(d){
   const rij = i => `<tr><td class="bw-il">${esc(i.label)} <span class="bw-jaar">${i.jaar||''}</span><br>${bwRichting(i.richting)}${i.noot?`<br><span class="bw-r">${esc(i.noot)}</span>`:''}</td>
     ${BW_VOLG.map(g=>`<td><span class="bw-w">${bwFmt(i.key,i.waarden[g])}</span>${i.richting?bwVakjes(i.scores[g],true):''}</td>`).join('')}
-    <td class="bw-nl">NL ${bwFmt(i.key,i.waarden.nl)}<br><span class="bw-r">mediaan gemeente ${bwFmt(i.key,i.mediaan)}</span></td>
+    <td class="bw-nl">NL ${bwFmt(i.key,i.waarden.nl)}<br><span class="bw-r">mediaan van ${i.n} gemeenten: ${bwFmt(i.key,i.mediaan)}</span></td>
     <td>${THEMES.some(t=>t.key===i.key)?`<button type="button" class="bw-kaart" data-k="${i.key}">Op de kaart</button>`:''}</td></tr>`;
   return `<table class="bw-ind"><tbody>${d.indicatoren.map(rij).join('')}</tbody></table>
+    ${d.context?`<p class="bw-r"><b>Context:</b> ${esc(d.context)}</p>`:''}
     ${d.ontbreekt.length?`<p class="bw-mist"><b>Ontbreekt nog:</b> ${d.ontbreekt.map(esc).join(' · ')}</p>`:''}
     <p class="bw-r">Bronnen: ${[...new Set(d.indicatoren.map(i=>i.bron))].map(esc).join('; ')}. Drempels: zes even grote groepen van alle Nederlandse gemeenten.</p>`;
 }
