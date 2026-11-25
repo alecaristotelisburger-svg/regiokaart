@@ -21,7 +21,7 @@ with sync_playwright() as p:
     check('geen totaalcijfer', 'totaal' not in pg.inner_text('.bw-tabel').lower())
     pg.click('tr.bw-dim[data-d=veiligheid]'); pg.wait_for_timeout(200)
     check('onderbouwing klapt uit', pg.is_visible('.bw-ind') and 'misdrijven' in pg.inner_text('.bw-ind').lower())
-    check('ontbreekt-lijst', 'Ervaren onveiligheid' in pg.inner_text('.bw-detail'))
+    check('geen ervaren onveiligheid meer', 'onveilig' not in pg.inner_text('.bw-detail').lower() and len(pg.query_selector_all('.bw-detail .bw-ind tr')) == 4)
     pg.click('.bw-kaart[data-k=pol_totaal]'); pg.wait_for_timeout(500)
     check('op de kaart: thema gezet en venster dicht', pg.evaluate("$('theme').value") == 'pol_totaal' and not pg.is_visible('#bw'))
     pg.click('#btnBW'); pg.click('[data-tab=thermostaat]'); pg.click('[data-nieuw=duurzaam]')
