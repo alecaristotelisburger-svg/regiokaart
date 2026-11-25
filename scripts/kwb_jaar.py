@@ -191,15 +191,16 @@ for f in sorted(pdok_nieuw, key=lambda f: f['properties']['buurtcode']):
         veranderd.append(c); geom = mapping(shapely.set_precision(transform(wgs, g_n.simplify(4)), 0.00001))
     uit.append({'type': 'Feature', 'properties': buurt_props(p, keep), 'geometry': geom})
 json.dump({'type': 'FeatureCollection', 'features': uit}, open(os.path.join(DATA, 'buurten.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
-nieuw_codes = [c for c in veranderd if c not in oud]
-print('buurten:', len(uit), '| nieuw:', nieuw_codes, '| andere grens:', [c for c in veranderd if c in oud])
+# nieuw of gewijzigd ten opzichte van het vorige CBS-jaar (niet ten opzichte van data/buurten.json, anders is een tweede run 'leeg')
+nieuw_codes = [c for c in veranderd if c not in ruw_v]
+print('buurten:', len(uit), '| nieuw:', nieuw_codes, '| andere grens:', [c for c in veranderd if c in ruw_v])
 
 # jaar per kenmerk, ook voor de afgeleide kenmerken
 afgeleid = {'bijstand_per_1000': 'aantal_personen_met_een_alg_bijstandsuitkering_tot', 'ww_per_1000': 'aantal_personen_met_een_ww_uitkering_totaal',
             'bedrijven_per_1000_inwoners': 'aantal_bedrijfsvestigingen', 'nieuwbouw_per_1000_woningen': 'aantal_nieuwbouw_woningen'}
 for k, bronveld in afgeleid.items(): jaar[k] = jaar.get(bronveld, VORIG[0])
 json.dump({'nieuw': NIEUW[0], 'vorig': VORIG[0], 'tabellen': {NIEUW[0]: NIEUW[1], VORIG[0]: VORIG[1]}, 'opgehaald': opg_nieuw,
-           'aantal_buurten': len(uit), 'nieuwe_buurten': nieuw_codes, 'gewijzigde_buurten': [c for c in veranderd if c in oud], 'jaar': jaar},
+           'aantal_buurten': len(uit), 'nieuwe_buurten': nieuw_codes, 'gewijzigde_buurten': [c for c in veranderd if c in ruw_v], 'jaar': jaar},
           open(os.path.join(DATA, 'kwb_jaar.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 
 # ---------- 5. gemeenten (voor Zuid-Holland en Nederland) ----------
@@ -220,5 +221,9 @@ for f in gem['features']:
             p[k] = waarde(bronkey[k][0].get(c), k)
     p.update({k: v for k, v in buurt_props(p, keep).items() if k in afgeleid})
 json.dump(gem, open(os.path.join(DATA, 'gemeenten_kwb_mix.geojson'), 'w'))
+# alle gemeenten zonder grenzen: voor de drempels van de brede-welvaartsthermometer (scripts/brede_welvaart.py; niet in de pagina)
+os.makedirs(os.path.join(DATA, 'afgeleid'), exist_ok=True)
+json.dump({f['properties']['gemeentecode']: {kk: f['properties'].get(kk) for kk in cijfers + list(afgeleid) + ['gemeentenaam', 'water']} for f in gem['features']},
+          open(os.path.join(DATA, 'afgeleid', 'gemeenten_kwb.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ref.py'), 'gemeenten_kwb_mix.geojson'], cwd=DATA, check=True)
 os.remove(os.path.join(DATA, 'gemeenten_kwb_mix.geojson'))

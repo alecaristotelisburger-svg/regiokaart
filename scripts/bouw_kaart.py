@@ -25,7 +25,7 @@ for fn in sorted(os.listdir(P('src', 'fonts'))):
         ff += f"@font-face{{font-family:'{fam}';font-style:normal;font-weight:{w};font-display:swap;src:url(data:font/woff2;base64,{b64}) format('woff2')}}\n"
 s = s.replace('<!--FONTS-->', '<style>' + ff + '</style>')
 s = s.replace('<!--LEAFLET_JS-->', '<script>' + js + '</script>\n<script>' + pdf + '</script>')
-names = ['buurten', 'gemeenten', 'nnn', 'n2k', 'roads', 'rail', 'stations', 'buslines', 'busstops', 'voorz', 'locaties', 'net', 'erfgoed', 'trend', 'prognose', 'klimaat', 'sociaal', 'leefbaarometer', 'reistijd', 'ongevallen', 'gezondheid', 'politie', 'statline', 'keringen', 'bedrijventerreinen', 'energie', 'bodem', 'kwb_jaar']
+names = ['buurten', 'gemeenten', 'nnn', 'n2k', 'roads', 'rail', 'stations', 'buslines', 'busstops', 'voorz', 'locaties', 'net', 'erfgoed', 'trend', 'prognose', 'klimaat', 'sociaal', 'leefbaarometer', 'reistijd', 'ongevallen', 'gezondheid', 'politie', 'statline', 'keringen', 'bedrijventerreinen', 'energie', 'bodem', 'kwb_jaar', 'bw', 'thermostaat']
 data = {k: json.load(open(P('data', k + '.json'))) for k in names}
 data['natuur'] = json.load(open(P('data', 'natuur_gm.json')))
 # provinciegrenzen (CBS 2024) voor de kaartjes bij Vergelijken; alleen de naam is nodig

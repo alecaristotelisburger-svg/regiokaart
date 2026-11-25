@@ -398,6 +398,70 @@
   body.presenteren #presBalk{display:flex;position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:1300;align-items:center;gap:8px;background:rgba(255,255,255,.96);border-radius:12px;box-shadow:0 4px 18px rgba(40,0,50,.2);padding:8px 10px;font-family:Barlow,sans-serif}
   #presBalk .tk-knop{width:38px;height:38px;font-size:18px}
   #presTeller{font:600 14px Barlow,sans-serif;color:var(--accent);min-width:56px;text-align:center}
+  /* knoppen bovenaan: tekst op één regel; tijdens het tekenen alleen Tekenen en de tekenbalk (anders past de balk niet) */
+  #wissel .tekenknop{white-space:nowrap}
+  #wissel.tekenen #btnVergelijken,#wissel.tekenen #btnBW,#wissel.tekenen #btn3D,#wissel.tekenen #btnPresenteren{display:none}
+  /* ---------- brede welvaart ---------- */
+  #bw{position:fixed;inset:0;z-index:1500;background:var(--soft);display:flex;flex-direction:column;font-family:Barlow,system-ui,sans-serif;color:var(--ink)}
+  #bw[hidden]{display:none}
+  .bw-balk{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 22px;background:#fff;border-bottom:1px solid var(--line)}
+  .bw-balk h2{margin:0;font:700 20px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--accent)}
+  .bw-balk .vg-sub{color:var(--muted);font-size:13px}
+  .bw-tabs{display:flex;gap:4px;background:var(--soft);border-radius:18px;padding:3px}
+  .bw-tabs button{all:unset;cursor:pointer;font:600 13px Barlow,sans-serif;color:var(--accent);padding:5px 12px;border-radius:15px}
+  .bw-tabs button.aan{background:var(--accent);color:#fff}
+  .bw-tabs button:focus-visible{outline:2px solid var(--magenta)}
+  .bw-pdf{display:flex;align-items:center;gap:6px;margin-left:auto}
+  .bw-pdf .btn{padding:6px 11px;font-size:12.5px;white-space:nowrap}
+  .bw-pdf select{font:13px Barlow,sans-serif;border:1px solid #d9cbd6;border-radius:8px;padding:5px 7px;color:var(--ink)}
+  #bwDl{font-size:12px;margin:0}
+  #bwInhoud{flex:1;overflow:auto;padding:18px 22px 40px}
+  #bwInhoud>*{max-width:1180px;margin-left:auto;margin-right:auto}
+  .bw-legenda{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:12.5px;margin-bottom:10px}
+  .bw-legenda i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .bw-legenda small{color:var(--muted)} .bw-ref{color:var(--muted);margin-left:auto}
+  .bw-tabelvak{overflow-x:auto;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(40,0,50,.08)}
+  .bw-tabel{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+  .bw-tabel thead th{font:700 12.5px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--muted);text-align:left;padding:10px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+  .bw-tabel td,.bw-tabel tbody th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+  .bw-tabel tbody th{font-weight:600;color:var(--ink)}
+  tr.bw-dim{cursor:pointer} tr.bw-dim:hover,tr.bw-dim.open{background:#fbf5fa} tr.bw-dim:focus-visible{outline:2px solid var(--magenta);outline-offset:-2px}
+  .bw-pijl{display:inline-block;width:14px;color:var(--accent)}
+  .bw-vak{display:inline-flex;gap:2px;vertical-align:middle}
+  .bw-vak i{width:13px;height:13px;border:1.5px solid #d9cbd6;border-radius:2px;background:#fff}
+  .bw-vak.klein i{width:9px;height:9px;border-width:1px}
+  .bw-sc{display:inline-block;margin-left:6px;font-size:12px;color:var(--ink2);min-width:22px}
+  .bw-trend{color:var(--muted);font-size:12px} .bw-dek{color:var(--ink2)}
+  tr.bw-detail>td{background:#fbf5fa;padding:4px 10px 14px 34px;white-space:normal}
+  .bw-ind{width:100%;border-collapse:collapse;font-size:12.5px}
+  .bw-ind td,.bw-ind th{padding:6px 8px;border-bottom:1px solid #eee3ec;vertical-align:top;text-align:left}
+  .bw-ind th{font:600 12px Barlow,sans-serif;color:var(--muted)}
+  .bw-il{min-width:220px;white-space:normal}
+  .bw-w{display:block;font-weight:600;margin-bottom:2px}
+  .bw-r{font-size:11.5px;color:var(--muted)}
+  .bw-jaar{display:inline-block;font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:0 5px;margin-left:3px}
+  .bw-nl{color:var(--ink2);font-size:12px}
+  .bw-kaart{font:600 11.5px Barlow,sans-serif;color:var(--accent);background:#fff;border:1px solid #e4d9e2;border-radius:12px;padding:3px 9px;cursor:pointer;white-space:nowrap}
+  .bw-kaart:hover{border-color:var(--accent)}
+  .bw-mist{font-size:12px;margin:8px 0 2px;color:#7a4b00}
+  .bw-h3{font:700 14px "Barlow Semi Condensed",Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:22px auto 8px}
+  .bw-h3 small{font:500 12px Barlow,sans-serif;letter-spacing:0;text-transform:none;color:var(--muted);margin-left:6px}
+  .bw-noot{font-size:12px;color:var(--muted);margin-top:12px}
+  .bw-intro{margin-bottom:14px !important;font-size:14px;line-height:1.5}
+  .ts-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(40,0,50,.08);padding:12px 14px}
+  .ts-p{font:600 12.5px Barlow,sans-serif;color:var(--ink);margin-bottom:6px}
+  .ts-v{display:flex;flex-wrap:wrap;gap:3px;min-height:14px} .ts-v i{width:14px;height:14px;border-radius:2px} .ts-v span{font-size:11.5px;color:var(--muted)}
+  .ts-prog{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(40,0,50,.08);padding:12px 16px;margin-top:12px}
+  .ts-prog h3{margin:0 0 8px;font:700 15px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--accent)}
+  .ts-rij{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .ts-rij input{flex:1;min-width:0;font:13px Barlow,sans-serif;border:1px solid #d9cbd6;border-radius:7px;padding:6px 8px}
+  .ts-rij select{font:13px Barlow,sans-serif;border:1px solid #d9cbd6;border-radius:7px;padding:5px 6px;max-width:260px}
+  .ts-kleur{width:14px;height:14px;border-radius:2px;flex:none}
+  .ts-acties{display:flex;gap:8px;margin-top:14px}
+  .bw-uitleg{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(40,0,50,.08);padding:4px 22px 18px;font-size:14px;line-height:1.55}
+  .bw-uitleg p,.bw-uitleg ol{max-width:780px} .bw-blok{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  body.presenteren #btnBW{display:none !important}
+  @media (max-width:900px){ .ts-strip{grid-template-columns:repeat(2,1fr)} .bw-pdf{margin-left:0} }
   /* ---------- 3D ---------- */
   #d3{position:fixed;inset:0;z-index:1500;background:#f3eef2;display:flex;flex-direction:column;font-family:Barlow,system-ui,sans-serif;color:var(--ink)}
   #d3[hidden]{display:none}
@@ -685,7 +749,7 @@
   </aside>
   <div id="map"></div>
   <div id="wissel" hidden><div class="merk"><small>Databank · prototype</small>Regiokaart Midden-Holland</div>
-    <button type="button" class="tourknop btnTour" title="Rondleiding" aria-label="Rondleiding">?</button><div class="seg2" role="group" aria-label="Weergave"><button type="button" data-w="paneel" class="aan" aria-pressed="true">Paneel</button><button type="button" data-w="data" aria-pressed="false">Data</button></div><button type="button" id="btnTekenen" class="tekenknop" aria-pressed="false" title="Tekenen op de kaart: pen, tekst, rechthoek, cirkel en pijl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>Tekenen</button><button type="button" id="btnVergelijken" class="tekenknop" title="Twee gebieden naast elkaar vergelijken, met grafieken"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/></svg>Vergelijken</button><button type="button" id="btn3D" class="tekenknop" title="De buurten als blokken in 3D: hoogte = waarde van het thema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>3D</button><button type="button" id="btnPresenteren" class="tekenknop" title="Presentatie maken en schermvullend tonen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8M10 8l4 2-4 2z"/></svg>Presenteren</button><div id="tekenBalk" class="tekenbalk" role="toolbar" aria-label="Tekengereedschap" aria-hidden="true"></div></div>
+    <button type="button" class="tourknop btnTour" title="Rondleiding" aria-label="Rondleiding">?</button><div class="seg2" role="group" aria-label="Weergave"><button type="button" data-w="paneel" class="aan" aria-pressed="true">Paneel</button><button type="button" data-w="data" aria-pressed="false">Data</button></div><button type="button" id="btnTekenen" class="tekenknop" aria-pressed="false" title="Tekenen op de kaart: pen, tekst, rechthoek, cirkel en pijl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>Tekenen</button><button type="button" id="btnVergelijken" class="tekenknop" title="Twee gebieden naast elkaar vergelijken, met grafieken"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/></svg>Vergelijken</button><button type="button" id="btnBW" class="tekenknop" title="Brede welvaart: regiothermometer en thermostaat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a2 2 0 014 0v9.5a4 4 0 11-4 0z"/><path d="M12 9v7"/></svg>Brede welvaart</button><button type="button" id="btn3D" class="tekenknop" title="De buurten als blokken in 3D: hoogte = waarde van het thema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>3D</button><button type="button" id="btnPresenteren" class="tekenknop" title="Presentatie maken en schermvullend tonen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8M10 8l4 2-4 2z"/></svg>Presenteren</button><div id="tekenBalk" class="tekenbalk" role="toolbar" aria-label="Tekengereedschap" aria-hidden="true"></div></div>
   <div id="presPaneel" role="dialog" aria-labelledby="presKopTitel" hidden>
     <div class="pres-kop"><h3 id="presKopTitel">Presentatie</h3><button type="button" class="tk-knop" id="presSluit" aria-label="Sluiten">✕</button></div>
     <p class="pres-uitleg">Zet de kaart zoals je hem wilt laten zien (thema, lagen, uitsnede, tekeningen) en voeg hem toe als dia. Geef elke dia een titel. Met ▶ toon je ze schermvullend; blader met de pijltjestoetsen, stop met Esc.</p>
@@ -700,6 +764,13 @@
     <div class="vg-balk"><h2 id="vglTitel">Vergelijken</h2><span class="vg-sub">Kies links en rechts een gemeente, de regio, Zuid-Holland of Nederland</span><p id="vglDl" class="note" aria-live="polite"></p><button type="button" class="tk-knop" id="vglSluit" title="Sluiten (Esc)" aria-label="Vergelijken sluiten">✕</button></div>
     <div id="vglThemas" class="vg-themas" aria-label="Thema’s in de vergelijking"></div>
     <div id="vglInhoud"></div>
+  </div>
+  <div id="bw" role="dialog" aria-labelledby="bwTitel" hidden>
+    <div class="bw-balk"><h2 id="bwTitel">Brede welvaart</h2>
+      <div class="bw-tabs" role="tablist"><button type="button" role="tab" data-tab="thermometer">Thermometer</button><button type="button" role="tab" data-tab="thermostaat">Thermostaat</button><button type="button" role="tab" data-tab="uitleg">Hoe we scoren</button></div>
+      <div class="bw-pdf"><button type="button" class="btn" id="bwPdfRegio">PDF regio (A4)</button><select id="bwGm" aria-label="Gemeente voor de PDF"></select><button type="button" class="btn licht" id="bwPdfGm">PDF gemeente</button><p id="bwDl" class="note" aria-live="polite"></p></div>
+      <button type="button" class="tk-knop" id="bwSluit" title="Sluiten (Esc)" aria-label="Brede welvaart sluiten" style="font-size:20px;width:36px;height:36px">✕</button></div>
+    <div id="bwInhoud"></div>
   </div>
   <div id="d3" role="dialog" aria-labelledby="d3Titel" hidden>
     <div class="d3-balk"><h2 id="d3Titel">3D</h2>
@@ -906,6 +977,12 @@ const EXTRA2 = {
     ggdT('ggd_geluid','Ernstige geluidhinder door wegverkeer','Aandeel volwassenen met ernstige geluidhinder door wegverkeer.'),
     ggdT('ggd_woonomgeving','Tevreden met de woonomgeving','Aandeel volwassenen dat tevreden is met de woonomgeving.'),
     ggdT('ggd_verkoeling','Kan binnen goed verkoeling vinden','Aandeel volwassenen dat bij hitte binnen goed verkoeling kan vinden.'),
+    ggdT('ggd_langdurig','Langdurige aandoening','Aandeel volwassenen met één of meer langdurige aandoeningen.'),
+    ggdT('ggd_regie','Regie over het eigen leven','Aandeel volwassenen dat matig tot veel regie over het eigen leven ervaart.'),
+    ggdT('ggd_veerkracht','Hoge veerkracht','Aandeel volwassenen met een hoge veerkracht.'),
+    ggdT('ggd_steun','Krijgt steun van anderen','Aandeel volwassenen dat steun krijgt van anderen.'),
+    ggdT('ggd_woning','Tevreden met de woning','Aandeel volwassenen dat tevreden is met de eigen woning.'),
+    ggdT('ggd_groen','Tevreden met het groen','Aandeel volwassenen dat tevreden is met het groen in de omgeving.'),
     polT('pol_totaal','Misdrijven (totaal)','Geregistreerde misdrijven'),
     polT('pol_inbraak','Woninginbraken','Diefstal en inbraak uit woningen'),
     polT('pol_fiets','Fietsdiefstal','Diefstal van fietsen, brom- en snorfietsen'),
@@ -3323,6 +3400,211 @@ $('d3Boven').addEventListener('click', ()=>{ d3ZetDraai(false); d3Camera('boven'
 $('d3Bg').addEventListener('change', e=>d3Achtergrond(e.target.checked));
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('d3').hidden && !window.presActief) sluit3D(); });
 if(MOBIEL) $('btn3D').hidden=true;
+
+/* ---------- Brede welvaart: regiothermometer (data/bw.json, scripts/brede_welvaart.py) en thermostaat ----------
+   Thermometer = hoe het inwoners vergaat: 11 dimensies (RaboResearch), score 0–5 t.o.v. alle Nederlandse gemeenten.
+   Thermostaat = hoe ver de besluiten van de regio per programma zijn (eigen invoer, in deze browser of uit data/thermostaat.json). */
+const BW = DATA.bw, BW_VOLG = ['regio','GM0513','GM0627','GM1892','GM1901','GM1931'];
+const BW_NAAM = g => g==='regio' ? 'Regio' : g==='zh' ? 'Zuid-Holland' : g==='nl' ? 'Nederland' : GM[g];
+const BW_KLEUR = {basis:'#c8553d', functioneel:'#e8c87a', excellent:'#5b0065'};
+const BW_TREDEN = ['basis','functioneel','excellent'];
+const bwTrede = s => s==null ? null : s<2 ? 'basis' : s<4 ? 'functioneel' : 'excellent';
+const bwFmt = (key, v) => { if(v==null) return '–'; const t=THEMES.find(x=>x.key===key); return t ? t.fmt(v) : nl1.format(v); };
+const bwNum = s => s==null ? '–' : nl1.format(s);
+function bwVakjes(s, klein){
+  const tr=bwTrede(s);
+  return `<span class="bw-vak${klein?' klein':''}" title="${s==null?'geen gegevens':`${tr} (score ${bwNum(s)} van 5)`}">${BW_TREDEN.map(x=>`<i style="${x===tr?`background:${BW_KLEUR[x]};border-color:${BW_KLEUR[x]}`:''}"></i>`).join('')}</span>${klein?'':`<b class="bw-sc">${bwNum(s)}</b>`}`;
+}
+const bwRichting = r => r>0 ? '<span class="bw-r" title="Hoger is gunstiger">▲ hoger is gunstiger</span>' : r<0 ? '<span class="bw-r" title="Lager is gunstiger">▼ lager is gunstiger</span>' : '<span class="bw-r">context, niet gescoord</span>';
+let bwOpen = null, bwTab = 'thermometer';
+
+// ---- thermostaat: besluiten per programma ----
+const TS_OPSLAG='regiokaart-thermostaat-v1';
+const TS_TREDEN=['Bestaat niet','Alleen genoemd','Onderzocht','Bestuurlijk besloten','Gefinancierd en in uitvoering','Werkzaam: effect zichtbaar'];
+let tsData;
+try{ tsData=JSON.parse(localStorage.getItem(TS_OPSLAG)||'null'); }catch(e){ tsData=null; }
+if(!tsData || !tsData.programmas) tsData = JSON.parse(JSON.stringify(DATA.thermostaat || {programmas:{}}));
+for(const p of PROGRAMMAS) tsData.programmas[p.k] = tsData.programmas[p.k] || [];
+const tsBewaar = () => { tsData.bijgewerkt=new Date().toISOString().slice(0,10); try{ localStorage.setItem(TS_OPSLAG, JSON.stringify(tsData)); }catch(e){} };
+function tsStrip(){
+  return `<div class="ts-strip">${PROGRAMMAS.map(p=>{ const b=tsData.programmas[p.k];
+    return `<div><div class="ts-p">${esc(p.kort)}</div><div class="ts-v">${b.length ? b.map(x=>`<i title="${esc(x.naam||'besluit')}: ${TS_TREDEN[x.trede]}" style="background:${BW_KLEUR[bwTrede(x.trede)]}"></i>`).join('') : '<span>nog niets ingevuld</span>'}</div></div>`; }).join('')}</div>`;
+}
+
+// ---- thermometer ----
+function bwThermometer(){
+  const kop = BW_VOLG.map(g=>`<th>${BW_NAAM(g)}</th>`).join('');
+  let rijen='';
+  for(const d of BW.dimensies){
+    const open = bwOpen===d.k;
+    rijen += `<tr class="bw-dim${open?' open':''}" data-d="${d.k}" tabindex="0" aria-expanded="${open}"><th scope="row"><span class="bw-pijl">${open?'▾':'▸'}</span>${esc(d.naam)}</th>
+      ${BW_VOLG.map(g=>`<td>${bwVakjes(d.per_gebied[g].score)}</td>`).join('')}
+      <td class="bw-trend" title="De trend volgt bij de tweede meting">nulmeting</td><td class="bw-dek">${d.per_gebied.regio.dekking}%</td></tr>`;
+    if(open) rijen += `<tr class="bw-detail"><td colspan="${BW_VOLG.length+3}">${bwDetail(d)}</td></tr>`;
+  }
+  const V=BW.vooruitblik, vr = (lbl, wf, nl) => `<tr><th scope="row">${lbl}</th>${BW_VOLG.map(g=>`<td>${wf(g)}</td>`).join('')}<td colspan="2" class="bw-nl">NL ${nl}</td></tr>`;
+  const groei = v => v==null?'–':teken(v,nl1v)+'%';
+  return `<div class="bw-legenda">${BW_TREDEN.map(t=>`<span><i style="background:${BW_KLEUR[t]}"></i>${t[0].toUpperCase()+t.slice(1)} <small>${t==='basis'?'0–2: duidelijk ongunstiger dan gemiddeld':t==='functioneel'?'2–4: rond het gemiddelde':'4–5: duidelijk gunstiger'}</small></span>`).join('')}<span class="bw-ref">Vergeleken met ${esc(BW.referentie)}. Klik op een dimensie voor de onderbouwing.</span></div>
+    <div class="bw-tabelvak"><table class="bw-tabel"><thead><tr><th>Dimensie</th>${kop}<th>Trend</th><th title="Deel van de bedoelde gegevens dat er al is (regio)">Dekking</th></tr></thead><tbody>${rijen}</tbody></table></div>
+    <h3 class="bw-h3">Vooruitblik <small>raming en context, geen score</small></h3>
+    <div class="bw-tabelvak"><table class="bw-tabel bw-vooruit"><thead><tr><th></th>${kop}<th colspan="2"></th></tr></thead><tbody>
+      ${vr('Bevolkingsgroei 2024–2040 (prognose)', g=>groei(V.groei[g]), groei(V.groei.nl))}
+      ${V.indicatoren.map(i=>vr(i.label+` <span class="bw-jaar">${i.jaar||''}</span>`, g=>bwFmt(i.key,i.waarden[g]), bwFmt(i.key,i.waarden.nl))).join('')}
+    </tbody></table></div>
+    <h3 class="bw-h3">Thermostaat <small>besluiten per programma, ingevuld door de regio</small></h3>${tsStrip()}
+    <p class="bw-noot">Geen totaalcijfer: de weging tussen dimensies is een bestuurlijke keuze. Elke score is het gemiddelde van de indicatoren eronder; onbekend telt niet als nul maar verlaagt de dekking. Versie ${BW.versie}, berekend ${dmy(BW.gemaakt)}.</p>`;
+}
+function bwDetail(d){
+  const rij = i => `<tr><td class="bw-il">${esc(i.label)} <span class="bw-jaar">${i.jaar||''}</span><br>${bwRichting(i.richting)}${i.noot?`<br><span class="bw-r">${esc(i.noot)}</span>`:''}</td>
+    ${BW_VOLG.map(g=>`<td><span class="bw-w">${bwFmt(i.key,i.waarden[g])}</span>${i.richting?bwVakjes(i.scores[g],true):''}</td>`).join('')}
+    <td class="bw-nl">NL ${bwFmt(i.key,i.waarden.nl)}<br><span class="bw-r">mediaan gemeente ${bwFmt(i.key,i.mediaan)}</span></td>
+    <td>${THEMES.some(t=>t.key===i.key)?`<button type="button" class="bw-kaart" data-k="${i.key}">Op de kaart</button>`:''}</td></tr>`;
+  return `<table class="bw-ind"><tbody>${d.indicatoren.map(rij).join('')}</tbody></table>
+    ${d.ontbreekt.length?`<p class="bw-mist"><b>Ontbreekt nog:</b> ${d.ontbreekt.map(esc).join(' · ')}</p>`:''}
+    <p class="bw-r">Bronnen: ${[...new Set(d.indicatoren.map(i=>i.bron))].map(esc).join('; ')}. Drempels: zes even grote groepen van alle Nederlandse gemeenten.</p>`;
+}
+
+// ---- thermostaat invullen ----
+function bwThermostaat(){
+  return `<p class="bw-intro">Hier houdt de regio bij hoe ver de besluiten per programma zijn. Zo staat elk jaar naast de thermometer of beweging in de besluiten terugkomt bij de inwoners. Wat je invult, staat alleen in deze browser. Bewaar het als bestand om het te delen of om het voor iedereen op de kaart te laten zetten.</p>
+    ${tsStrip()}
+    ${PROGRAMMAS.map(p=>`<section class="ts-prog"><h3>${esc(p.naam)}</h3>
+      ${tsData.programmas[p.k].map((b,i)=>`<div class="ts-rij"><input type="text" value="${esc(b.naam||'')}" placeholder="Naam van het besluit of de maatregel" data-p="${p.k}" data-i="${i}" data-v="naam" aria-label="Besluit">
+        <select data-p="${p.k}" data-i="${i}" data-v="trede" aria-label="Trede">${TS_TREDEN.map((t,j)=>`<option value="${j}" ${j===b.trede?'selected':''}>${j} · ${t}</option>`).join('')}</select>
+        <span class="ts-kleur" style="background:${BW_KLEUR[bwTrede(b.trede)]}"></span><button type="button" class="tk-knop" data-weg="${p.k}:${i}" aria-label="Besluit verwijderen">✕</button></div>`).join('')}
+      <button type="button" class="d3-knop" data-nieuw="${p.k}">+ Besluit</button></section>`).join('')}
+    <div class="ts-acties"><button type="button" class="btn" id="tsBewaarBestand">Bewaar als bestand</button><label class="btn licht" for="tsLaad">Bestand laden</label><input type="file" id="tsLaad" accept=".json,application/json" hidden></div>
+    <p class="bw-r">Treden: 0–1 basis (bestaat niet of alleen genoemd) · 2–3 functioneel (onderzocht, bestuurlijk besloten) · 4–5 excellent (gefinancierd, in uitvoering en werkzaam).</p>`;
+}
+function bwUitleg(){
+  return `<div class="bw-uitleg"><h3 class="bw-h3">Hoe we scoren</h3>
+    <table class="bw-ind"><thead><tr><th>Trede</th><th>Score</th><th>Thermometer: hoe het inwoners vergaat</th><th>Thermostaat: besluiten per programma</th></tr></thead><tbody>
+    <tr><td><i class="bw-blok" style="background:${BW_KLEUR.basis}"></i>Basis</td><td>0–2</td><td>Duidelijk ongunstiger dan de meeste gemeenten</td><td>Bestaat niet, of is alleen genoemd</td></tr>
+    <tr><td><i class="bw-blok" style="background:${BW_KLEUR.functioneel}"></i>Functioneel</td><td>2–4</td><td>Rond het midden van Nederland</td><td>Onderzocht en bestuurlijk besloten</td></tr>
+    <tr><td><i class="bw-blok" style="background:${BW_KLEUR.excellent}"></i>Excellent</td><td>4–5</td><td>Duidelijk gunstiger dan de meeste gemeenten</td><td>Gefinancierd, in uitvoering en werkzaam</td></tr></tbody></table>
+    <p><b>De drempels.</b> Voor elke indicator zijn alle Nederlandse gemeenten in zes even grote groepen verdeeld. Valt een gemeente in de gunstigste groep, dan scoort die 5; in de ongunstigste 0. Bij indicatoren waar lager gunstiger is (armoede, misdrijven, eenzaamheid) telt het andersom. De regio als geheel wordt met dezelfde drempels gemeten. Een dimensie krijgt het gemiddelde van haar indicatoren.</p>
+    <p><b>Drie vaste regels.</b></p><ol>${BW.regels.map(r=>`<li>${esc(r)}</li>`).join('')}</ol>
+    <p><b>De dimensies</b> zijn de elf van RaboResearch, zodat de regio één taal houdt. RaboResearch meet per COROP-regio; deze thermometer gaat door tot de vijf gemeenten, en via de kaart tot de buurt.</p>
+    <p><b>Kanttekeningen.</b> Gezondheid, welzijn, betrokkenheid en sociale contacten komen uit de Gezondheidsmonitor: schattingen op basis van een enquête. De jaren verschillen per indicator (2023 tot 2025) en staan overal bij. Bij Werk-privébalans gebruiken we de afstand tot station en snelweg als benadering, tot er cijfers over pendel en reistijd naar banen zijn. De richting van ‘Nieuwbouw’ (meer is gunstiger) is een keuze die past bij de groeiambitie van de regio.</p>
+    <p class="bw-r">Versie ${BW.versie} · berekend ${dmy(BW.gemaakt)} · script scripts/brede_welvaart.py</p></div>`;
+}
+function renderBw(){
+  document.querySelectorAll('#bw .bw-tabs button').forEach(b=>{ const aan=b.dataset.tab===bwTab; b.classList.toggle('aan',aan); b.setAttribute('aria-selected',aan); });
+  const I=$('bwInhoud');
+  I.innerHTML = bwTab==='thermometer' ? bwThermometer() : bwTab==='thermostaat' ? bwThermostaat() : bwUitleg();
+  I.querySelectorAll('tr.bw-dim').forEach(r=>{ const kies=()=>{ bwOpen = bwOpen===r.dataset.d ? null : r.dataset.d; renderBw(); };
+    r.onclick=kies; r.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); kies(); } }; });
+  I.querySelectorAll('.bw-kaart').forEach(b=>b.onclick=e=>{ e.stopPropagation(); sluitBw(); $('theme').value=b.dataset.k; $('theme').dispatchEvent(new Event('change')); if(!$('lyrFill').checked){ $('lyrFill').checked=true; $('lyrFill').dispatchEvent(new Event('change')); } });
+  I.querySelectorAll('[data-v]').forEach(el=>el.onchange=el.oninput=()=>{ const b=tsData.programmas[el.dataset.p][+el.dataset.i]; b[el.dataset.v] = el.dataset.v==='trede' ? +el.value : el.value; tsBewaar(); if(el.dataset.v==='trede') renderBw(); });
+  I.querySelectorAll('[data-nieuw]').forEach(b=>b.onclick=()=>{ tsData.programmas[b.dataset.nieuw].push({naam:'', trede:0}); tsBewaar(); renderBw(); });
+  I.querySelectorAll('[data-weg]').forEach(b=>b.onclick=()=>{ const [p,i]=b.dataset.weg.split(':'); tsData.programmas[p].splice(+i,1); tsBewaar(); renderBw(); });
+  if($('tsBewaarBestand')) $('tsBewaarBestand').onclick=()=>{ dlTarget='bwDl'; saveFile(`thermostaat-regio-midden-holland-${stamp()}.json`, new Blob([JSON.stringify(tsData,null,1)],{type:'application/json'})); };
+  if($('tsLaad')) $('tsLaad').onchange=e=>{ const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ const d=JSON.parse(t); if(!d.programmas) throw 0; tsData=d; for(const p of PROGRAMMAS) tsData.programmas[p.k]=tsData.programmas[p.k]||[]; tsBewaar(); renderBw(); $('bwDl').textContent='Thermostaat geladen.'; }).catch(()=>{ $('bwDl').textContent='Dit bestand is geen thermostaat van de regiokaart.'; }); };
+}
+function openBw(){ $('bw').hidden=false; document.body.classList.add('bw-open'); renderBw(); $('bwInhoud').scrollTop=0; }
+function sluitBw(){ $('bw').hidden=true; document.body.classList.remove('bw-open'); }
+$('btnBW').addEventListener('click', openBw);
+$('bwSluit').addEventListener('click', sluitBw);
+document.querySelectorAll('#bw .bw-tabs button').forEach(b=>b.addEventListener('click', ()=>{ bwTab=b.dataset.tab; renderBw(); }));
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('bw').hidden && !window.presActief) sluitBw(); });
+$('bwGm').innerHTML = Object.entries(GM).map(([c,n])=>`<option value="${c}">${n}</option>`).join('');
+if(MOBIEL) $('btnBW').hidden=true;
+
+// ---- PDF ----
+function bwPdfVakjes(doc, x, y, s, w=3.2, h=3.2){
+  const tr=bwTrede(s);
+  BW_TREDEN.forEach((t,i)=>{ const xx=x+i*(w+0.6);
+    if(t===tr){ doc.setFillColor(...hex(BW_KLEUR[t])); doc.rect(xx,y,w,h,'F'); }
+    else { doc.setDrawColor(...hex('#cfc3cc')); doc.setLineWidth(0.2); doc.rect(xx,y,w,h,'S'); } });
+}
+function bwPdfVoet(doc, W, tekst){
+  doc.setFontSize(6.8); doc.setTextColor(...hex(MUTED)); doc.setFont('helvetica','normal');
+  doc.text(doc.splitTextToSize(pdfText(tekst), W-20), 10, 284);
+}
+async function bwPdfRegio(){
+  dlTarget='bwDl'; dlStatus('Rapportage regio wordt gemaakt…');
+  const { jsPDF } = window.jspdf, doc=new jsPDF({unit:'mm',format:'a4'}), W=210;
+  pdfHeader(doc, W, 'Regiothermometer brede welvaart', `Regio Midden-Holland · nulmeting · versie ${BW.versie} · ${today()}`);
+  let y=32; doc.setFontSize(8.5); doc.setTextColor(...hex(INK));
+  doc.text(doc.splitTextToSize(pdfText(`Hoe het inwoners vergaat op de elf dimensies van brede welvaart (RaboResearch), voor de regio en de vijf gemeenten. Elke score (0–5) vergelijkt met ${BW.referentie}: basis 0–2, functioneel 2–4, excellent 4–5. Geen totaalcijfer: de weging is een bestuurlijke keuze.`), W-20), 10, y); y+=12;
+  const c0=10, cw=[47,21.5,21.5,21.5,21.5,21.5,21.5], cx=[c0]; for(let i=1;i<cw.length;i++) cx.push(cx[i-1]+cw[i-1]); const dekX=cx[6]+cw[6]+1;
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...hex(MUTED));
+  doc.text('DIMENSIE', c0, y); BW_VOLG.forEach((g,i)=>doc.text(pdfText(BW_NAAM(g)).replace('Bodegraven-Reeuwijk','Bodegraven-R.'), cx[i+1], y)); doc.text('DEKKING', dekX, y);
+  y+=2; doc.setDrawColor(...hex('#e4d9e2')); doc.line(10,y,W-10,y); y+=2;
+  for(const d of BW.dimensies){
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...hex(INK)); doc.text(pdfText(d.naam), c0, y+3.4, {maxWidth:cw[0]-1});
+    BW_VOLG.forEach((g,i)=>{ const s=d.per_gebied[g].score; bwPdfVakjes(doc, cx[i+1], y+0.8, s); doc.setFontSize(8); doc.setTextColor(...hex(INK)); doc.text(bwNum(s), cx[i+1]+12.4, y+3.4); });
+    doc.setTextColor(...hex(MUTED)); doc.text(d.per_gebied.regio.dekking+'%', dekX, y+3.4);
+    y+=6.6; doc.setDrawColor(...hex('#f0e9ee')); doc.line(10,y-1.4,W-10,y-1.4);
+  }
+  y+=3; doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...hex(PURPLE)); doc.text('Vooruitblik (raming)', 10, y); y+=5;
+  const V=BW.vooruitblik, rij=(lbl,f,nl)=>{ doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...hex(INK)); doc.text(pdfText(lbl),c0,y); BW_VOLG.forEach((g,i)=>doc.text(pdfText(f(g)), cx[i+1], y)); doc.setTextColor(...hex(MUTED)); doc.text(pdfText('NL '+nl), dekX, y); y+=4.6; };
+  const gr=v=>v==null?'–':teken(v,nl1v)+'%';
+  rij('Bevolkingsgroei 2024–2040', g=>gr(V.groei[g]), gr(V.groei.nl));
+  V.indicatoren.forEach(i=>rij(i.label, g=>bwFmt(i.key,i.waarden[g]), bwFmt(i.key,i.waarden.nl)));
+  y+=3; doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...hex(PURPLE)); doc.text('Thermostaat: besluiten per programma', 10, y); y+=5;
+  const pw=(W-20)/PROGRAMMAS.length;
+  PROGRAMMAS.forEach((p,i)=>{ const x=10+i*pw, b=tsData.programmas[p.k]; doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...hex(INK));
+    doc.text(doc.splitTextToSize(pdfText(p.kort), pw-3), x, y);
+    if(!b.length){ doc.setTextColor(...hex(MUTED)); doc.text('nog niets ingevuld', x, y+9); }
+    b.slice(0,12).forEach((x2,j)=>{ doc.setFillColor(...hex(BW_KLEUR[bwTrede(x2.trede)])); doc.rect(x+j*4.2, y+6.5, 3.4, 3.4, 'F'); }); });
+  y+=16;
+  doc.setFontSize(7.5); doc.setTextColor(...hex(INK)); doc.setFont('helvetica','normal');
+  doc.text(doc.splitTextToSize(pdfText('Vaste regels: '+BW.regels.join(' ')), W-20), 10, y);
+  bwPdfVoet(doc, W, `Bronnen: CBS Kerncijfers Wijken en Buurten ${KWB_JAREN}; CBS sociaal domein en inkomen (2023–2024); GGD'en en RIVM, Gezondheidsmonitor 2024 (schattingen, 18+); Politie (via CBS) 2025; CBS/PBL Regionale prognose 2023–2050. Trend volgt bij de tweede meting. Onderbouwing per indicator: Regiokaart Midden-Holland, knop Brede welvaart.`);
+  await saveFile(`brede-welvaart-regio-midden-holland-${stamp()}.pdf`, doc.output('blob'));
+}
+async function bwPdfGemeente(){
+  const code=$('bwGm').value, naam=GM[code]; dlTarget='bwDl'; dlStatus('Rapportage '+naam+' wordt gemaakt…');
+  const { jsPDF } = window.jspdf, doc=new jsPDF({unit:'mm',format:'a4'}), W=210;
+  pdfHeader(doc, W, 'Brede welvaart '+naam, `Regiothermometer · nulmeting · versie ${BW.versie} · ${today()}`);
+  let y=31; const cx=[10, 96, 122, 148, 172];
+  const kop=()=>{ doc.setFont('helvetica','bold'); doc.setFontSize(7.2); doc.setTextColor(...hex(MUTED)); doc.text('DIMENSIE EN INDICATOR',cx[0],y); doc.text(pdfText(naam.toUpperCase()).replace('BODEGRAVEN-REEUWIJK','BODEGR.-REEUWIJK'),cx[1],y); doc.text('REGIO',cx[2],y); doc.text('NEDERLAND',cx[3],y); doc.text('SCORE',cx[4],y); y+=2; doc.setDrawColor(...hex('#e4d9e2')); doc.line(10,y,W-10,y); y+=3.4; };
+  kop();
+  for(const d of BW.dimensies){
+    doc.setFillColor(...hex('#f6eaf5')); doc.rect(10,y-3.2,W-20,5,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.6); doc.setTextColor(...hex(PURPLE)); doc.text(pdfText(d.naam), cx[0]+1, y);
+    const s=d.per_gebied[code].score; bwPdfVakjes(doc, cx[4], y-2.6, s, 2.8, 2.8); doc.text(bwNum(s), cx[4]+10.4, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...hex(MUTED)); doc.text(pdfText('regio '+bwNum(d.per_gebied.regio.score)+' · dekking '+d.per_gebied[code].dekking+'%'), cx[2], y);
+    y+=4.6;
+    for(const i of d.indicatoren){
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.6); doc.setTextColor(...hex(INK));
+      doc.text(pdfText(i.label+(i.jaar?' ('+i.jaar+')':'')+(i.richting?'':' – context')), cx[0]+3, y, {maxWidth:84});
+      doc.text(pdfText(bwFmt(i.key,i.waarden[code])), cx[1], y); doc.setTextColor(...hex(MUTED)); doc.text(pdfText(bwFmt(i.key,i.waarden.regio)), cx[2], y); doc.text(pdfText(bwFmt(i.key,i.waarden.nl)), cx[3], y);
+      if(i.richting) bwPdfVakjes(doc, cx[4], y-2.3, i.scores[code], 2.4, 2.4);
+      y+=3.9;
+    }
+    if(d.ontbreekt.length){ doc.setFontSize(6.6); doc.setTextColor(...hex(MUTED)); doc.text(pdfText('Ontbreekt nog: '+d.ontbreekt.join(', ')), cx[0]+3, y, {maxWidth:W-26}); y+=3.6; }
+    y+=1.2;
+    if(y>270 && d!==BW.dimensies[BW.dimensies.length-1]){ bwPdfVoet(doc,W,'Score 0–5 per indicator t.o.v. '+BW.referentie+'; per dimensie het gemiddelde. Basis 0–2, functioneel 2–4, excellent 4–5.'); doc.addPage(); y=18; kop(); }
+  }
+  bwPdfVoet(doc, W, `Score 0–5 per indicator t.o.v. ${BW.referentie}; per dimensie het gemiddelde. Basis 0–2, functioneel 2–4, excellent 4–5. Geen totaalcijfer. Bronnen: CBS, GGD/RIVM (schattingen), Politie. Vervolg: buurtbijlage.`);
+  // buurtbijlage
+  doc.addPage(); pdfHeader(doc, W, 'Buurtbijlage '+naam, 'Brede welvaart per buurt · kleur = dezelfde drempels als de gemeenten (indicatief)');
+  const BI=[['soc_inkomen_inw','Inkomen p.i.'],['soc_laag_inkomen_pct','Laag inkomen'],['ggd_gezond','Gezond'],['ggd_regie','Regie'],['pol_totaal','Misdr./1.000'],['ggd_vrijwilliger','Vrijwilligers'],['ggd_eenzaam','Eenzaam'],['ggd_woning','Tevr. woning']];
+  const kort=(k,v)=>bwFmt(k,v).replace(' per 1.000','');
+  const pas=(t,max)=>{ doc.setFontSize(6.8); if(doc.getTextWidth(t)<=max) return t; while(t.length>4 && doc.getTextWidth(t+'…')>max) t=t.slice(0,-1); return t+'…'; };
+  const ind=Object.fromEntries(BW.dimensies.flatMap(d=>d.indicatoren).map(i=>[i.key,i]));
+  const sc=(i,v)=>{ if(v==null||!i||!i.drempels) return null; const k=i.drempels.filter(c=>v>c).length; return i.richting>0?k:5-k; };
+  const fs=gmFeats(code).slice().sort((a,b)=>nameOf(a).localeCompare(nameOf(b),'nl'));
+  y=32; const x0=10, bw0=56, cwid=(W-20-bw0)/BI.length;
+  const hdr=()=>{ doc.setFont('helvetica','bold'); doc.setFontSize(6.8); doc.setTextColor(...hex(MUTED)); doc.text('BUURT',x0,y); BI.forEach(([k,l],j)=>doc.text(pdfText(l),x0+bw0+j*cwid,y)); y+=1.6; doc.setDrawColor(...hex('#e4d9e2')); doc.line(10,y,W-10,y); y+=3.2; };
+  hdr();
+  for(const f of fs){
+    if(y>276){ doc.addPage(); y=18; hdr(); }
+    const p=f.properties, inw=clean(p.aantal_inwoners);
+    doc.setFont('helvetica','normal'); doc.setFontSize(6.8); doc.setTextColor(...hex(INK));
+    doc.text(pas(pdfText(nameOf(f)),bw0-5)+(inw!=null&&inw<100?' *':''), x0, y);
+    BI.forEach(([k],j)=>{ const v=cleanK(p,k), s=sc(ind[k],v), xx=x0+bw0+j*cwid;
+      if(s!=null){ doc.setFillColor(...hex(BW_KLEUR[bwTrede(s)])); doc.rect(xx-0.8,y-2.6,cwid-1.2,3.4,'F'); }
+      doc.setTextColor(...hex(s!=null && bwTrede(s)!=='functioneel' ? '#ffffff' : INK)); doc.text(pdfText(kort(k,v)), xx, y); });
+    y+=3.9;
+  }
+  bwPdfVoet(doc, W, 'Kleur per cel: dezelfde zes groepen als bij de gemeenten (basis rood, functioneel geel, excellent paars). Buurtcijfers zijn kleiner en onzekerder; * = minder dan 100 inwoners. Gezondheid, regie, eenzaamheid en vrijwilligers: GGD/RIVM-schattingen 2024; inkomen: CBS 2023; misdrijven: Politie 2025, per 1.000 inwoners. Een streepje = geen gegevens of geheim.');
+  await saveFile(`brede-welvaart-${slug(naam)}-${stamp()}.pdf`, doc.output('blob'));
+}
+$('bwPdfRegio').addEventListener('click', ()=>bwPdfRegio().catch(e=>{ console.error(e); dlStatus('Maken van de PDF is mislukt.'); }));
+$('bwPdfGm').addEventListener('click', ()=>bwPdfGemeente().catch(e=>{ console.error(e); dlStatus('Maken van de PDF is mislukt.'); }));
 
 $('presLogo').src=DATA.logo;
 /* ---------- Deelbare link: thema, lagen, achtergrond en uitsnede staan in het webadres (#...) ---------- */

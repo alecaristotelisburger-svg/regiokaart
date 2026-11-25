@@ -146,6 +146,7 @@ def sociaal():
     ref = {'zh': agg([v for c, v in gm_rij.items() if c in zh]), 'nl': agg(gm_rij.values())}
     GEB = ['GM0513', 'GM1892', 'GM1901', 'GM1931', 'GM0627']
     gebied = {**{c: agg([gm_rij[c]]) for c in GEB if c in gm_rij}, 'regio': agg([gm_rij[c] for c in GEB if c in gm_rij])}
+    alle_gemeenten('sociaal', {c: agg([r]) for c, r in gm_rij.items()})
     schrijf('sociaal', {'gebied': gebied, 'bron': f'CBS Kerncijfers wijken en buurten 2024 ({SOC24}); inkomen 2023 ({SOC23})', 'opgehaald': d['opgehaald'], 'buurt': buurt, 'ref': ref,
                         'aantal_zh_gemeenten': len(zh)})
     print('   buurten met Wmo:', sum('soc_wmo_per_1000' in b for b in buurt.values()), '| ZH-gemeenten', len(zh), '| ref', {k: round(v, 1) for k, v in ref['nl'].items() if v})
@@ -277,9 +278,16 @@ def agg_rijen(rijen, regels):
     return out
 
 
+def alle_gemeenten(naam, gm):
+    """waarden van alle gemeenten van Nederland, voor de drempels van de brede-welvaartsthermometer (niet in de pagina)"""
+    os.makedirs(P('data', 'afgeleid'), exist_ok=True)
+    json.dump(gm, open(P('data', 'afgeleid', naam + '_gemeenten.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+
+
 def met_ref(naam, buurt, gm, regels, extra):
     zh = zh_gemeenten()
     ref = {'zh': agg_rijen([v for c, v in gm.items() if c in zh], regels), 'nl': agg_rijen(list(gm.values()), regels)}
+    alle_gemeenten(naam, gm)
     GEB = ['GM0513', 'GM1892', 'GM1901', 'GM1931', 'GM0627']   # de vijf gemeenten en de regio uit de officiële gemeentecijfers (zelfde regels als ZH en NL)
     extra = dict(extra, gebied={**{c: agg_rijen([gm[c]], regels) for c in GEB if c in gm}, 'regio': agg_rijen([gm[c] for c in GEB if c in gm], regels)})
     buurt = {c: {k: v for k, v in x.items() if v is not None} for c, x in buurt.items() if c in BP}
@@ -291,7 +299,10 @@ def met_ref(naam, buurt, gm, regels, extra):
 GGD = {'GoedErvarenGezondheid_4': 'ggd_gezond', 'HoogRisicoAngststoornisOfDepressie_14': 'ggd_angst', 'HeelVeelStressAfg4Weken_17': 'ggd_stress',
        'Eenzaam_25': 'ggd_eenzaam', 'SterkEenzaam_26': 'ggd_sterk_eenzaam', 'Mantelzorger_30': 'ggd_mantelzorg', 'Vrijwilligerswerk_31': 'ggd_vrijwilliger',
        'MoeiteMetRondkomen_32': 'ggd_rondkomen', 'Overgewicht_33': 'ggd_overgewicht', 'RooktTabak_35': 'ggd_roken', 'VoldoetAanDeBeweegrichtlijn_40': 'ggd_bewegen',
-       'ErnstigeGeluidhinderWegverkeer_45': 'ggd_geluid', 'TevredenMetDeWoonomgeving_57': 'ggd_woonomgeving', 'KanGoedVerkoelingVindenBinnen_59': 'ggd_verkoeling'}
+       'ErnstigeGeluidhinderWegverkeer_45': 'ggd_geluid', 'TevredenMetDeWoonomgeving_57': 'ggd_woonomgeving', 'KanGoedVerkoelingVindenBinnen_59': 'ggd_verkoeling',
+       # sinds 25-11-2026 (brede welvaart):
+       'EenOfMeerLangdurigeAandoeningen_5': 'ggd_langdurig', 'MatigVeelRegieOverHetEigenLeven_24': 'ggd_regie',
+       'HogeVeerkracht_23': 'ggd_veerkracht', 'KrijgtSteunVanAnderen_29': 'ggd_steun', 'TevredenMetDeWoning_56': 'ggd_woning', 'TevredenMetHetGroenInDeOmgeving_58': 'ggd_groen'}
 def gezondheid():
     flt = " and Perioden eq '2024JJ00' and Leeftijd eq '20300' and Marges eq 'MW00000'"
     d = bron('rivm-ggd-gezondheid-2024', lambda: {'b': odata_d('50150NED', ['WijkenEnBuurten'] + list(GGD), FB + flt), 'g': odata_d('50150NED', ['WijkenEnBuurten'] + list(GGD), FG + flt)})
