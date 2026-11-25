@@ -63,7 +63,7 @@ with sync_playwright() as p:
     check('keuze bewaard in de browser', pg.evaluate("JSON.parse(localStorage.getItem('regiokaart-vergelijk-themas-v1')).length") == rij())
     pg.click('#vglThemas [data-p=alle]'); pg.wait_for_timeout(200); check('alle thema’s terug', rij() > 60 and pg.evaluate("localStorage.getItem('regiokaart-vergelijk-themas-v1')") is None)
     pg.select_option('.vg-kies[data-kant=L]', 'zh'); pg.select_option('.vg-kies[data-kant=R]', 'nl'); pg.wait_for_timeout(300)
-    check('kaartjes Zuid-Holland en Nederland', pg.evaluate("[...document.querySelectorAll('.vg-kaartje')].map(s=>s.getAttribute('aria-label')).join('|')") == 'Zuid-Holland, met de regio|Nederland, met Zuid-Holland en de regio')
+    check('kaartjes Zuid-Holland en Nederland', pg.evaluate("[...document.querySelectorAll('#vgl .vg-kaartje')].map(s=>s.getAttribute('aria-label')).join('|')") == 'Zuid-Holland, met de regio|Nederland, met Zuid-Holland en de regio')
     pg.screenshot(path=os.path.join(UIT, 'vergelijken-zh-nl.png'))
     pg.keyboard.press('Escape'); pg.wait_for_timeout(600); check('Esc sluit', not pg.is_visible('#vgl'))
     check('link zonder vergelijk na sluiten', 'vergelijk' not in pg.evaluate('location.hash'))

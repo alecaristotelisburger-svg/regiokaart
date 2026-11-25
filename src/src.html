@@ -400,7 +400,68 @@
   #presTeller{font:600 14px Barlow,sans-serif;color:var(--accent);min-width:56px;text-align:center}
   /* knoppen bovenaan: tekst op één regel; tijdens het tekenen alleen Tekenen en de tekenbalk (anders past de balk niet) */
   #wissel .tekenknop{white-space:nowrap}
-  #wissel.tekenen #btnVergelijken,#wissel.tekenen #btnBW,#wissel.tekenen #btn3D,#wissel.tekenen #btnPresenteren{display:none}
+  #wissel.tekenen #btnVergelijken,#wissel.tekenen #btnBW,#wissel.tekenen #btn3D,#wissel.tekenen #btnPresenteren,#wissel.tekenen #btnNieuw{display:none}
+  /* ---------- nieuwe huisstijl (body.nieuw) ---------- */
+  #wissel .nieuwknop{border-color:var(--magenta);color:var(--accent);background:linear-gradient(#fff,#fff) padding-box,linear-gradient(90deg,var(--accent),var(--magenta),var(--orange)) border-box;border:1.5px solid transparent}
+  #wissel .nieuwknop:hover{background:linear-gradient(90deg,#fbeaf5,#fff4ea) padding-box,linear-gradient(90deg,var(--accent),var(--magenta),var(--orange)) border-box}
+  body.nieuw #panel,body.nieuw #toggle{display:none}
+  body.nieuw #map{margin-left:72px}
+  body.nieuw #wissel{display:none}
+  body.nieuw #wissel.tekenen{display:flex;left:88px !important;top:68px}
+  body.nieuw #wissel .seg2,body.nieuw #wissel .merk,body.nieuw #wissel .tourknop,body.nieuw #btnBW,body.nieuw #btnVergelijken,body.nieuw #btn3D,body.nieuw #btnPresenteren,body.nieuw #btnNieuw{display:none !important}
+  body.nieuw .leaflet-top.leaflet-left{top:58px}
+  #nwRail{position:fixed;left:0;top:0;bottom:0;width:72px;background:#fff;border-right:1px solid var(--line);z-index:1300;display:flex;flex-direction:column;align-items:center;gap:1px;padding:10px 0 8px;overflow-y:auto;font-family:Barlow,sans-serif}
+  #nwRail[hidden],#nwZoek[hidden],#nwPaneel[hidden],#nwBuurt[hidden]{display:none}
+  #nwRail button{all:unset;cursor:pointer;box-sizing:border-box;width:64px;padding:6px 2px;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:2px;font:600 10.5px/1.15 Barlow,sans-serif;color:var(--muted);text-align:center}
+  #nwRail button svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #nwRail button:hover,#nwRail button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+  #nwRail button:focus-visible{outline:2px solid var(--magenta)}
+  #nwRail .nw-logo{width:56px;height:56px;padding:4px;margin-bottom:8px;border-radius:12px}
+  #nwRail .nw-logo svg{width:100%;height:100%;stroke:none}
+  #nwRail .nw-logo:hover{background:var(--accent-soft)}
+  .nw-vul{flex:1;min-height:8px}
+  .nw-zoek{position:fixed;left:88px;top:12px;z-index:1200;display:flex;gap:8px;align-items:flex-start;transition:left .2s}
+  body.nw-paneel-open .nw-zoek{left:428px}
+  .nw-zoekvak{position:relative;width:320px}
+  .nw-zoekvak #zoek{width:100%;box-sizing:border-box;border:0;border-radius:24px;padding:10px 16px;font:14px Barlow,sans-serif;box-shadow:0 2px 10px rgba(40,0,50,.16);background:#fff}
+  .nw-zoekvak #zoekRes{position:absolute;left:0;right:0;top:46px;background:#fff;border-radius:12px;box-shadow:0 6px 20px rgba(40,0,50,.18);max-height:360px;overflow:auto;margin:0}
+  .nw-themaknop{all:unset;cursor:pointer;background:var(--accent);color:#fff;border-radius:22px;padding:10px 16px;font:600 13.5px Barlow,sans-serif;box-shadow:0 2px 10px rgba(40,0,50,.2);white-space:nowrap;max-width:360px;overflow:hidden;text-overflow:ellipsis}
+  .nw-themaknop:focus-visible{outline:2px solid var(--magenta);outline-offset:2px}
+  #nwPaneel{position:fixed;left:72px;top:0;bottom:0;width:340px;background:#fff;border-right:1px solid var(--line);z-index:1250;box-shadow:6px 0 20px rgba(40,0,50,.08);display:flex;flex-direction:column;font-family:Barlow,sans-serif}
+  .nw-pkop{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+  .nw-pkop h2{margin:0;font:700 20px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--accent)}
+  #nwPanelen{flex:1;overflow:auto;padding:0 16px 24px}
+  #nwPanelen section{padding:12px 0}
+  #nwPanelen section:last-child{border-bottom:0}
+  body.nieuw #theme{display:none}
+  body.nieuw #legend{display:none}
+  .nw-zoekthema input{width:100%;box-sizing:border-box;font:14px Barlow,sans-serif;border:1.5px solid #e4d9e2;border-radius:10px;padding:9px 12px;margin:4px 0 6px}
+  .nw-groep{font:600 11px Barlow,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+  .nw-groep span{color:#b9a9b5;margin-left:2px}
+  .nw-chips{display:flex;flex-wrap:wrap;gap:5px}
+  .nw-chips button{all:unset;cursor:pointer;font:500 12.5px/1.25 Barlow,sans-serif;border:1px solid #e4d9e2;border-radius:14px;padding:4px 10px;color:var(--ink)}
+  .nw-chips button:hover{border-color:var(--accent)}
+  .nw-chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .nw-sub{font:700 13.5px Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:20px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+  .nw-acties{display:flex;flex-direction:column;gap:6px;padding:4px 0 8px}
+  .nw-intro{font-size:14px;line-height:1.5;margin:4px 0 10px}
+  #nwBuurt{position:fixed;left:88px;bottom:18px;width:360px;max-height:calc(100% - 120px);overflow:auto;background:#fff;border-radius:14px;box-shadow:0 8px 28px rgba(40,0,50,.22);z-index:1150;padding:14px 16px;font-family:Barlow,sans-serif;transition:left .2s}
+  body.nw-paneel-open #nwBuurt{left:428px}
+  .nw-bkop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .nw-bkop h3{margin:0;font:700 20px/1.15 "Barlow Semi Condensed",Barlow,sans-serif;color:var(--accent)}
+  .nw-bsub{font-size:12.5px;color:var(--muted);margin:2px 0 8px}
+  .nw-groot{font:700 30px/1.05 "Barlow Semi Condensed",Barlow,sans-serif;color:var(--ink);margin:6px 0 2px}
+  .nw-groot small{display:block;font:500 12.5px Barlow,sans-serif;color:var(--muted);margin-top:2px}
+  .nw-vgl{display:grid;grid-template-columns:110px 1fr 90px;gap:5px 8px;align-items:center;font-size:12.5px;margin:10px 0}
+  .nw-bar{height:7px;background:#f3ebf1;border-radius:4px;overflow:hidden} .nw-bar i{display:block;height:100%;background:#8a2486} .nw-bar.hier i{background:var(--orange)}
+  .nw-vgl .w{text-align:right;font-variant-numeric:tabular-nums}
+  .nw-kern{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:4px 0 10px}
+  .nw-kern div{background:var(--soft);border-radius:8px;padding:6px 8px;font-size:11px;color:var(--muted);line-height:1.2}
+  .nw-kern b{display:block;font:700 14.5px "Barlow Semi Condensed",Barlow,sans-serif;color:var(--ink)}
+  .nw-bknop{display:flex;gap:6px;flex-wrap:wrap} .nw-bknop .btn{padding:6px 11px;font-size:12.5px}
+  #nwAllesVak{margin-top:10px;border-top:1px solid var(--line);padding-top:6px}
+  body.presenteren #nwRail,body.presenteren #nwZoek,body.presenteren #nwPaneel,body.presenteren #nwBuurt{display:none !important}
+  body.presenteren.nieuw #map{margin-left:0}
   /* ---------- brede welvaart ---------- */
   #bw{position:fixed;inset:0;z-index:1500;background:var(--soft);display:flex;flex-direction:column;font-family:Barlow,system-ui,sans-serif;color:var(--ink)}
   #bw[hidden]{display:none}
@@ -759,7 +820,24 @@
   </aside>
   <div id="map"></div>
   <div id="wissel" hidden><div class="merk"><small>Databank · prototype</small>Regiokaart Midden-Holland</div>
-    <button type="button" class="tourknop btnTour" title="Rondleiding" aria-label="Rondleiding">?</button><div class="seg2" role="group" aria-label="Weergave"><button type="button" data-w="paneel" class="aan" aria-pressed="true">Paneel</button><button type="button" data-w="data" aria-pressed="false">Data</button></div><button type="button" id="btnBW" class="tekenknop" title="Brede welvaart: regiothermometer en thermostaat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a2 2 0 014 0v9.5a4 4 0 11-4 0z"/><path d="M12 9v7"/></svg>Brede welvaart</button><button type="button" id="btnVergelijken" class="tekenknop" title="Twee gebieden naast elkaar vergelijken, met grafieken"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/></svg>Vergelijken</button><button type="button" id="btnTekenen" class="tekenknop" aria-pressed="false" title="Tekenen op de kaart: pen, tekst, rechthoek, cirkel en pijl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>Tekenen</button><button type="button" id="btn3D" class="tekenknop" title="De buurten als blokken in 3D: hoogte = waarde van het thema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>3D</button><button type="button" id="btnPresenteren" class="tekenknop" title="Presentatie maken en schermvullend tonen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8M10 8l4 2-4 2z"/></svg>Presenteren</button><div id="tekenBalk" class="tekenbalk" role="toolbar" aria-label="Tekengereedschap" aria-hidden="true"></div></div>
+    <button type="button" class="tourknop btnTour" title="Rondleiding" aria-label="Rondleiding">?</button><div class="seg2" role="group" aria-label="Weergave"><button type="button" data-w="paneel" class="aan" aria-pressed="true">Paneel</button><button type="button" data-w="data" aria-pressed="false">Data</button></div><button type="button" id="btnBW" class="tekenknop" title="Brede welvaart: regiothermometer en thermostaat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a2 2 0 014 0v9.5a4 4 0 11-4 0z"/><path d="M12 9v7"/></svg>Brede welvaart</button><button type="button" id="btnVergelijken" class="tekenknop" title="Twee gebieden naast elkaar vergelijken, met grafieken"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/></svg>Vergelijken</button><button type="button" id="btnTekenen" class="tekenknop" aria-pressed="false" title="Tekenen op de kaart: pen, tekst, rechthoek, cirkel en pijl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>Tekenen</button><button type="button" id="btn3D" class="tekenknop" title="De buurten als blokken in 3D: hoogte = waarde van het thema"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>3D</button><button type="button" id="btnPresenteren" class="tekenknop" title="Presentatie maken en schermvullend tonen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8M10 8l4 2-4 2z"/></svg>Presenteren</button><button type="button" id="btnNieuw" class="tekenknop nieuwknop" title="Probeer de nieuwe huisstijl: kaart centraal, menu links">✦ Nieuwe huisstijl</button><div id="tekenBalk" class="tekenbalk" role="toolbar" aria-label="Tekengereedschap" aria-hidden="true"></div></div>
+  <nav id="nwRail" hidden aria-label="Hoofdmenu">
+    <button type="button" id="nwLogo" class="nw-logo" title="Hele regio in beeld" aria-label="Hele regio in beeld"></button>
+    <button type="button" data-p="themas" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Thema's</button>
+    <button type="button" data-p="lagen" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>Lagen</button>
+    <button type="button" data-p="cijfers" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Cijfers</button>
+    <button type="button" id="nwVgl"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="14" rx="1"/></svg>Vergelijk</button>
+    <button type="button" id="nwBw"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a2 2 0 014 0v9.5a4 4 0 11-4 0z"/><path d="M12 9v7"/></svg>Welvaart</button>
+    <button type="button" id="nw3d"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>3D</button>
+    <button type="button" id="nwTeken"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>Tekenen</button>
+    <button type="button" data-p="delen" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 14v6h14v-6"/></svg>Delen</button>
+    <span class="nw-vul"></span>
+    <button type="button" data-p="info" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</button>
+    <button type="button" id="nwOud" title="Terug naar de oude weergave"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14l-5-5 5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/></svg>Oude weergave</button>
+  </nav>
+  <div id="nwZoek" class="nw-zoek" hidden><div id="nwZoekVak" class="nw-zoekvak"></div><button type="button" id="nwThemaKnop" class="nw-themaknop"></button></div>
+  <aside id="nwPaneel" hidden><div class="nw-pkop"><h2 id="nwPaneelTitel"></h2><button type="button" class="tk-knop" id="nwPaneelX" aria-label="Paneel sluiten">✕</button></div><div id="nwPanelen"></div></aside>
+  <div id="nwBuurt" hidden></div>
   <div id="presPaneel" role="dialog" aria-labelledby="presKopTitel" hidden>
     <div class="pres-kop"><h3 id="presKopTitel">Presentatie</h3><button type="button" class="tk-knop" id="presSluit" aria-label="Sluiten">✕</button></div>
     <p class="pres-uitleg">Zet de kaart zoals je hem wilt laten zien (thema, lagen, uitsnede, tekeningen) en voeg hem toe als dia. Geef elke dia een titel. Met ▶ toon je ze schermvullend; blader met de pijltjestoetsen, stop met Esc.</p>
@@ -1238,7 +1316,7 @@ function drawBuurten(){
         lyr.setStyle({weight:3,color:'#fc7c00',opacity:1});
       });
       lyr.on('mouseout', ()=>{ lyr.closeTooltip(); buurtLayer.resetStyle(lyr); });
-      lyr.on('click', e=>{ e.originalEvent._buurt = true; if(typeof busLayer!=='undefined' && map.hasLayer(busLayer) && busPopup(e.latlng,true)) return; const html = popupHtml(f); const pop = L.popup({maxWidth:320, maxHeight:380}).setLatLng(e.latlng).setContent(html).openOn(map); if($('lyrAhn').checked) queryAhn(e.latlng, pop, html); });
+      lyr.on('click', e=>{ e.originalEvent._buurt = true; if(typeof busLayer!=='undefined' && map.hasLayer(busLayer) && busPopup(e.latlng,true)) return; if(window.nwAanStijl && nwAanStijl()){ nwBuurt(f); return; } const html = popupHtml(f); const pop = L.popup({maxWidth:320, maxHeight:380}).setLatLng(e.latlng).setContent(html).openOn(map); if($('lyrAhn').checked) queryAhn(e.latlng, pop, html); });
     }
   }).addTo(map);
 }
@@ -2680,7 +2758,7 @@ function tourTik(nu){
   tourRaf=requestAnimationFrame(tourTik);
 }
 function tourOpen(){
-  if(MOBIEL || dataView) return;   // alleen in de paneelweergave
+  if(MOBIEL || dataView || document.body.classList.contains('nieuw')) return;   // alleen in de paneelweergave
   tourStap=0; $('tour').hidden=false; $('tour').classList.remove('weg'); tourTeken();
   cancelAnimationFrame(tourRaf); tourVorige=performance.now(); tourRaf=requestAnimationFrame(tourTik);
 }
@@ -3611,6 +3689,103 @@ async function bwPdfRegio(){
 }
 $('bwPdfRegio').addEventListener('click', ()=>bwPdfRegio().catch(e=>{ console.error(e); dlStatus('Maken van de PDF is mislukt.'); }));
 
+/* ---------- Nieuwe huisstijl (demo A, 25-11-2026): kaart centraal, balk links, één paneel tegelijk ----------
+   Extra weergave naast de oude: body.nieuw. De echte bedieningsonderdelen (lagen, downloads, programma's, zoeken …)
+   worden naar de panelen verplaatst en bij terugschakelen teruggezet (zelfde aanpak als de dataweergave).
+   In de link als &stijl=nieuw. Alleen computer. */
+let nwAan=false, nwOpen=null; window.nwAanStijl=()=>nwAan; const nwVerplaatst=[];
+function nwVerplaats(el, doel){ if(!el) return; const plek=document.createElement('span'); plek.hidden=true; plek.className='nw-plek'; el.before(plek); nwVerplaatst.push([el,plek]); doel.appendChild(el); }
+function nwTerug(){ while(nwVerplaatst.length){ const [el,plek]=nwVerplaatst.pop(); plek.replaceWith(el); } }
+const NW_PANELEN = {
+  themas:{t:'Thema’s'}, lagen:{t:'Kaartlagen'}, cijfers:{t:'Cijfers van de regio'}, delen:{t:'Delen en downloaden'}, info:{t:'Over de kaart'}};
+function nwBouwPanelen(){
+  const P=$('nwPanelen'); P.innerHTML='';
+  for(const [k,p] of Object.entries(NW_PANELEN)){ const d=document.createElement('div'); d.className='nw-inhoud'; d.dataset.p=k; d.hidden=true; P.appendChild(d); }
+  const vak=k=>P.querySelector(`[data-p=${k}]`);
+  // thema's: zoeken + catalogus per onderwerp, daaronder de programma's en de toelichting bij het gekozen thema
+  vak('themas').innerHTML=`<label class="nw-zoekthema"><input type="search" id="nwThemaZoek" placeholder="Zoek een thema, bijv. eenzaam of WOZ" aria-label="Zoek een thema"></label><div id="nwCatalogus"></div><div class="nw-sub">Programma's</div>`;
+  nwVerplaats($('secProg'), vak('themas'));
+  nwVerplaats($('theme').closest('section'), vak('themas'));
+  nwVerplaats($('secAchtergrond'), vak('lagen')); nwVerplaats($('secLagen'), vak('lagen'));
+  for(const id of ['cmpChart','klapProg','klapSec']){ const el=$(id); nwVerplaats(id==='cmpChart'? el.closest('section') : el, vak('cijfers')); }
+  const knoppen=document.createElement('div'); knoppen.className='nw-acties';
+  knoppen.innerHTML=`<button type="button" class="btn" id="nwPres">Presenteren</button><button type="button" class="btn licht" id="nwLink">Link naar deze weergave kopiëren</button>`;
+  vak('delen').appendChild(knoppen);
+  nwVerplaats($('deelStatus'), vak('delen'));
+  nwVerplaats($('btnMapPdf').closest('section'), vak('delen')); nwVerplaats($('btnProfPdf').closest('section'), vak('delen'));
+  $('nwPres').onclick=()=>{ nwPaneel(null); $('btnPresenteren').click(); };
+  $('nwLink').onclick=()=>$('btnDeel').click();
+  vak('info').innerHTML=`<p class="nw-intro">Bodegraven-Reeuwijk, Gouda, Krimpenerwaard, Waddinxveen en Zuidplas. Kies een thema en klik op een buurt voor de kerncijfers.</p>`;
+  nwVerplaats($('status'), vak('info')); nwVerplaats($('klapBron'), vak('info'));
+  nwVerplaats($('zoek'), $('nwZoekVak')); nwVerplaats($('zoekRes'), $('nwZoekVak'));
+  $('nwThemaZoek').oninput=nwCatalogus; nwCatalogus();
+}
+function nwCatalogus(){
+  const q=($('nwThemaZoek')||{}).value?.trim().toLowerCase()||'', nu=$('theme').value;
+  const T=THEMES.filter(t=>!q || (t.label+' '+(t.note||'')+' '+t.g).toLowerCase().includes(q));
+  const groepen=[...new Set(T.map(t=>t.g))];
+  $('nwCatalogus').innerHTML = groepen.length ? groepen.map(g=>`<div class="nw-groep">${esc(g)} <span>${T.filter(t=>t.g===g).length}</span></div><div class="nw-chips">${T.filter(t=>t.g===g).map(t=>`<button type="button" data-k="${t.key}" aria-pressed="${t.key===nu}">${esc(t.label)}</button>`).join('')}</div>`).join('')
+    : '<p class="note">Geen thema gevonden.</p>';
+  $('nwCatalogus').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{ $('theme').value=b.dataset.k; $('theme').dispatchEvent(new Event('change'));
+    if(!$('lyrFill').checked){ $('lyrFill').checked=true; $('lyrFill').dispatchEvent(new Event('change')); } });
+}
+function nwChip(){ $('nwThemaKnop').textContent = (hasTheme() ? currentTheme().label : 'Kies een thema') + ' ▾'; if(nwOpen==='themas') nwCatalogus(); }
+function nwPaneel(k){
+  if(k && nwOpen===k) k=null; nwOpen=k;
+  document.querySelectorAll('#nwRail [data-p]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.p===k));
+  $('nwPaneel').hidden=!k; document.body.classList.toggle('nw-paneel-open', !!k);
+  document.querySelectorAll('#nwPanelen .nw-inhoud').forEach(d=>d.hidden=d.dataset.p!==k);
+  if(k){ $('nwPaneelTitel').textContent=NW_PANELEN[k].t; if(k==='themas') nwCatalogus(); }
+}
+// compacte buurtkaart in plaats van de lange pop-up
+function nwBuurt(f){
+  const p=f.properties, t=currentTheme(), g=p.gemeentecode, inw=clean(p.aantal_inwoners), kaart=$('nwBuurt');
+  let groot='', vgl='';
+  if(hasTheme()){
+    const v=cleanK(p,t.key), fm=t.trend ? trFmtGm(t.trend.soort) : t.fmt;
+    groot=`<div class="nw-groot">${v==null?'–':t.fmt(v)}<small>${esc(t.label)}</small></div>`;
+    const rijen = t.trend ? [['Deze buurt',v,1],[GM[g],trendWaarde(g,t.trend.key)],['Regio',trendWaarde(null,t.trend.key)]]
+      : [['Deze buurt',v,1],[GM[g],gebiedWaarde(g,t,false)],['Regio',gebiedWaarde('regio',t,false)],['Nederland',DATA.ref&&DATA.ref.nl?DATA.ref.nl[t.key]:null]];
+    const max=Math.max(...rijen.map(r=>Math.abs(r[1]||0)))||1;
+    vgl=`<div class="nw-vgl">${rijen.map(([n,w,hier])=>`<span>${esc(n)}</span><div class="nw-bar${hier?' hier':''}"><i style="width:${w==null?0:Math.abs(w)/max*100}%"></i></div><span class="w">${w==null?'–':(hier?t.fmt(w):fm(w))}</span>`).join('')}</div>`;
+  }
+  const kern=[['aantal_inwoners','Inwoners'],['percentage_personen_65_jaar_en_ouder','65-plussers'],['gemiddelde_woningwaarde','WOZ-waarde'],['percentage_koopwoningen','Koopwoningen'],['ggd_eenzaam','Eenzaamheid'],['soc_inkomen_inw','Inkomen p.i.']]
+    .map(([k,l])=>{ const tt=THEMES.find(x=>x.key===k), v=cleanK(p,k); return `<div><b>${v==null||!tt?'–':tt.fmt(v)}</b>${l}</div>`; }).join('');
+  kaart.innerHTML=`<div class="nw-bkop"><div><h3>${esc(nameOf(f))}</h3><div class="nw-bsub">${esc(gmOf(f))}${p.wijknaam?' · wijk '+esc(p.wijknaam):''}</div></div><button type="button" class="tk-knop" id="nwBuurtX" aria-label="Sluiten">✕</button></div>
+    ${inw!=null&&inw<100?`<div class="popklein">Kleine buurt (${nl0.format(inw)} inwoners): cijfers zijn hier onzeker.</div>`:''}
+    ${groot}${vgl}<div class="nw-kern">${kern}</div>
+    <div class="nw-bknop"><button type="button" class="btn" id="nwAlles">Alle cijfers</button><button type="button" class="btn licht" id="nwVglGm">Vergelijk ${esc(GM[g]||'gemeente')}</button></div>
+    <div id="nwAllesVak" hidden></div>`;
+  kaart.hidden=false;
+  $('nwBuurtX').onclick=()=>{ kaart.hidden=true; };
+  $('nwAlles').onclick=()=>{ const v=$('nwAllesVak'); v.hidden=!v.hidden; if(!v.hidden) v.innerHTML=popupHtml(f); $('nwAlles').textContent=v.hidden?'Alle cijfers':'Minder'; };
+  $('nwVglGm').onclick=()=>{ vglL=g; vglR='regio'; openVgl(); };
+}
+function zetStijl(aan, stil){
+  if(MOBIEL) aan=false;
+  if(aan===nwAan) return; nwAan=aan;
+  if(aan){ if(dataView) zetWeergave(false, true); if(!$('tour').hidden) tourSluit(false); map.closePopup(); nwBouwPanelen(); nwChip(); }
+  else { nwPaneel(null); $('nwBuurt').hidden=true; nwTerug(); }
+  document.body.classList.toggle('nieuw', aan); $('nwRail').hidden=!aan; $('nwZoek').hidden=!aan;
+  setTimeout(()=>{ map.invalidateSize({animate:false}); if(!stil) regioInBeeld(false); }, 30);
+  if(!stil) schrijfHash();
+}
+// de balk links met het regiokaartje als logo
+$('nwLogo').innerHTML = svgKaartje('regio', VGL_A);
+$('nwLogo').onclick=()=>regioInBeeld(true);
+document.querySelectorAll('#nwRail [data-p]').forEach(b=>b.onclick=()=>nwPaneel(b.dataset.p));
+$('nwVgl').onclick=()=>{ nwPaneel(null); openVgl(); };
+$('nwBw').onclick=()=>{ nwPaneel(null); openBw(); };
+$('nw3d').onclick=()=>{ nwPaneel(null); open3D(); };
+$('nwTeken').onclick=()=>{ nwPaneel(null); $('btnTekenen').click(); };
+$('nwOud').onclick=()=>zetStijl(false);
+$('nwPaneelX').onclick=()=>nwPaneel(null);
+$('nwThemaKnop').onclick=()=>nwPaneel('themas');
+$('btnNieuw').onclick=()=>zetStijl(true);
+$('theme').addEventListener('change', ()=>{ if(nwAan) nwChip(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && nwAan && nwOpen && !window.presActief && $('vgl').hidden && $('bw').hidden && $('d3').hidden) nwPaneel(null); });
+if(MOBIEL) $('btnNieuw').hidden=true;
+
 $('presLogo').src=DATA.logo;
 /* ---------- Deelbare link: thema, lagen, achtergrond en uitsnede staan in het webadres (#...) ---------- */
 const LAAG_IDS = {overzicht:'lyrSnap', fill:'lyrFill', ahn:'lyrAhn', trein:'lyrRail', bus:'lyrOv', vz:'lyrVz', wegen:'lyrRoads', nnn:'lyrNnn', n2k:'lyrN2k', net:'lyrNet', erf:'lyrErf', bouwjaar:'lyrBag', loc:'lyrLoc', klimaat:'lyrKlim', ongevallen:'lyrOng', dijken:'lyrKer', bedrijven:'lyrBedr', energie:'lyrEn', bodem:'lyrBod'};
@@ -3625,6 +3800,7 @@ function stateHash(){
   if(basemap!=='kaart') q.set('achtergrond', basemap);
   if(dataView) q.set('weergave','data');
   if(progKeuze) q.set('programma', progKeuze);
+  if(nwAan) q.set('stijl','nieuw');
   if(!$('vgl').hidden) q.set('vergelijk', vglL+'~'+vglR);
   q.set('kaart', `${+map.getZoom().toFixed(2)}/${c.lat.toFixed(5)}/${c.lng.toFixed(5)}`);
   return '#'+q.toString().replace(/%2C/g,',').replace(/%2F/g,'/');
@@ -3636,6 +3812,7 @@ function leesHash(h=location.hash, volledig=false){
     if(!q.get('achtergrond') && basemap!=='kaart') setBasemap('kaart'); }
   const fire=(id,v)=>{ if($(id).checked!==v){ $(id).checked=v; $(id).dispatchEvent(new Event('change')); } };
   if(q.get('weergave')==='data' && !volledig) zetWeergave(true, true);
+  if(q.get('stijl')==='nieuw' && !volledig) zetStijl(true, true);
   if(q.get('vergelijk') && !volledig){ const [l,r]=q.get('vergelijk').split('~'); if(vglInfo(l)&&vglInfo(r)){ vglL=l; vglR=r; setTimeout(openVgl,0); } }
   if(q.get('programma') && PROGRAMMAS.some(x=>x.k===q.get('programma'))){ progKeuze=q.get('programma'); renderProg(); }
   if(q.get('achtergrond')) setBasemap(q.get('achtergrond'));
